@@ -2,10 +2,14 @@ cd ~/projects/all_tchin/results/GSE101597
 source config
 echo $gse
 echo $project
-rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
-## data description
+## design described here
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
-
+## bw are there
+echo ~/projects/${datashare}/${gse}/.
+## QC is here
+echo ~/projects/${datashare}/${gse}/multiqc_notrim.html
+ 
+rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
 
 
 # SRR5838434_1.fastq.gz GSM2706541  Input_R1
@@ -100,8 +104,8 @@ snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 49 --cluster "oa
 
 
 ## get results
-mkdir -p ~/projects/${datashare}/${gse}/raw/
+mkdir -p ~/projects/${datashare}/${gse}/
 rsync -auvP dahu:~/projects/${datashare}/${gse}/*.txt ~/projects/${datashare}/${gse}/
 rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/*.html ~/projects/${datashare}/${gse}/raw/
-rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/multiqc_notrim* ~/projects/${datashare}/${gse}/raw/
+rsync -auvP dahu:~/projects/${datashare}/${gse}/multiqc_notrim* ~/projects/${datashare}/${gse}/
 
