@@ -1,5 +1,5 @@
 ---
-title: "TSS profiles"
+title: "TSS profiles protein-coding transcripts"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
