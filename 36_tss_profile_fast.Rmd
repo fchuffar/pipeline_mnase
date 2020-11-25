@@ -91,18 +91,19 @@ if (!exists("matrix_file_tss")) {
 
   # score_filenames
   score_filenames = c(
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_SR_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    NULL
   )
   brsl = arsl = 5000
   bin_size = 10
