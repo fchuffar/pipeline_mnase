@@ -8,64 +8,38 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838434_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838435_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838436_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838437_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838438_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838439_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838440_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838441_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838442_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838443_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838444_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838445_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838446_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838447_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838448_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838449_1_fastxtrimf30.fastq.gz", 
-
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706541_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706542_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706543_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706544_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706545_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706546_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706547_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706548_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706549_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706550_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706551_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706552_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706553_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706554_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706555_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706556_end-to-end_trim30.log",
-
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706541_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706542_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706543_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706544_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706545_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706546_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706547_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706548_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706549_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706550_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706551_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706552_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706553_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706554_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706555_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706556_end-to-end_trim30_srt_SR_30_4_RPKM.bw",      
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30.log",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30.log",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
     shell:"""
 echo workflow \"pipeline_mnase\" completed at `date` 
 
-multiqc --force -o ~/projects/datashare/GSE101597/ -n multiqc_notrim \
-  ~/projects/datashare/GSE101597/raw/*_fastqc.zip \
-  ~/projects/datashare/GSE101597/*_end-to-end_trim30.log \
-  ~/projects/datashare/GSE101597/*_end-to-end_trim30.bam
+multiqc --force -o ~/projects/datashare/GSE70312raw/ -n multiqc_notrim \
+  ~/projects/datashare/GSE70312raw/raw/*_fastqc.zip \
+  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.log \
+  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.bam
           """
+
+
+rule mmq_filter_for_danpos:
+    input:
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
+    output: 
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam",
+      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam.bai",
+    threads: 1
+    shell:"""
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+samtools view -bq 30 {input.bam} > {output.bam}
+samtools index {output.bam}
+    """
 
 
 rule align_solid:
