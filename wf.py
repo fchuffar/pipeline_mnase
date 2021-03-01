@@ -8,6 +8,7 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
+<<<<<<< HEAD
       "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003914_1_Input_WT-1_1_fastxtrimf30.fastq.gz"       ,
       "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003915_2_Input_KO-1_1_fastxtrimf30.fastq.gz"       ,
       "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003916_3_SSRP1-CHIP_WT-1_1_fastxtrimf30.fastq.gz"  ,
@@ -83,6 +84,40 @@ multiqc --force -o ~/projects/datashare_epistorage/chip_hira_ssrp1/ -n multiqc_n
           """
 
 
+=======
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30.log",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30.log",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
+    shell:"""
+echo workflow \"pipeline_mnase\" completed at `date` 
+
+multiqc --force -o ~/projects/datashare/GSE70312raw/ -n multiqc_notrim \
+  ~/projects/datashare/GSE70312raw/raw/*_fastqc.zip \
+  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.log \
+  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.bam
+          """
+
+
+rule mmq_filter_for_danpos:
+    input:
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
+    output: 
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam",
+      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam.bai",
+    threads: 1
+    shell:"""
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+samtools view -bq 30 {input.bam} > {output.bam}
+samtools index {output.bam}
+    """
+>>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
 
 rule align_solid:

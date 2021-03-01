@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 cd ~/projects/atad2/results/chip_hira_ssrp1
+=======
+cd ~/projects/atad2/results/GSE70312
+>>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 source config
 echo $gse
 echo $project
@@ -9,7 +13,12 @@ echo ~/projects/${datashare}/${gse}/multiqc_notrim.html
 echo ~/projects/${project}/results/${gse}/ 
 echo ~/projects/${datashare}/${gse}
 
+<<<<<<< HEAD
 rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
+=======
+# GSM1723635 SRR2079661 ES_Atad2tag_AntiHA  
+# GSM1723636 SRR2079662 ES wild type_antiHA 
+>>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
 # Dear Florent,
 # The samples are Embryonic Stem cells(cell line 46C) and KOs are ATAD2 KO.
@@ -40,6 +49,21 @@ ln -s  ~/projects/datashare_epistorage/TGML_runs/fastq/202011030_R338_SK/fastq r
 ls -lha ~/projects/${datashare}/${gse}/raw
 sequencing_read_type=PE
 
+<<<<<<< HEAD
+=======
+## metadata linking sample and raw files
+gsms=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+echo $gsms
+echo $gsms | wc
+cd ~/projects/${datashare}/${gse}/
+for gsm in $gsms
+do
+  # echo ${gsm}
+  srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  echo $srrs ${gsm}
+  # echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
+done
+>>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
 ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_1.fastq.gz      
 ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_1.fastq.gz      
@@ -66,6 +90,7 @@ ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO
 ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_2.fastq.gz  
 ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_2.fastq.gz  
 
+<<<<<<< HEAD
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_WT_rep1_trim30.info      
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_KO_rep1_trim30.info      
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_WT_rep1_trim30.info 
@@ -78,6 +103,13 @@ echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003922_9_SSRP1-CHIP_W
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_KO_rep2_trim30.info
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__WT_rep2_trim30.info 
 echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__KO_rep2_trim30.info 
+=======
+
+cd ~/projects/${datashare}/${gse}
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079661_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR207966_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/GSM1723635_trim30.info
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079662_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079662_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/GSM1723636_trim30.info
+cat *.info
+>>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
 
 ## qc align count
