@@ -1,15 +1,6 @@
-<<<<<<< HEAD
-gse="chip_hira_ssrp1"
-project="atad2"
-gsm="GSM2706541"
-=======
-gse="GSE70312"
-project="atad2"
-gsm="GSM1723635"
->>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
+gse="00_pipeline_mnase"
+project="small_structs"
 species="Mus_musculus"
 version="mm10"
 annotation="UCSC"
-gtf_prefix="geneswchrm" 
 datashare="datashare_epistorage"
-strand="reverse"
