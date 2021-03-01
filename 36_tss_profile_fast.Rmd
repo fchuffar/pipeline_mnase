@@ -26,6 +26,24 @@ knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, 
 ```{r label="blacklist"}
 options(scipen=999)
 
+# https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
+# downloading UCSC rmsk data as BED
+# BED formatted UCSC track content can be obtained from UCSC table broswer.
+# The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
+#
+# the assembly "Feb.2009 GRCh37/hg19"
+# the group "repeats and variations"
+# the track "RepeatMasker"
+# and finally the table "rmsk"
+# As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
+#
+# region: "genome"
+# ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
+#
+# output format: "BED - browser extensibke format"
+# output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
+# file type returned: "gzip compressed"
+
 if (!exists("rmsk_raw")) {
   rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
 }
@@ -84,30 +102,31 @@ write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, 
 
 
 
+# Heatmap
+
+
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
-if (!exists("matrix_file_tss")) {
-  
-  matrix_file_tss = paste0("matrix_", prefix, ".txt.gz")
+  matrix_file = paste0("matrix_", prefix, ".txt.gz")
 
   # score_filenames
   score_filenames = c(
     "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
     "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
     "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
     "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
     "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
     NULL
   )
   brsl = arsl = 5000
   bin_size = 10
-  matrix_file_tss = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file_tss,
+  matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
     blacklist_filename = blacklist_filename,
     bin_size = bin_size,
     before_region_start_length = brsl,
@@ -116,129 +135,19 @@ if (!exists("matrix_file_tss")) {
     number_of_processors=32,
     sort_regions="descend"
   )
+  ```
 
-  # computeMatrix reference-point -R tss_mm10.bed -S /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/F_ast_end-to-end_trim30_srt_30_4_RPKM.bw --outFileName tmp/matrix_tss.txt.gz --referencePoint TSS --binSize 10 --beforeRegionStartLength 5000 --afterRegionStartLength 5000 --numberOfProcessors 32 --sortRegions keep --blackListFileName blacklist_file.bed
 
-  # descend
-
-  # hm_out_filenames[[prefix]] = paste0("tmp/hm_", prefix, ".raw.png")
-  # hm_out_filename = hm_out_filenames[prefix]
-  hm_out_filename = paste0("hm_", prefix, ".raw.png")
-  hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=matrix_file_tss, out_filename=hm_out_filename, FORCE_EXEC=TRUE, color_map="YlOrRd", sort_regions="descend")
-}
-
+```{r eval=TRUE, label="sort_heatmap"}
+source("common.R")
+ordered_wig_signal = fast_matrix_file(matrix_file, GRP=TRUE)
+hm_out_filename = paste0("tmp/hm_", prefix, ".fasted.png")
+hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=FALSE, color_map="YlOrRd", sort_regions="descend")
 ```
 
-# Heatmap
-
-```{r, echo=FALSE, out.width="100%", results="markup"}
-hm_out_filename = paste0("hm_", prefix, ".raw.png")
-knitr::include_graphics(hm_out_filename)
-# for (prefix in names(hm_out_filenames)) {
-#   hm_out_filename = hm_out_filenames[[prefix]]
-#   knitr::include_graphics(hm_out_filename)
-# }
-# knitr::include_graphics(unlist(hm_out_filenames)        )
-```
-
-
-
-
-
-
-
-
-
-
-
-```{r eval=FALSE, label="heatmap_sorted"}
-sort_matrix_file = function(matrix_file, GRP=FALSE) {
-  raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
-  dim(raw_wig_signal)
-  # plot(apply(raw_wig_signal[,-(1:6)], 2, mean))
-  # abline(v=c(131,150), col=2)
-
-  # filter_according_to_column_nb = 5
-  # idx = ((filter_according_to_column_nb-1) * (brsl + arsl)/bin_size + 1):(filter_according_to_column_nb*(brsl + arsl)/bin_size)
-  # q = quantile(apply(as.matrix(raw_wig_signal[1:1000,-(1:6)][,idx]), 1, mean), probs=0.990)
-  # idx = which(as.vector(apply(as.matrix(raw_wig_signal[1:1000,-(1:6)][,idx]), 1,mean) > q))
-  # # raw_wig_signal[idx,1:6][]
-  # raw_wig_signal[idx,-(1:6)] = 0
-
-  sort_according_to_column_nb = 3
-  idx = ((sort_according_to_column_nb-1) * (brsl + arsl)/bin_size + 1):(sort_according_to_column_nb*(brsl + arsl)/bin_size)
-  score = apply(raw_wig_signal[,-(1:6)][,idx], 1, function(l){
-    which(l==max(l))[1]
-  })
-  mat_centred_on_peak = raw_wig_signal[,1:6]
-  mat_centred_on_peak[,2] = mat_centred_on_peak[,2] - brsl + score*bin_size 
-  mat_centred_on_peak[,3] = mat_centred_on_peak[,2] + 1 
-
-
-  grps = raw_wig_signal[,5]
-  system2(command="zcat", args=paste0(matrix_file, " | head -n1 ", 
-    "| sed -e 's/_end-to-end_trim30_srt_30_4_RPKM//g' ", 
-    "| sed -e 's/_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM/_nuc/g' ", 
-    "| sed -e 's/_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM/_ss/g' ", 
-    "| sed -e 's/_srt_30_4_RPKM//g' ", 
-    "| sed -e 's/SRR1019858/GSM1253297/g' ", 
-    "| sed -e 's/SRR1019859/GSM1253298/g' ", 
-    "| sed -e 's/SRR1019860/GSM1253299/g' ", 
-    "| sed -e 's/SRR1019861/GSM1253300/g' ", 
-    "| sed -e 's/SRR1019862/GSM1253301/g' ", 
-    "| sed -e 's/SRR1019863/GSM1253302/g' ", 
-    "| sed -e 's/S_bn3/S_nuc_4/g' ", 
-    "| sed -e 's/S_bn1/S_nuc_12/g' ", 
-    "| sed -e 's/S_bn6/S_nuc_12/g' ", 
-    "| sed -e 's/S_bn5/S_sms_4/g' ", 
-    "| sed -e 's/S_bn2/S_sms_12/g' ", 
-    "| sed -e 's/S_pp2/S_WT_04/g' ", 
-    "| sed -e 's/S_pp4/S_WT_08/g' ", 
-    "| sed -e 's/S_pp6/S_WT_12/g' ", 
-    "| sed -e 's/S_nn2/S_KO_04/g' ", 
-    "| sed -e 's/S_nn4/S_KO_08/g' ", 
-    "| sed -e 's/S_nn6/S_KO_12/g' ", 
-    "> ", matrix_file, ".sort.txt"))
-  if (GRP) {
-    o = order(grps, score)
-  } else {
-    o = order(score)
-  }
-
-
-  write.table(raw_wig_signal[o,], paste0(matrix_file, ".sort.txt"), quote=FALSE, col.names=FALSE, row.names=FALSE, append=TRUE, sep="\t")
-  system2(command="rm", args=paste0(matrix_file, ".sort.txt.gz"))
-  system2(command="gzip", args=paste0(matrix_file, ".sort.txt"))  
-  ret = list(ordered_wig_signal=raw_wig_signal[o,] , centred_on_peak_bed=mat_centred_on_peak[o,])
-  return(ret)
-}
-
-
-ordered_wig_signal = sort_matrix_file(matrix_file_tss, GRP=TRUE)[[1]]
-
-hm_out_filename = paste0("hm_", prefix, ".sorted.png")
-hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file_tss, ".sort.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=TRUE, color_map="YlOrRd")
-```
-
-```{r, echo=FALSE, out.width="100%", results="markup"}
+```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}
 knitr::include_graphics(hm_out_filename)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

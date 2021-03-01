@@ -8,64 +8,81 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838434_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838435_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838436_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838437_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838438_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838439_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838440_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838441_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838442_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838443_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838444_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838445_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838446_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838447_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838448_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/GSE101597/raw/SRR5838449_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003914_1_Input_WT-1_1_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003915_2_Input_KO-1_1_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003916_3_SSRP1-CHIP_WT-1_1_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003917_4_SSRP1-CHIP_KO-1_1_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003918_5_HIRA-CHIP_WT-1_1_fastxtrimf30.fastq.gz"   ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003919_6_HIRA-CHIP_KO-1_1_fastxtrimf30.fastq.gz"   ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003920_7_Input_WT-2_1_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003921_8_Input_KO-2_1_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003922_9_SSRP1-CHIP_WT-2_1_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003923_10_SSRP1-CHIP_KO-2_1_fastxtrimf30.fastq.gz" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003924_11_HIRA-CHIP_WT-2_1_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003925_12_HIRA-CHIP_KO-2_1_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003914_1_Input_WT-1_2_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003915_2_Input_KO-1_2_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003916_3_SSRP1-CHIP_WT-1_2_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003917_4_SSRP1-CHIP_KO-1_2_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003918_5_HIRA-CHIP_WT-1_2_fastxtrimf30.fastq.gz"   ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003919_6_HIRA-CHIP_KO-1_2_fastxtrimf30.fastq.gz"   ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003920_7_Input_WT-2_2_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003921_8_Input_KO-2_2_fastxtrimf30.fastq.gz"       ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003922_9_SSRP1-CHIP_WT-2_2_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003923_10_SSRP1-CHIP_KO-2_2_fastxtrimf30.fastq.gz" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003924_11_HIRA-CHIP_WT-2_2_fastxtrimf30.fastq.gz"  ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/raw/S003925_12_HIRA-CHIP_KO-2_2_fastxtrimf30.fastq.gz"  ,
 
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706541_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706542_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706543_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706544_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706545_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706546_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706547_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706548_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706549_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706550_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706551_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706552_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706553_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706554_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706555_end-to-end_trim30.log",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706556_end-to-end_trim30.log",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_mmq30.bam" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_mmq30.bam" ,
 
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706541_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706542_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706543_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706544_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706545_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706546_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706547_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706548_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706549_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706550_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706551_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706552_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706553_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706554_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706555_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/GSE101597/GSM2706556_end-to-end_trim30_srt_SR_30_4_RPKM.bw",      
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30.log" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30.log" ,
+
+
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+
     shell:"""
 echo workflow \"pipeline_mnase\" completed at `date` 
 
-multiqc --force -o ~/projects/datashare/GSE101597/ -n multiqc_notrim \
-  ~/projects/datashare/GSE101597/raw/*_fastqc.zip \
-  ~/projects/datashare/GSE101597/*_end-to-end_trim30.log \
-  ~/projects/datashare/GSE101597/*_end-to-end_trim30.bam
+multiqc --force -o ~/projects/datashare_epistorage/chip_hira_ssrp1/ -n multiqc_notrim \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1/raw/*_fastqc.zip \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1/*_end-to-end_trim30.log \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1/*_end-to-end_trim30.bam
           """
+
+
 
 
 rule align_solid:
@@ -107,6 +124,19 @@ fsmax={wildcards.fsmax}
 BAM_OUT={output.bam}
 samtools view -h $BAM | awk '$9 < -'$fsmin' && $9 > -'$fsmax' || $9 > '$fsmin' && $9 < '$fsmax' || $1 ~ /^@/' | samtools view -bS - > $BAM_OUT
 ls -lha $BAM_OUT
+samtools index {output.bam}
+    """
+
+rule mmq_filter_for_danpos:
+    input:
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
+    output: 
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam",
+      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam.bai",
+    threads: 1
+    shell:"""
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+samtools view -bq 30 {input.bam} > {output.bam}
 samtools index {output.bam}
     """
 
