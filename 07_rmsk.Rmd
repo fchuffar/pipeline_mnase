@@ -20,7 +20,11 @@ On the Importance to Acknowledge Transposable Elements in Epigenomic Analyses, G
 
 
 
-```{r label="features"}
+Billingsley, K.J., Lättekivi, F., Planken, A. et al. Analysis of repetitive element expression in the blood and skin of patients with Parkinson’s disease identifies differential expression of satellite elements. Sci Rep 9, 4369 (2019)
+  
+  
+
+```{r features, eval=FALSE}
 # https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
 # downloading UCSC rmsk data as BED
 # BED formatted UCSC track content can be obtained from UCSC table broswer.
@@ -43,6 +47,8 @@ if (!exists("rmsk_raw")) {
   rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
 }
 rmsk = rmsk_raw
+rmsk = rmsk[nchar(rmsk[,1])<=5,]
+rmsk = rmsk[nchar(rmsk[,1])!="chrM",]
 
 sat2_feat = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
 sat2_feat_saf = sat2_feat[1:5]
@@ -69,87 +75,389 @@ head(sat2_feat_saf)
 
 
 
-transcripts_feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
-transcripts_feat = transcripts_feat[!is.na(transcripts_feat$tx_end),]
-transcripts_feat = transcripts_feat[nchar(transcripts_feat$chrom_text) <=5,]
-table(transcripts_feat$type, useNA="ifany")
-table(transcripts_feat$chrom_text, useNA="ifany")
 
 
+
+
+
+
+
+
+
+
+
+
+# transcripts_feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
+# transcripts_feat = transcripts_feat[!is.na(transcripts_feat$tx_end),]
+# transcripts_feat = transcripts_feat[nchar(transcripts_feat$chrom_text) <=5,]
+# table(transcripts_feat$type, useNA="ifany")
+# table(transcripts_feat$chrom_text, useNA="ifany")
+#
+#
+# # library(bedr)
+# # foo = sat2_feat
+# # foo = foo[nchar(foo[,1])<6,]
+# # foo = foo[order(foo[,1], foo[,2]),]
+# # bar = transcripts_feat[,1:6]
+# # bar = bar[order(bar[,1], bar[,2]),]
+# # b.int1 <- bedr.join.region(foo, bar);
+# # transcripts_feat = transcripts_feat[!transcripts_feat$gene_symbol %in% b.int1$gene_symbol,]
+#
+# transcripts_feat_saf = transcripts_feat[1:5]
+#
+#
+# colnames(transcripts_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# transcripts_feat_saf[,1] = paste0(transcripts_feat[,4])
+# transcripts_feat_saf[,1] = "transcripts"
+# # transcripts_feat_saf[,1] = paste0(transcripts_feat[,4], "_", transcripts_feat[,1], ":", transcripts_feat[,2], "-", transcripts_feat[,3])
+# transcripts_feat_saf[,2] = transcripts_feat[,1]
+# transcripts_feat_saf[,3] = transcripts_feat[,2]
+# transcripts_feat_saf[,4] = transcripts_feat[,3]
+# transcripts_feat_saf[,5] = transcripts_feat[,6]
+#
+# head(transcripts_feat_saf, 50)
+
+
+
+
+
+
+
+
+
+
+if (!exists("annotations")) {
+  # annots = c("mm10_lncrna_gencode")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_lncrna_gencode", "mm10_enhancers_fantom")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_enhancers_fantom")
+  # annots = c( 'mm10_basicgenes', 'mm10_cpgs')
+  write.table(rmsk[rmsk[,4]=="GSAT_MM",]  , file="gsat.mm10.bed"  , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+  write.table(rmsk[rmsk[,4]=="SYNREP_MM",], file="synrep.mm10.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+  annotatr::read_annotations(con="gsat.mm10.bed"  , genome = "mm10", name = "gsat"  , format = "bed")
+  annotatr::read_annotations(con="synrep.mm10.bed", genome = "mm10", name = "synrep", format = "bed")
+  annots = c( "mm10_basicgenes", "mm10_cpgs", "mm10_custom_gsat", "mm10_custom_synrep")
+  annots = "mm10_basicgenes"
+  annots = "mm10_cpgs"
+  annotations = annotatr::build_annotations(genome = 'mm10', annotations = annots)  
+}
+
+
+
+
+
+
+annotations_feat = as.data.frame(annotations)
+annotations_feat$seqnames = as.character(annotations_feat$seqnames)
+annotations_feat = annotations_feat[nchar(annotations_feat[,1])<=5,]
+annotations_feat = annotations_feat[nchar(annotations_feat[,1])!="chrM",]
+annotations_feat = annotations_feat[,c(1,2,3,6,10,5)]
+rownames(annotations_feat) = annotations_feat[,4]
+head(annotations_feat)
+dim(annotations_feat)
+annotations_feat = annotations_feat[nchar(annotations_feat$seqnames) <=5,]
+table(annotations_feat$seqnames, useNA="ifany")
+table(annotations_feat$type, useNA="ifany")
+dim(annotations_feat)
+
+
+# remove annotations_feat that overlap sat2_feat
+annotations_feat_id_colname = "id"
 library(bedr)
-foo = sat2_feat
-foo = foo[nchar(foo[,1])<6,]
-foo = foo[order(foo[,1], foo[,2]),]
-bar = transcripts_feat[,1:6]
-bar = bar[order(bar[,1], bar[,2]),]
-b.int1 <- bedr.join.region(foo, bar);
-transcripts_feat = transcripts_feat[!transcripts_feat$gene_symbol %in% b.int1$gene_symbol,]
-
-transcripts_feat_saf = transcripts_feat[1:5]
+b.int1 = bedr.join.region(sat2_feat[order(sat2_feat[,1], sat2_feat[,2]),], annotations_feat[order(annotations_feat[,1], annotations_feat[,2]),])
+head(b.int1)
+dim(b.int1)
+# annotations_feat["inter:237",]
+dim(annotations_feat)
+annotations_feat = annotations_feat[!annotations_feat[,annotations_feat_id_colname] %in% b.int1[,annotations_feat_id_colname],]
+dim(annotations_feat)
 
 
-colnames(transcripts_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
-transcripts_feat_saf[,1] = paste0(transcripts_feat[,4])
-transcripts_feat_saf[,1] = "transcripts"
-# transcripts_feat_saf[,1] = paste0(transcripts_feat[,4], "_", transcripts_feat[,1], ":", transcripts_feat[,2], "-", transcripts_feat[,3])
-transcripts_feat_saf[,2] = transcripts_feat[,1]
-transcripts_feat_saf[,3] = transcripts_feat[,2]
-transcripts_feat_saf[,4] = transcripts_feat[,3]
-transcripts_feat_saf[,5] = transcripts_feat[,6]
 
-head(transcripts_feat_saf, 50)
+annotations_feat_saf = annotations_feat[1:5]
+colnames(annotations_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+annotations_feat_saf[,1] = paste0(annotations_feat[,5])
+# annotations_feat_saf[,1] = "annotations"
+# annotations_feat_saf[,1] = paste0(annotations_feat[,4], "_", annotations_feat[,1], ":", annotations_feat[,2], "-", annotations_feat[,3])
+annotations_feat_saf[,2] = annotations_feat[,1]
+annotations_feat_saf[,3] = annotations_feat[,2]
+annotations_feat_saf[,4] = annotations_feat[,3]
+annotations_feat_saf[,5] = "+"
 
-
+head(annotations_feat_saf, 50)
 
 
 
 
+range(mixed_feat_saf[,4] - mixed_feat_saf[3] )
 
 
-
-
-mixed_feat_saf = rbind(sat2_feat_saf, transcripts_feat_saf)
+mixed_feat_saf = rbind(sat2_feat_saf, annotations_feat_saf)
 head(mixed_feat_saf)
 tail(mixed_feat_saf)
 dim(mixed_feat_saf)
 prefix = "rmsk"
+options(scipen=999)
 write.table(mixed_feat_saf, file=paste0(prefix, ".saf"), sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r genome_partition_5kb}
+# rmsk
+if (!exists("rmsk_raw")) {
+  rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+}
+rmsk = rmsk_raw
+rmsk = rmsk[nchar(rmsk[,1])<=5,]
+# rmsk = rmsk[nchar(rmsk[,1])!="chrM",]
+# rmsk[rmsk[,1]%in%"chrM",]
+
+# annotations
+if (!exists("annotations")) {
+  # annots = c("mm10_lncrna_gencode")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_lncrna_gencode", "mm10_enhancers_fantom")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_enhancers_fantom")
+  # annots = c( 'mm10_basicgenes', 'mm10_cpgs')
+  write.table(rmsk[rmsk[,4]=="GSAT_MM",]                        , file="gsat.mm10.bed"  , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+  write.table(rmsk[rmsk[,4]=="SYNREP_MM",]                      , file="synrep.mm10.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+  write.table(list("chr17", 39842997, 39848829, "Rn45s", 1, "+"), file="rn45s.mm10.bed" , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+  write.table(list("chr11", 3126500, 3200500, "Sfi1", 1, "-")   , file="sfi1.mm10.bed"  , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+  annotatr::read_annotations(con="gsat.mm10.bed"  , genome = "mm10", name = "gsat"  , format = "bed")
+  annotatr::read_annotations(con="synrep.mm10.bed", genome = "mm10", name = "synrep", format = "bed")
+  annotatr::read_annotations(con="rn45s.mm10.bed" , genome = "mm10", name = "rn45s" , format = "bed")
+  annotatr::read_annotations(con="sfi1.mm10.bed"  , genome = "mm10", name = "sfi1"  , format = "bed")
+  annots = c( "mm10_basicgenes", "mm10_cpgs", "mm10_custom_gsat", "mm10_custom_synrep", "mm10_custom_rn45s", "mm10_custom_sfi1")
+  annotations = annotatr::build_annotations(genome = 'mm10', annotations = annots)  
+}
+
+
+# genome 
+chr_sizes = read.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes", stringsAsFactors=FALSE)
+head(chr_sizes)
+dim(chr_sizes)
+chr_sizes = chr_sizes[chr_sizes[,1] != "chrM",]
+genome = data.frame(chr=chr_sizes[,1], beg=1, end=chr_sizes[,2], name1=chr_sizes[,1], name2=chr_sizes[,1], stringsAsFactorsnd="+", stringsAsFactors=FALSE)
+
+rownames(genome) = NULL
+print(genome)
+dim(genome)
+# bamCoverage \
+#   -b ~/projects/datashare_epistorage/TGML_runs/bam_mnase/CS_Nuc.bam \
+#   --numberOfProcessors 12 \
+#   --binSize 10 \
+#   --minMappingQuality 30 \
+#   --normalizeUsing RPKM \
+#   -o ~/projects/datashare_epistorage/TGML_runs/bam_mnase/CS_Nuc.bw
+
+# features
+slice_genome = function(win_size, genome) {
+  feat = apply(genome, 1, function(l) {
+    beg = seq(1, as.numeric(l[[3]]), by=win_size)
+    beg = beg[-length(beg)]
+    if  (beg[length(beg)] + win_size > l[[3]]) {
+      beg = beg[-length(beg)]
+    }
+    end = beg + win_size
+    ret = data.frame(chr=l[[1]], beg=beg, end=end, name1=l[[5]], name2=paste0(l[[4]], "_feat", 1:length(beg)), strand=l[[6]], stringsAsFactors=FALSE)
+    return(ret)
+  })
+  feat = do.call(rbind, feat)
+  feat[,4] = paste0("feat_", 1:nrow(feat))
+  rownames(feat) = feat[,4]
+  # feat[,2] = feat[,2], scientific = FALSE)
+  # feat[,3] = format(feat[,3], scientific = FALSE)
+  head(feat)
+  dim(feat)
+  feat
+}
+
+feat5kb = slice_genome(5000, genome)
+head(feat5kb)
+
+feat = feat5kb
+feat[,5] = 1
+write.table(feat, file="feat5kb.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+dm_regions = annotatr::read_regions(con="feat5kb.bed", genome = 'mm10', format = 'bed')
+# Intersect the regions we read in with the annotations
+dm_annotated = annotatr::annotate_regions(
+    regions = dm_regions,
+    annotations = annotations,
+    ignore.strand = TRUE,
+    quiet = FALSE)
+# A GRanges object is returned
+df_dm_annotated = data.frame(dm_annotated)
+df_dm_annotated$annot.type = as.factor(df_dm_annotated$annot.type)
+names(table(df_dm_annotated$annot.type))
+
+
+grps = c(
+  "mm10_custom_gsat"    , 
+  "mm10_custom_synrep"  , 
+  "mm10_custom_rn45s"   , 
+  "mm10_custom_sfi1"    , 
+  "mm10_genes_promoters",
+  "mm10_genes_1to5kb"   , 
+  "mm10_genes_5UTRs"    , 
+  "mm10_genes_exons"    , 
+  "mm10_genes_introns"  , 
+  "mm10_genes_3UTRs"    ,
+  "mm10_cpg_islands"    , 
+  "mm10_cpg_shores"     , 
+  "mm10_cpg_shelves"    , 
+  "mm10_cpg_inter"      ,
+  NULL 
+)
+
+head(df_dm_annotated)
+dim(df_dm_annotated)
+sum(duplicated(df_dm_annotated$name))
+
+dim(df_dm_annotated)
+df_dm_annotated = df_dm_annotated[df_dm_annotated$annot.type%in%grps,]
+dim(df_dm_annotated)
+df_dm_annotated$annot.type = factor(df_dm_annotated$annot.type, levels=grps)
+
+df_dm_annotated$annot.type[1:6]
+
+
+df_dm_annotated = df_dm_annotated[order(df_dm_annotated$seqnames, df_dm_annotated$start, df_dm_annotated$annot.type),]
+df_dm_annotated = df_dm_annotated[!duplicated(df_dm_annotated$name),]
+dim(df_dm_annotated)
+
+rownames(df_dm_annotated) = df_dm_annotated$name
+
+
+feat5kb$grps = "other"
+feat5kb[rownames(df_dm_annotated),]$grps = as.character(df_dm_annotated$annot.type)
+
+
+
+table(feat5kb$grps)
+head(feat5kb)
+dim(feat5kb)
+
+
+# stop("EFN")
+fat_feat5kb = lapply(unique(feat5kb$grps), function(grp) {
+  feat = feat5kb[feat5kb$grps%in%grp,]
+  dim(feat)
+  fat_feat = lapply(unique(feat[,1]), function(chr) {
+    d = feat[feat[,1]==chr,]
+    i = intervals::Intervals(c(d[,2], d[,3]), type="Z")
+    c = intervals::close_intervals(intervals::reduce(i))
+    # cl = intervals::clusters(i, 20000 + 1000)
+    # enlarge your fat feat
+    # l = win_sizes_min*2
+    l = 0
+    c = intervals::close_intervals( intervals::contract( intervals::reduce(intervals::expand(i, l)), l) )
+    dim(c)
+
+    df = data.frame(chr, c[,1], c[,2], ".", ".", "+")
+    return(df)
+  })
+  fat_feat = do.call(rbind, fat_feat)
+  dim(fat_feat)
+  fat_feat[,3] - fat_feat[,2]
+  fat_feat$grps = grp
+  fat_feat
+})
+fat_feat5kb = do.call(rbind, fat_feat5kb)
+dim(fat_feat5kb)
+table(fat_feat5kb$grps)
+
+feat5kb = fat_feat5kb
+
+
+
+
+
+
+
+
+
+
+
+feat5kb_saf = feat5kb[1:5]
+colnames(feat5kb_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+feat5kb_saf[,1] = feat5kb$grps
+# feat5kb_saf[,1] = "annotations"
+# feat5kb_saf[,1] = paste0(feat5kb[,4], "_", feat5kb[,1], ":", feat5kb[,2], "-", feat5kb[,3])
+feat5kb_saf[,2] = feat5kb[,1]
+feat5kb_saf[,3] = feat5kb[,2]
+feat5kb_saf[,4] = feat5kb[,3]
+feat5kb_saf[,5] = "+"
+
+head(feat5kb_saf)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+prefix = "sliced_genome_5kb"
+options(scipen=999)
+write.table(feat5kb_saf, file=paste0(prefix, ".saf"), sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+```
+
 
 ```{r label="featureCounts"}
 mmq=0
 cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
-  "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
+  "-a ", prefix, ".saf -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
+  # "-a ", prefix, ".saf -M -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
+  # "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
   # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/IH36_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/IH37_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/IH38_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/IH39_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/IH40_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/NO31_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/NO32_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/NO33_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/NO34_end-to-end_trimno_srt.bam" ,
-  "/home/chuffarf/projects/datashare_epistorage/temporize_mnase/NO35_end-to-end_trimno_srt.bam" ,
+  # Spermato sonication input TH2B H2AL2 H3
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in1_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30.bam ",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30.bam ",
   ""
 )
 print(paste(cmd, args))
 system2(cmd, args)
 system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
-
-# stop("EFN")
 ```
 
 ```{r label="normalization"}
-if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
+# if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
 counts_summary = read.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
 rownames(counts_summary) = counts_summary[,1]
 counts_summary = counts_summary[,-1]
 colnames(counts_summary) = substr(colnames(counts_summary), 68, 71)
 print(counts_summary)
 
-counts = mread.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
 rownames(counts) = counts[,1]
 counts = counts[,-(1:6)]
 colnames(counts) = substr(colnames(counts), 68, 71)
@@ -190,16 +498,18 @@ head(rpm_aligned)
 
 
 ```{r label="boxplots"}
-stages = c("ih36","ih37","ih38","ih39","ih40","no31","no32","no33","no34","no35")
+stages = colnames(rpm_aligned)
 grps = c(
   "unassigned", 
   "unmapped",
-  "GSAT_MM", 
-  "SYNREP_MM", 
-  "transcripts", 
-  "Rn45s"
+  # "GSAT_MM",
+  # "SYNREP_MM",
+  # "Rn45s",
+  intersect(grps, unique(feat5kb_saf[,1]))
 )
 
+
+# intersect(grps)
 rpm_aligned = rpm_aligned[grps,stages]
 rpm_total = rpm_total[grps,stages]
                 
@@ -253,8 +563,10 @@ legend("topright", col=1:length(levels(tmp_fact)), lty=1, levels(tmp_fact))
 
 
 
-
-
+```{r results="verbatim", ech=TRUE}
+print(rpm_aligned)
+system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
+```
 
 
 
