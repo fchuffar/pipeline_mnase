@@ -302,32 +302,33 @@ df_dm_annotated$annot.type = as.factor(df_dm_annotated$annot.type)
 names(table(df_dm_annotated$annot.type))
 
 
-grps = c(
-  "mm10_custom_gsat"    , 
-  "mm10_custom_synrep"  , 
-  "mm10_custom_rn45s"   , 
-  "mm10_custom_sfi1"    , 
-  "mm10_genes_promoters",
-  "mm10_genes_1to5kb"   , 
-  "mm10_genes_5UTRs"    , 
-  "mm10_genes_exons"    , 
-  "mm10_genes_introns"  , 
-  "mm10_genes_3UTRs"    ,
-  "mm10_cpg_islands"    , 
-  "mm10_cpg_shores"     , 
-  "mm10_cpg_shelves"    , 
-  "mm10_cpg_inter"      ,
+dict_grps = c(
+  mm10_custom_gsat      =  "GSAT"    , 
+  mm10_custom_synrep    =  "SYNREP"  , 
+  # mm10_custom_rn45s     =  "rn45s"   ,
+  # mm10_custom_sfi1      =  "sfi1"    ,
+  mm10_genes_promoters  =  "promoter", 
+  mm10_genes_1to5kb     =  "promoter", 
+  mm10_genes_5UTRs      =  "promoter", 
+  mm10_genes_exons      =  "body"    , 
+  mm10_genes_introns    =  "body"    , 
+  mm10_genes_3UTRs      =  "body"    , 
+  mm10_cpg_islands      =  "island_shore_shelf"     , 
+  mm10_cpg_shores       =  "island_shore_shelf"     , 
+  mm10_cpg_shelves      =  "island_shore_shelf"     , 
+  mm10_cpg_inter        =  "IGR"   , 
   NULL 
 )
+
 
 head(df_dm_annotated)
 dim(df_dm_annotated)
 sum(duplicated(df_dm_annotated$name))
 
 dim(df_dm_annotated)
-df_dm_annotated = df_dm_annotated[df_dm_annotated$annot.type%in%grps,]
+df_dm_annotated = df_dm_annotated[df_dm_annotated$annot.type%in%names(dict_grps),]
 dim(df_dm_annotated)
-df_dm_annotated$annot.type = factor(df_dm_annotated$annot.type, levels=grps)
+df_dm_annotated$annot.type = factor(df_dm_annotated$annot.type, levels=names(dict_grps))
 
 df_dm_annotated$annot.type[1:6]
 
@@ -337,14 +338,15 @@ df_dm_annotated = df_dm_annotated[!duplicated(df_dm_annotated$name),]
 dim(df_dm_annotated)
 
 rownames(df_dm_annotated) = df_dm_annotated$name
-
+dim(df_dm_annotated)
 
 feat5kb$grps = "other"
 feat5kb[rownames(df_dm_annotated),]$grps = as.character(df_dm_annotated$annot.type)
-
-
-
 table(feat5kb$grps)
+feat5kb$grps = dict_grps[feat5kb$grps]
+
+
+table(feat5kb$grps, useNA="ifany")
 head(feat5kb)
 dim(feat5kb)
 
@@ -400,7 +402,8 @@ feat5kb_saf[,4] = feat5kb[,3]
 feat5kb_saf[,5] = "+"
 
 head(feat5kb_saf)
-
+table(feat5kb_saf[,1])
+dim(feat5kb_saf)
 
 
 
@@ -439,7 +442,7 @@ args = paste0(
   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30.bam ",
   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30.bam ",
   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30.bam ",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30.bam ",
   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30.bam ",
   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30.bam ",
   ""
@@ -454,13 +457,13 @@ system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
 counts_summary = read.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
 rownames(counts_summary) = counts_summary[,1]
 counts_summary = counts_summary[,-1]
-colnames(counts_summary) = substr(colnames(counts_summary), 68, 71)
+colnames(counts_summary) = substr(colnames(counts_summary), 68, 72)
 print(counts_summary)
 
 counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
 rownames(counts) = counts[,1]
 counts = counts[,-(1:6)]
-colnames(counts) = substr(colnames(counts), 68, 71)
+colnames(counts) = substr(colnames(counts), 68, 72)
 print(counts)
 
 
@@ -505,7 +508,7 @@ grps = c(
   # "GSAT_MM",
   # "SYNREP_MM",
   # "Rn45s",
-  intersect(grps, unique(feat5kb_saf[,1]))
+  intersect(unique(dict_grps), unique(feat5kb_saf[,1]))
 )
 
 
@@ -522,7 +525,7 @@ tmp_fact =factor(rownames(rpm_aligned), levels=rownames(rpm_aligned))
 matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix)
 # legend("topright", col=1:length(levels(tmp_fact)), lty=1, levels(tmp_fact))
 axis(1, 1:ncol(rpm_aligned), colnames(rpm_aligned), las=2)
-plot(0,0,xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
+plot(0,0,xaxt="n", yaxt="n", xlab="", ylab="", bty="n", col=0)
 legend("topright", col=1:length(levels(tmp_fact)), lty=1, levels(tmp_fact))
 # matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix)
 
