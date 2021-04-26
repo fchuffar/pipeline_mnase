@@ -8,6 +8,32 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_BRD4_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_Inpu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5ac_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5bu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_BRD4_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_Inpu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5ac_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5bu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_BRD4_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_Inpu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5ac_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5bu_R1_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_BRD4_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_Inpu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5ac_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5bu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_BRD4_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_Inpu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5ac_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5bu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_BRD4_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_Inpu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5ac_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5bu_R2_fastqc.zip",
+
+
       "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_BRD4_end-to-end_trimno.log",
       "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_Inpu_end-to-end_trimno.log",
       "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_K5ac_end-to-end_trimno.log",
