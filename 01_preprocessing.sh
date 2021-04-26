@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-cd ~/projects/atad2/results/chip_hira_ssrp1
-=======
-cd ~/projects/atad2/results/GSE70312
->>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
+cd ~/projects/all_tchin/results/chip_gao_novogen
 source config
 echo $gse
 echo $project
@@ -12,104 +8,76 @@ echo ~/projects/${datashare}/${gse}/.
 echo ~/projects/${datashare}/${gse}/multiqc_notrim.html
 echo ~/projects/${project}/results/${gse}/ 
 echo ~/projects/${datashare}/${gse}
-
-<<<<<<< HEAD
 rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
-=======
-# GSM1723635 SRR2079661 ES_Atad2tag_AntiHA  
-# GSM1723636 SRR2079662 ES wild type_antiHA 
->>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
-# Dear Florent,
-# The samples are Embryonic Stem cells(cell line 46C) and KOs are ATAD2 KO.
-# SSRP1 is a sub-unit of histone chaperone FACT and HIRA is another histone chaperone.
-# Tao could you confirme.
-# Thanks
-# Saadi
-#
-# -rw-r--r-- 1 chuffarf l-iab        2.1G Nov 25 13:40 S003914_1_Input_WT-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        2.1G Nov 25 13:06 S003915_2_Input_KO-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        1.6G Nov 25 13:09 S003916_3_SSRP1-CHIP_WT-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        2.0G Nov 25 13:58 S003917_4_SSRP1-CHIP_KO-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        1.9G Nov 25 13:47 S003918_5_HIRA-CHIP_WT-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf f-epimedcore 1.7G Nov 25 12:55 S003919_6_HIRA-CHIP_KO-1_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        2.0G Nov 25 13:16 S003920_7_Input_WT-2_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        2.2G Nov 25 13:54 S003921_8_Input_KO-2_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        1.8G Nov 25 13:50 S003922_9_SSRP1-CHIP_WT-2_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        1.7G Nov 25 13:13 S003923_10_SSRP1-CHIP_KO-2_1.fastq.gz
-# -rw-r--r-- 1 chuffarf f-epimedcore 1.8G Nov 25 12:51 S003924_11_HIRA-CHIP_WT-2_1.fastq.gz
-# -rw-r--r-- 1 chuffarf l-iab        1.7G Nov 25 12:58 S003925_12_HIRA-CHIP_KO-2_1.fastq.gz
-
-
+# transfering data on summer 
 mkdir -p ~/projects/${datashare}/${gse}
 cd ~/projects/${datashare}/${gse}
-ln -s  ~/projects/datashare_epistorage/TGML_runs/fastq/202011030_R338_SK/fastq raw
+# rsync -auvP /Volumes/datashare1/datashare/chip_gao_novogen/ cargo:~/projects/datashare_epistorage/chip_gao_novogen/
 
-# SR or PE?
-ls -lha ~/projects/${datashare}/${gse}/raw
-sequencing_read_type=PE
+# check MD5
+cd ~/projects/datashare_epistorage/chip_gao_novogen/raw/delivered/
+ls -lha *.*data/*/*.fq.gz
+cat  *.*data/*/*.txt > md5.orig.txt
+cat md5.orig.txt
+# md5sum *.*data/*/*.fq.gz > md5.summer.txt &
+# tail -f md5.summer.txt
+cat md5.orig.txt| cut -f1 -d" " > tmp1
+# cat md5.bettik.txt| cut -f1 -d" " > tmp2
+cat md5.summer.txt| cut -f1 -d" " > tmp3
+diff tmp1 tmp3
 
-<<<<<<< HEAD
-=======
-## metadata linking sample and raw files
-gsms=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
-echo $gsms
-echo $gsms | wc
-cd ~/projects/${datashare}/${gse}/
-for gsm in $gsms
-do
-  # echo ${gsm}
-  srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
-  echo $srrs ${gsm}
-  # echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
-done
->>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
+# design 
+# ChIP Bu Ac REH,
+# K5Ac    WT  
+# K5Bu  x KO1 = 12 conditions
+# BRD4    KO2 
+# Input
+cd ~/projects/datashare_epistorage/chip_gao_novogen/raw/
+ls -lha delivered/2.cleandata/*/*.fq.gz
 
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_1.fastq.gz      
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_1.fastq.gz      
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003917_4_SSRP1-CHIP_KO-1_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003918_5_HIRA-CHIP_WT-1_1.fastq.gz 
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003919_6_HIRA-CHIP_KO-1_1.fastq.gz 
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003920_7_Input_WT-2_1.fastq.gz      
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003921_8_Input_KO-2_1.fastq.gz      
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003922_9_SSRP1-CHIP_WT-2_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_1.fastq.gz
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_2.fastq.gz       
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_2.fastq.gz       
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_2.fastq.gz  
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003917_4_SSRP1-CHIP_KO-1_2.fastq.gz  
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003918_5_HIRA-CHIP_WT-1_2.fastq.gz   
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003919_6_HIRA-CHIP_KO-1_2.fastq.gz   
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003920_7_Input_WT-2_2.fastq.gz       
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003921_8_Input_KO-2_2.fastq.gz       
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003922_9_SSRP1-CHIP_WT-2_2.fastq.gz  
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_2.fastq.gz 
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_2.fastq.gz  
-ls -lha /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_2.fastq.gz  
+ln -s delivered/2.cleandata/KO1-BRD4_FMRC210105505-1a/KO1-BRD4_FMRC210105505-1a_1.clean.fq.gz   ./KO1_BRD4_R1.fastq.gz
+ln -s delivered/2.cleandata/KO1-BRD4_FMRC210105505-1a/KO1-BRD4_FMRC210105505-1a_2.clean.fq.gz   ./KO1_BRD4_R2.fastq.gz
+ln -s delivered/2.cleandata/KO1-Input_FMRC210105496-1a/KO1-Input_FMRC210105496-1a_1.clean.fq.gz ./KO1_Inpu_R1.fastq.gz
+ln -s delivered/2.cleandata/KO1-Input_FMRC210105496-1a/KO1-Input_FMRC210105496-1a_2.clean.fq.gz ./KO1_Inpu_R2.fastq.gz
+ln -s delivered/2.cleandata/KO1-K5ac_FMRC210105499-1a/KO1-K5ac_FMRC210105499-1a_1.clean.fq.gz   ./KO1_K5ac_R1.fastq.gz
+ln -s delivered/2.cleandata/KO1-K5ac_FMRC210105499-1a/KO1-K5ac_FMRC210105499-1a_2.clean.fq.gz   ./KO1_K5ac_R2.fastq.gz
+ln -s delivered/2.cleandata/KO1-K5bu_FMRC210105502-1a/KO1-K5bu_FMRC210105502-1a_1.clean.fq.gz   ./KO1_K5bu_R1.fastq.gz
+ln -s delivered/2.cleandata/KO1-K5bu_FMRC210105502-1a/KO1-K5bu_FMRC210105502-1a_2.clean.fq.gz   ./KO1_K5bu_R2.fastq.gz
+ln -s delivered/2.cleandata/KO2-BRD4_FMRC210105506-1a/KO2-BRD4_FMRC210105506-1a_1.clean.fq.gz   ./KO2_BRD4_R1.fastq.gz
+ln -s delivered/2.cleandata/KO2-BRD4_FMRC210105506-1a/KO2-BRD4_FMRC210105506-1a_2.clean.fq.gz   ./KO2_BRD4_R2.fastq.gz
+ln -s delivered/2.cleandata/KO2-Input_FMRC210105497-1a/KO2-Input_FMRC210105497-1a_1.clean.fq.gz ./KO2_Inpu_R1.fastq.gz
+ln -s delivered/2.cleandata/KO2-Input_FMRC210105497-1a/KO2-Input_FMRC210105497-1a_2.clean.fq.gz ./KO2_Inpu_R2.fastq.gz
+ln -s delivered/2.cleandata/KO2-K5ac_FMRC210105500-1a/KO2-K5ac_FMRC210105500-1a_1.clean.fq.gz   ./KO2_K5ac_R1.fastq.gz
+ln -s delivered/2.cleandata/KO2-K5ac_FMRC210105500-1a/KO2-K5ac_FMRC210105500-1a_2.clean.fq.gz   ./KO2_K5ac_R2.fastq.gz
+ln -s delivered/2.cleandata/KO2-K5bu_FMRC210105503-1a/KO2-K5bu_FMRC210105503-1a_1.clean.fq.gz   ./KO2_K5bu_R1.fastq.gz
+ln -s delivered/2.cleandata/KO2-K5bu_FMRC210105503-1a/KO2-K5bu_FMRC210105503-1a_2.clean.fq.gz   ./KO2_K5bu_R2.fastq.gz
+ln -s delivered/2.cleandata/WT-BRD4_FMRC210105504-1a/WT-BRD4_FMRC210105504-1a_1.clean.fq.gz     ./WTy_BRD4_R1.fastq.gz
+ln -s delivered/2.cleandata/WT-BRD4_FMRC210105504-1a/WT-BRD4_FMRC210105504-1a_2.clean.fq.gz     ./WTy_BRD4_R2.fastq.gz
+ln -s delivered/2.cleandata/WT-Input_FMRC210105495-1a/WT-Input_FMRC210105495-1a_1.clean.fq.gz   ./WTy_Inpu_R1.fastq.gz
+ln -s delivered/2.cleandata/WT-Input_FMRC210105495-1a/WT-Input_FMRC210105495-1a_2.clean.fq.gz   ./WTy_Inpu_R2.fastq.gz
+ln -s delivered/2.cleandata/WT-K5ac_FMRC210105498-1a/WT-K5ac_FMRC210105498-1a_1.clean.fq.gz     ./WTy_K5ac_R1.fastq.gz
+ln -s delivered/2.cleandata/WT-K5ac_FMRC210105498-1a/WT-K5ac_FMRC210105498-1a_2.clean.fq.gz     ./WTy_K5ac_R2.fastq.gz
+ln -s delivered/2.cleandata/WT-K5bu_FMRC210105501-1a/WT-K5bu_FMRC210105501-1a_1.clean.fq.gz     ./WTy_K5bu_R1.fastq.gz
+ln -s delivered/2.cleandata/WT-K5bu_FMRC210105501-1a/WT-K5bu_FMRC210105501-1a_2.clean.fq.gz     ./WTy_K5bu_R2.fastq.gz
 
-<<<<<<< HEAD
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003914_1_Input_WT-1_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_WT_rep1_trim30.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003915_2_Input_KO-1_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_KO_rep1_trim30.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003916_3_SSRP1-CHIP_WT-1_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_WT_rep1_trim30.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003917_4_SSRP1-CHIP_KO-1_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003917_4_SSRP1-CHIP_KO-1_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_KO_rep1_trim30.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003918_5_HIRA-CHIP_WT-1_1_fastxtrimf30.fastq.gz    -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003918_5_HIRA-CHIP_WT-1_2_fastxtrimf30.fastq.gz   " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__WT_rep1_trim30.info  
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003919_6_HIRA-CHIP_KO-1_1_fastxtrimf30.fastq.gz    -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003919_6_HIRA-CHIP_KO-1_2_fastxtrimf30.fastq.gz   " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__KO_rep1_trim30.info  
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003920_7_Input_WT-2_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003920_7_Input_WT-2_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_WT_rep2_trim30.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003921_8_Input_KO-2_1_fastxtrimf30.fastq.gz        -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003921_8_Input_KO-2_2_fastxtrimf30.fastq.gz       " > /home/fchuffar/projects/${datashare}/${gse}/Input_KO_rep2_trim30.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003922_9_SSRP1-CHIP_WT-2_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003922_9_SSRP1-CHIP_WT-2_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_WT_rep2_trim30.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003923_10_SSRP1-CHIP_KO-2_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/SSRP1_KO_rep2_trim30.info
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003924_11_HIRA-CHIP_WT-2_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__WT_rep2_trim30.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_1_fastxtrimf30.fastq.gz   -2 /home/fchuffar/projects/${datashare}/${gse}/raw/S003925_12_HIRA-CHIP_KO-2_2_fastxtrimf30.fastq.gz  " > /home/fchuffar/projects/${datashare}/${gse}/HIRA__KO_rep2_trim30.info 
-=======
+# metadata
+cd ~/projects/datashare_epistorage/${gse}/
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_BRD4_R1_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_Inpu_R1_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5ac_R1_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5bu_R1_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_BRD4_R1_trimno.info  
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_Inpu_R1_trimno.info  
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5ac_R1_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5bu_R1_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_BRD4_R1_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_Inpu_R1_trimno.info
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5ac_R1_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5bu_R1_trimno.info 
+ls -lha 
 
-cd ~/projects/${datashare}/${gse}
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079661_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR207966_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/GSM1723635_trim30.info
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079662_1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/${datashare}/${gse}/raw/SRR2079662_2_fastxtrimf30.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/GSM1723636_trim30.info
 cat *.info
->>>>>>> e40209656a670e34b3a9fde1da524381f15d2482
 
 
 ## qc align count
