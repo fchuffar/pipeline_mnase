@@ -63,18 +63,18 @@ ln -s delivered/2.cleandata/WT-K5bu_FMRC210105501-1a/WT-K5bu_FMRC210105501-1a_2.
 
 # metadata
 cd ~/projects/datashare_epistorage/${gse}/
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_BRD4_R1_trimno.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_Inpu_R1_trimno.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5ac_R1_trimno.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5bu_R1_trimno.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_BRD4_R1_trimno.info  
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_Inpu_R1_trimno.info  
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5ac_R1_trimno.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5bu_R1_trimno.info      
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_BRD4_R1_trimno.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_Inpu_R1_trimno.info
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5ac_R1_trimno.info 
-echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5bu_R1_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_BRD4_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_Inpu_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5ac_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO1_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO1_K5bu_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_BRD4_trimno.info  
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_Inpu_trimno.info  
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5ac_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/KO2_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/KO2_K5bu_trimno.info      
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_BRD4_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_BRD4_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_Inpu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_Inpu_trimno.info
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5ac_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5ac_trimno.info 
+echo " -1 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R1.fastq.gz -2 /home/fchuffar/projects/${datashare}/${gse}/raw/WTy_K5bu_R2.fastq.gz " > /home/fchuffar/projects/${datashare}/${gse}/WTy_K5bu_trimno.info 
 ls -lha 
 
 cat *.info
