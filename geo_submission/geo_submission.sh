@@ -1,8 +1,7 @@
-cd  ~/projects/all_tchin/results/chip_gao_novogen/geo_submission
+cd  ~/projects/all_tchin/results/chip_gao_novogen/
+source config
 ssh cargo
-source ~/projects/all_tchin/results/${gse}/config
 
-GSE_TARGET_NAME="GSE7"
 # Transfering files
 cd /home/fchuffar/projects/${datashare}/${gse}/
 ls -lha raw/*R1.fastq.gz raw/*R2.fastq.gz
@@ -26,18 +25,22 @@ md5sum *.fastq.gz > md5.geo.txt
 cd /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/bw
 md5sum *.bw > md5.geo.txt
 
-# cat /home/fchuffar/projects/datashare_epistorage/${gse}/raw/md5_orig.txt
-# cat /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/md5.geo.txt
 
+# check MD5 fastq
+cat /home/fchuffar/projects/${datashare}/${gse}/raw/delivered/md5.summer.txt | grep cleandata | cut -f1 -d" " | sort > /tmp/md5tmp1
+cat /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/md5.geo.txt | cut -f1 -d" " | sort > /tmp/md5tmp2
+cat /tmp/md5tmp1
+cat /tmp/md5tmp2
+diff /tmp/md5tmp1 /tmp/md5tmp2
 
 # Put metadata
 cat /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/md5.geo.txt
-cat /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/counts/md5.geo.txt
-ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/*1_notrim.fastq.gz
-ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/*2_notrim.fastq.gz
+cat /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/bw/md5.geo.txt
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/*R1.fastq.gz
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/*R2.fastq.gz
 cd ~/projects/${project}/results/${gse}/geo_submission
-open geo_submission_metadata.xlsx
-rsync -auvP geo_submission_metadata.xlsx cargo:/bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/.
+open seq_template_v10_template7_tocomplete.xlsx
+rsync -auvP seq_template_v10_template7_tocomplete.xlsx cargo:/bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/.
 
 # Creating archive
 cd /bettik/chuffarf/geo_submission/${gse}/
