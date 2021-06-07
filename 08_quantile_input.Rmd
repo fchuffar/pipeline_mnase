@@ -1,0 +1,343 @@
+---
+title: "Clustering of gene profiles"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+```{r label="params"}
+prefix = "gene_profile_quantile_tss_input"
+```
+
+
+```{r label="blacklist"}
+# https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
+# downloading UCSC rmsk data as BED
+# BED formatted UCSC track content can be obtained from UCSC table broswer.
+# The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
+#
+# the assembly "Feb.2009 GRCh37/hg19"
+# the group "repeats and variations"
+# the track "RepeatMasker"
+# and finally the table "rmsk"
+# As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
+#
+# region: "genome"
+# ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
+#
+# output format: "BED - browser extensibke format"
+# output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
+# file type returned: "gzip compressed"
+options(scipen=999)
+
+if (!exists("rmsk_raw")) {
+  rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+}
+rmsk = rmsk_raw
+
+# blacklist = rmsk
+blacklist = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
+# blacklist = rbind(blacklist, list("chr19", 61266781, 61266782, "chr19:61266781-61266782", 1404, "+"))
+blacklist = rbind(blacklist, list("chr11", 3126500, 3200500, "Sfi1", 300, "-"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("Sfi1", "chr11", 3126500, 3200500, "-"))
+print(head(blacklist))
+dim(blacklist)
+blacklist_filename = "blacklist_file.bed"
+write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)    
+```
+
+
+
+
+
+
+```{r label="tss_feature"}
+regions_filenames = c(
+  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q4.bed", 
+  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q3.bed", 
+  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q2.bed", 
+  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q1.bed", 
+  NULL
+)
+```
+
+
+
+# Heatmap
+
+```{r, label="computeMatrix tss_keys", eval=TRUE}
+matrix_file = paste0("matrix_", prefix, ".txt.gz")
+# score_filenames
+score_filenames = c(
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+
+  # # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+  # # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  NULL
+)
+brsl = 500
+arsl = 1500
+bin_size = 10
+prefix = "gene_profile_quantile_tss"
+reference_point = "TSS"
+matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
+  blacklist_filename = blacklist_filename,
+  bin_size = bin_size,
+  before_region_start_length = brsl,
+  after_region_start_length = arsl,
+  reference_point = reference_point,
+  FORCE_EXEC=FALSE,
+  number_of_processors=32,
+  sort_regions="descend"
+)
+source("common.R")
+dir.create("tmp", recursive=TRUE, showWarnings=FALSE)
+ordered_wig_signal = fast_matrix_file(matrix_file, GRP=TRUE)
+hm_out_filename = paste0("tmp/hm_", prefix, ".fasted.png")
+hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=FALSE, color_map="YlOrRd", sort_regions="descend")
+```
+
+```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}
+knitr::include_graphics(hm_out_filename)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r hira_vs_fact, eval=TRUE}
+raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+dim(raw_wig_signal)
+
+con = gzfile(matrix_file)
+json = readLines(con, n=1)
+close(con)
+json = substr(json, 2, nchar(json))
+metadata = jsonlite::fromJSON(json, simplifyVector = FALSE)
+metadata$sample_boundaries
+metadata$group_boundaries
+
+
+layout(matrix(1:6,2), respect=TRUE)
+for (q in 4:2) {
+  for (rep in 1:2) {
+    foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
+    dim(foo)
+    plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-10,10), main=paste0("Q", q, " rep", rep))
+    # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+    # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+    axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
+    bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
+    lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2)
+    # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+    # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+
+    if  (rep==2) {
+      bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
+      lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3)
+      bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
+      lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4)
+      legend("topright", lty=1, col=3:4, paste0("KO, ChIP ", c("SSRP1", "HIRA")))
+    }
+    legend("bottomright", lty=1, col=1:2, paste0(c("WT", "KO")))
+  }
+}
+```
+
+
+```{r}
+pdf("08_quantile_input_figure_C.pdf", width=12, height=4)
+layout(matrix(1:3,1), respect=TRUE)
+for (q in 4:2) {
+  rep = 2
+  foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
+  dim(foo)
+  plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-8,12), main=paste0("Q", q, " rep", rep), xlab="", lwd=2)
+  # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+  # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+  axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
+  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
+  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2, lwd=2)
+  # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+  # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+
+  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
+  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3, lwd=2)
+  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
+  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4, lwd=2)
+  legend("topright", lty=1, col=1:4, c("WT, input", "KO, input", "KO, ChIP SSRP1", "KO, ChIP HIRA"), lwd=2)
+}
+dev.off()
+```
+
+```{r echo=FALSE, out.width="100%", results="asis"}
+pdf_file = "08_quantile_input_figure_C.pdf"
+if (file.exists(pdf_file)) {
+  cat(paste0("![](", pdf_file, ")"), "\n")
+}
+```
+
+
+
+```{r}
+pdf("08_quantile_input_figure_D.pdf", width=8, height=4)
+layout(matrix(c(1,1), 1), respect=TRUE)
+q = 4
+rep = 2
+foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
+dim(foo)
+period= 180
+plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-8,12), main=paste0("Q", q, " rep", rep, " period: ", period, "bp"), xlab="", lwd=2, xlim=c(0,100))
+abline(v=((-4:5) * period / 10) + 50+15, col="grey", lty=2)
+# lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+# lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
+axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
+bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
+lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2, lwd=2)
+# lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+# lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+
+bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
+lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3, lwd=2)
+bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
+lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4, lwd=2)
+# legend("topleft", lty=1, col=1:4, c("WT, input", "KO, input", "KO, ChIP SSRP1", "KO, ChIP HIRA"), lwd=2)
+dev.off()
+```
+
+
+```{r echo=FALSE, out.width="100%", results="asis"}
+pdf_file = "08_quantile_input_figure_D.pdf"
+if (file.exists(pdf_file)) {
+  cat(paste0("![](", pdf_file, ")"), "\n")
+}
+
+```
+
+
+
+
+# Material and Methods
+
+
+
+**Sequencing**
+
+Stranded paired-end 2x75bp reads were produced by Illumina NextSeq500. 
+Base calling was performed using RTA version 2.*
+
+**Trimming**
+
+Post processing of fastq files, Paired fastq files were processed by 5 prime trimming, keeping 30 bp-length fragments, using `fastx_trimmer`.
+with options: -l 30 -Q33, meaning 5 prime trimming keeping 30 bp-length fragments. 
+
+**Alignment**
+
+The trimmed fastq files were aligned on the USCS mm10 genome using `bowtie2`
+with options: –end-to-end, –no-mixed, –no-discordant. 
+
+**BigWig production**
+
+The bam siganl were normalized and smoothed using `bamCoverage`
+with options: --binSize 4 --minMappingQuality 30 --normalizeUsing RPKM.
+
+
+**Quartile of expression**
+
+We filtered protein-coding genes from NCBI Reference Sequence Database (RefSeq) and we organise genes by quartile of absolute RPKM expression in si-scrumble samples of GSE70314 (GSM1723639 et GSM1723640). Quartile of expression genes were exported as bed files available in supplementary.
+
+**Blacklist**
+
+We exclude from the analysis not only `GSAT_MM` and `SYNREP_MM` tagged loci in repeat masker but also *Sfi1* locus (chr11:3126500-3200500).
+
+**Heatmap**
+
+Heatmap were produced from BigWig files and quartile of expression bed files using `computeMatrix` and `plotHeatmap`
+with options: reference-point --referencePoint TSS --binSize 10 --beforeRegionStartLength 500 --afterRegionStartLength 1500 --sortRegions descend.
+
+**TSS Profile**
+
+TSS profiles were generated from `computeMatrix` outputs with a custom R script.
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

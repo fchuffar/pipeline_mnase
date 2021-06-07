@@ -3,80 +3,72 @@ localrules: target
 
 
 
-
 rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_BRD4_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_Inpu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5ac_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5bu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_BRD4_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_Inpu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5ac_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5bu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_BRD4_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_Inpu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5ac_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5bu_R1_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_BRD4_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_Inpu_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5ac_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO1_K5bu_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_BRD4_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_Inpu_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5ac_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/KO2_K5bu_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_BRD4_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_Inpu_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5ac_R2_fastqc.zip",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/raw/WTy_K5bu_R2_fastqc.zip",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004219_2_Input_KO_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004219_2_Input_KO_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004220_3_SSRP1_CHIP_WT_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004220_3_SSRP1_CHIP_WT_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004221_4_SSRP1_CHIP_KO_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004221_4_SSRP1_CHIP_KO_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004222_5_HIRA_CHIP_WT_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004222_5_HIRA_CHIP_WT_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004223_6_HIRA_CHIP_KO_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004223_6_HIRA_CHIP_KO_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004225_8_Input_KO_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004225_8_Input_KO_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004226_9_SSRP1_CHIP_WT_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004226_9_SSRP1_CHIP_WT_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004227_10_SSRP1_CHIP_KO_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004227_10_SSRP1_CHIP_KO_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004228_11_HIRA_CHIP_WT_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004228_11_HIRA_CHIP_WT_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004229_12_HIRA_CHIP_KO_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004229_12_HIRA_CHIP_KO_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004230_13_Input_WT_1_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004230_13_Input_WT_1_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004231_14_Input_WT_2_1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004231_14_Input_WT_2_2_fastxtrimf30.fastq.gz",
 
 
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_BRD4_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_Inpu_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_K5ac_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_K5bu_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_BRD4_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_Inpu_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_K5ac_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_K5bu_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_BRD4_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_Inpu_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_K5ac_end-to-end_trimno.log",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_K5bu_end-to-end_trimno.log",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
 
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_BRD4_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_Inpu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_K5ac_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO1_K5bu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_BRD4_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_Inpu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_K5ac_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/KO2_K5bu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_BRD4_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_Inpu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_K5ac_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_gao_novogen/WTy_K5bu_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep2_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep2_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep2_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep2_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep2_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep1_end-to-end_trim30.log",
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep2_end-to-end_trim30.log",
 
-      # "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_1_fastxtrimf30.fastq.gz",
-      # "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079661_2_fastxtrimf30.fastq.gz",
-      # "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_1_fastxtrimf30.fastq.gz",
-      # "/home/fchuffar/projects/datashare/GSE70312/raw/SRR2079662_2_fastxtrimf30.fastq.gz",
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_mmq30.bam" ,
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_mmq30.bam" ,
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
-      # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_SR_30_4_RPKM.bw",
+
+      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/KO1_BRD4_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
+
     shell:"""
 echo workflow \"pipeline_mnase\" completed at `date` 
 
-multiqc --force -o ~/projects/datashare/GSE70312raw/ -n multiqc_notrim \
-  ~/projects/datashare/GSE70312raw/raw/*_fastqc.zip \
-  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.log \
-  ~/projects/datashare/GSE70312raw/*_end-to-end_trim30.bam
+multiqc --force -o ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/ -n multiqc_notrim \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/*_fastqc.zip \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/*_end-to-end_trim30.log \
+  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/*_end-to-end_trim30.bam
           """
 
 

@@ -13,6 +13,7 @@ output:
 
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
 ```
 
 `r print(date())`
@@ -67,7 +68,6 @@ write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=
 
 ```{r label="tss_feature"}
 prefix = "tss"
-
 feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
 feat = feat[!is.na(feat$tx_end),]
 feat = feat[nchar(feat$chrom_text) <=5,]
@@ -110,18 +110,18 @@ write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, 
 
   # score_filenames
   score_filenames = c(
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-    "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
     NULL
   )
   brsl = arsl = 5000
