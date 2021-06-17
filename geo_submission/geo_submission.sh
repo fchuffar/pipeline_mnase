@@ -2,6 +2,9 @@ cd  ~/projects/all_tchin/results/chip_gao_novogen/
 source config
 ssh cargo
 
+# Metadata spreadsheet
+# https://www.ncbi.nlm.nih.gov/geo/info/examples/seq_template.xlsx
+
 # Transfering files
 cd /home/fchuffar/projects/${datashare}/${gse}/
 ls -lha raw/*R1.fastq.gz raw/*R2.fastq.gz
