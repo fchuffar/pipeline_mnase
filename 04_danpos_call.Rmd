@@ -1,0 +1,867 @@
+---
+title: "Peak Calling with `Danpos2`"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+```{r eval=FALSE, echo=FALSE}
+# peak calling with danpos2
+__conda_setup="$('/summer/epistorage/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+   eval "$__conda_setup"
+else
+   if [ -f "/summer/epistorage/miniconda3/etc/profile.d/conda.sh" ]; then
+       . "/summer/epistorage/miniconda3/etc/profile.d/conda.sh"
+   else
+       export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+   fi
+fi
+unset __conda_setup
+
+conda activate danpos_env
+
+cd ~/projects/datashare_epistorage/TGML_runs/bam_epimed/
+
+
+
+  
+samtools view -bq 30 S_H2A_end-to-end_trim30_srt.bam > S_H2A_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_H2A_end-to-end_trim30_srt_mmq30.bam 
+samtools view -bq 30 S_H31_end-to-end_trim30_srt.bam > S_H31_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_H31_end-to-end_trim30_srt_mmq30.bam 
+samtools view -bq 30 S_H32_end-to-end_trim30_srt.bam > S_H32_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_H32_end-to-end_trim30_srt_mmq30.bam 
+
+samtools view -bq 30 S_th1_end-to-end_trim30_srt.bam > S_th1_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_th1_end-to-end_trim30_srt_mmq30.bam 
+samtools view -bq 30 S_th2_end-to-end_trim30_srt.bam > S_th2_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_th2_end-to-end_trim30_srt_mmq30.bam 
+samtools view -bq 30 S_in1_end-to-end_trim30_srt.bam > S_in1_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_in1_end-to-end_trim30_srt_mmq30.bam 
+samtools view -bq 30 S_in2_end-to-end_trim30_srt.bam > S_in2_end-to-end_trim30_srt_mmq30.bam 
+samtools index S_in2_end-to-end_trim30_srt_mmq30.bam 
+
+ls -lha ~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_*_end-to-end_trim30_srt_mmq30.bam 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rm -Rf input_SON
+mkdir input_SON
+cd input_SON
+ln -s ../S_in1_end-to-end_trim30_srt_mmq30.bam input_SON_rep1.bam
+ln -s ../S_in2_end-to-end_trim30_srt_mmq30.bam input_SON_rep2.bam
+ls -lha
+cd ..
+ls -lha *_SON
+
+a=10
+q=20
+z=20
+jw=40
+jd=100
+
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_SON_input input_SON > danpos_out_SON_input.log &
+tail -f danpos_out_SON_input.log
+danpos.py dpeak -m 1 -o danpos_out_SON_input input_SON > danpos_out_SON_input_dpeak.log &
+tail -f danpos_out_SON_input_dpeak.log
+
+
+
+
+
+
+
+
+
+
+
+
+# rm -Rf ChIP_H3
+mkdir ChIP_H3
+cd ChIP_H3
+ln -s ../S_H31_end-to-end_trim30_srt_mmq30.bam ChIP_H3_rep1.bam
+ln -s ../S_H32_end-to-end_trim30_srt_mmq30.bam ChIP_H3_rep2.bam
+ls -lha
+cd ..
+mkdir input_H3
+cd input_H3
+ln -s ../S_in1_end-to-end_trim30_srt_mmq30.bam input_H3_rep1.bam
+ln -s ../S_in2_end-to-end_trim30_srt_mmq30.bam input_H3_rep2.bam
+ls -lha
+cd ..
+ls -lha *_H3
+
+a=10
+q=20
+z=20
+jw=40
+jd=100
+
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_H3_chip_input ChIP_H3 -b input_H3 > danpos_out_H3_chip_input.log &
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_H3_chip ChIP_H3  > danpos_out_H3_chip.log &
+
+danpos.py dpeak -m 1 -o danpos_out_H3_chip_input ChIP_H3 -b input_H3 > danpos_out_H3_chip_input_dpeak.log &
+danpos.py dpeak -m 1 -o danpos_out_H3_chip ChIP_H3  > danpos_out_H3_chip_dpeak.log &
+
+
+
+
+rm -Rf ChIP_TH2B input_TH2B
+mkdir ChIP_TH2B
+cd ChIP_TH2B
+ln -s ../S_th1_end-to-end_trim30_srt_mmq30.bam ChIP_TH2B_rep1.bam
+ln -s ../S_th2_end-to-end_trim30_srt_mmq30.bam ChIP_TH2B_rep2.bam
+ls -lha
+cd ..
+mkdir input_TH2B
+cd input_TH2B
+ln -s ../S_in1_end-to-end_trim30_srt_mmq30.bam input_TH2B_rep1.bam
+ln -s ../S_in2_end-to-end_trim30_srt_mmq30.bam input_TH2B_rep2.bam
+ls -lha
+cd ..
+ls -lha *_TH2B
+
+a=10
+q=20
+z=20
+jw=40
+jd=100
+
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_TH2B_chip_input ChIP_TH2B -b input_TH2B > danpos_out_TH2B_chip_input.log &
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_TH2B_chip ChIP_TH2B  > danpos_out_TH2B_chip.log &
+
+danpos.py dpeak -m 1  -o danpos_out_TH2B_chip_input ChIP_TH2B -b input_TH2B > danpos_out_TH2B_chip_input_peak.log &
+danpos.py dpeak -m 1  -o danpos_out_TH2B_chip ChIP_TH2B  > danpos_out_TH2B_chip_peak.log &
+
+
+
+danpos_out_dir = "danpos_out_H3_chip_input"
+prefix = "ChIP_H3.bgsub.Fnor"
+abs_thresh_smt = 128
+quantile_thresh_smt = 0.05
+quantile_thresh_fuzziness = 0.95
+thresh_len = c(110, 300)
+algo="peaks"
+rmarkdown::render("04_danpos_call.Rmd", output_file=paste0("04_danpos_call_", 
+  danpos_out_dir, "_", 
+  prefix, "_", 
+  abs_thresh_smt, "_", 
+  quantile_thresh_smt, "_", 
+  quantile_thresh_fuzziness, "_", 
+  thresh_len[1], "_", thresh_len[2], "_", 
+  algo, ".html")
+)
+
+danpos_out_dir = "danpos_out_TH2B_chip_input"
+prefix = "ChIP_TH2B.bgsub.Fnor"
+abs_thresh_smt = 128
+quantile_thresh_smt = 0.05
+quantile_thresh_fuzziness = 0.95
+thresh_len = c(110, 300)
+algo="peaks"
+rmarkdown::render("04_danpos_call.Rmd", output_file=paste0("04_danpos_call_", 
+  danpos_out_dir, "_", 
+  prefix, "_", 
+  abs_thresh_smt, "_", 
+  quantile_thresh_smt, "_", 
+  quantile_thresh_fuzziness, "_", 
+  thresh_len[1], "_", thresh_len[2], "_", 
+  algo, ".html")
+)
+
+
+danpos_out_dir = "danpos_out_SON_input"
+prefix = "input_SON.Fnor"
+abs_thresh_smt = 128
+quantile_thresh_smt = 0.05
+quantile_thresh_fuzziness = 0.95
+thresh_len = c(110, 300)
+algo="peaks"
+rmarkdown::render("04_danpos_call.Rmd", output_file=paste0("04_danpos_call_", 
+  danpos_out_dir, "_", 
+  prefix, "_", 
+  abs_thresh_smt, "_", 
+  quantile_thresh_smt, "_", 
+  quantile_thresh_fuzziness, "_", 
+  thresh_len[1], "_", thresh_len[2], "_", 
+  algo, ".html")
+)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r eval=TRUE, label="params"}
+if (!exists("danpos_out_dir")) {
+  danpos_out_dir = "danpos_out_H3_chip_input"
+}
+if (!exists("prefix")) {
+  prefix = "ChIP_H3.bgsub.Fnor"
+}
+if (!exists("abs_thresh_smt")) {
+  abs_thresh_smt = 128
+}
+if (!exists("quantile_thresh_smt")) {
+  quantile_thresh_smt = 0.05
+}
+if (!exists("quantile_thresh_fuzziness")) {
+  quantile_thresh_fuzziness = 0.95
+}
+if (!exists("thresh_len")) {
+  thresh_len = c(110, 300)
+}
+if (!exists("algo")) {
+  algo="peaks"
+}
+```
+
+
+```{r eval=TRUE, label="loading annotations"}
+if (!exists("rmsk_raw")) {
+  rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+}
+rmsk = rmsk_raw
+
+if (!exists("annotations")) {
+  # annots = c("mm10_lncrna_gencode")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_lncrna_gencode", "mm10_enhancers_fantom")
+  # annots = c('mm10_cpgs', 'mm10_basicgenes', "mm10_enhancers_fantom")
+  # annots = c( 'mm10_basicgenes', 'mm10_cpgs')
+  write.table(rmsk[rmsk[,4]=="GSAT_MM",]  , file="gsat.mm10.bed"  , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+  write.table(rmsk[rmsk[,4]=="SYNREP_MM",], file="synrep.mm10.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+  annotatr::read_annotations(con="gsat.mm10.bed"  , genome = "mm10", name = "gsat"  , format = "bed")
+  annotatr::read_annotations(con="synrep.mm10.bed", genome = "mm10", name = "synrep", format = "bed")
+  annots = c( "mm10_basicgenes", "mm10_cpgs", "mm10_custom_gsat", "mm10_custom_synrep")
+  annotations = annotatr::build_annotations(genome = 'mm10', annotations = annots)  
+}
+```
+
+
+
+```{r eval=TRUE, label="danpos_out"}
+source("common.R")
+
+print("Reading danpos output...")
+# ln -s ~/projects/datashare_epistorage/TGML_runs/bam_epimed/danpos_out_H3_chip_input
+# ln -s ~/projects/datashare_epistorage/TGML_runs/bam_epimed/danpos_out_TH2B_chip_input
+danpos_out = mget_danpos_out(prefix, danpos_out_dir, algo=algo)
+head(danpos_out)
+print("Annotating danpos output...")
+danpos_out_annot = mget_danpos_out_annot(prefix, danpos_out_dir, algo=algo)
+head(danpos_out_annot)
+table(danpos_out_annot$annot.type)
+# stope("EFN")
+
+# danpos_out[danpos_out$smt_value==16 & danpos_out$fuzziness_score <30, ]
+# head(danpos_out[danpos_out$smt_value==16 & danpos_out$fuzziness_score <35, ])
+
+
+if (!exists("chr_sizes")) {
+  print("Reading chr_sizes...")
+  chr_sizes = read.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes", stringsAsFactors=FALSE)
+  rownames(chr_sizes) = chr_sizes[,1]
+  head(chr_sizes)
+  dim(chr_sizes)
+}
+genome_size = sum(chr_sizes[names(table(danpos_out$chr)),2])
+
+
+# FILTERING DANPOS OUT
+# danpos_out[idx, ][!duplicated()]
+head(danpos_out)
+dim(danpos_out)
+print(paste0(signif(nrow(danpos_out) * 140 / 1000000, 3), " Mb (over ", signif(genome_size / 1000000, 3), " Mb)"))
+print(table(danpos_out$chr))
+
+sum(danpos_out$len)
+
+print(paste0(signif(100 * sum(danpos_out$len) / genome_size,3), "% of the genome"))
+
+```
+
+# Params
+
+Peak calling done on `r prefix` with danpos params `r danpos_out_dir`, with algorithm `r algo`.
+
+```{r stats, results="verbatim"}
+print(paste0(signif(100 * sum(danpos_out$len) / genome_size,3), "% of the genome"))
+```
+
+
+
+```{r results="verbatim", eval=FALSE}
+print(table(danpos_out_annot$annot.type))
+print(round(table(danpos_out_annot$annot.type)/nrow(danpos_out)*100,2))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Filtering features
+
+```{r, label="filtering", results="verbatim"}
+if (algo=="peaks") {
+  print(paste0("algo used:", algo))
+  danpos_out$smt_value = danpos_out$total_signal
+  danpos_out$fuzziness_score = danpos_out$width_above_cutoff
+  danpos_out$smt_pos = danpos_out$center
+  # thresh_fuzziness_score = 5000
+  # tmp_sub_danpos_out = danpos_out[danpos_out$fuzziness_score <= thresh_fuzziness_score & danpos_out$smt_value >= thresh_smt & !rownames(danpos_out) %in% danpos_out_annot[danpos_out_annot$annot.type %in% c("mm10_custom_gsat","mm10_custom_synrep"),]$name,]
+} else {
+  print(paste0("algo used:", algo))
+}
+
+plot_danpos_out_stat = function(tmp_sub_danpos_out, genome_size) {
+  layout(matrix(1:3,1), respect=TRUE)
+  barplot(table(tmp_sub_danpos_out$len), las=2, main=paste0("distribution of ", nrow(tmp_sub_danpos_out), " regions lengths"))
+  boxplot(log2(tmp_sub_danpos_out$smt_value+1)~tmp_sub_danpos_out$len, las=2, main="log(smt_value)~len")
+  boxplot(tmp_sub_danpos_out$fuzziness_score~tmp_sub_danpos_out$len, las=2, main="fuzziness~len")
+  print(paste0(signif(100 * sum(tmp_sub_danpos_out$len) / genome_size,3), "% of the genome"))  
+  dim(tmp_sub_danpos_out)
+}
+
+print("No filter")
+tmp_sub_danpos_out = danpos_out
+tmp_sub_danpos_out_annot = danpos_out_annot
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+print("filtering according to minor and major sat")
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  !rownames(tmp_sub_danpos_out) %in% tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$annot.type %in% c("mm10_custom_gsat","mm10_custom_synrep"),]$name,
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+print("filtering according to the length of the features")
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  tmp_sub_danpos_out$len >= thresh_len[1] &
+  tmp_sub_danpos_out$len <= thresh_len[2],
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+print("filtering Mito")
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  !tmp_sub_danpos_out$chr %in% "chrM", 
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+
+print("filtering according to the level of the signal (quantile)")
+dict_thresh_smt = sapply(as.character(sort(unique(tmp_sub_danpos_out$len))), function(len) {
+  quantile(tmp_sub_danpos_out[tmp_sub_danpos_out$len==len,]$smt_value, probs=quantile_thresh_smt)[[1]]
+})
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  tmp_sub_danpos_out$smt_value > dict_thresh_smt[as.character(tmp_sub_danpos_out$len)],
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+
+print("filtering according to the level of the signal (quantile)")
+dict_thresh_smt = sapply(as.character(sort(unique(tmp_sub_danpos_out$len))), function(len) {
+  quantile(tmp_sub_danpos_out[tmp_sub_danpos_out$len==len,]$smt_value, probs=0.999)[[1]]
+})
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  tmp_sub_danpos_out$smt_value < dict_thresh_smt[as.character(tmp_sub_danpos_out$len)],
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+
+
+print(paste0("filtering according to the level of the signal (absolute threshold ", abs_thresh_smt, ")"))
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  tmp_sub_danpos_out$smt_value > abs_thresh_smt,
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+
+print("filtering according to the fuzziness of the signal")
+dict_thresh_fuzziness = sapply(as.character(sort(unique(tmp_sub_danpos_out$len))), function(len) {
+  quantile(tmp_sub_danpos_out[tmp_sub_danpos_out$len==len,]$fuzziness_score, probs=quantile_thresh_fuzziness)[[1]]
+})
+tmp_sub_danpos_out = tmp_sub_danpos_out[
+  tmp_sub_danpos_out$fuzziness_score < dict_thresh_fuzziness[as.character(tmp_sub_danpos_out$len)],
+]
+tmp_sub_danpos_out_annot = tmp_sub_danpos_out_annot[tmp_sub_danpos_out_annot$name %in% rownames(tmp_sub_danpos_out),]
+plot_danpos_out_stat(tmp_sub_danpos_out, genome_size)
+```
+
+# Plotting fuzziness and occupancy
+
+
+
+```{r, label="fuzziness/occupancy plots"}
+print("categorize features according to fuzziness...")
+if (nrow(tmp_sub_danpos_out) < 50000) {
+  q = unique(quantile(tmp_sub_danpos_out$fuzziness_score, probs=seq(0,1,length=6)))
+} else if (nrow(tmp_sub_danpos_out) < 500000) {
+  q = unique(quantile(tmp_sub_danpos_out$fuzziness_score, probs=c(0, 0.05, seq(0,1,length=6)[-1])))  
+} else {
+  q = unique(quantile(tmp_sub_danpos_out$fuzziness_score, probs=c(0, 0.005, 0.05, seq(0,1,length=6)[-1])))  
+}
+tmp_sub_danpos_out$grp = as.numeric(cut(tmp_sub_danpos_out$fuzziness_score, q, include.lowest=TRUE))
+print(table(tmp_sub_danpos_out$grp))
+
+# # Export gene lists for Amigo
+# dir.create("tmp", recursive=TRUE, showWarnings=FALSE)
+# for (i in unique(tmp_sub_danpos_out$grp)) {
+#   genesqi_file = paste0("tmp/genesq", i, "_", prefix, ".txt")
+#   genesqi = unique(danpos_out_annot[danpos_out_annot$annot.type %in% "mm10_genes_promoters" & danpos_out_annot$name%in% rownames(tmp_sub_danpos_out)[tmp_sub_danpos_out$grp%in%i],]$annot.symbol)
+#   write.table(genesqi, genesqi_file, row.names=FALSE, quote=FALSE, col.names=FALSE)
+# }
+
+
+layout(matrix(1:6, 2), respect=TRUE)
+
+plot( density(log2(        danpos_out$smt_value + 1)), main="raw log2(occupancy+1) distribution")
+lines(density(log2(tmp_sub_danpos_out$smt_value + 1)), col=adjustcolor(2, alpha.f=.5))
+# abline(v=log2(thresh_smt + 1), col="red", lty=2)
+
+plot( density(        danpos_out$fuzziness_score), main="raw fuzziness distribution")
+lines(density(tmp_sub_danpos_out$fuzziness_score), col=adjustcolor(2, alpha.f=.5))
+abline(v=q, lty=3, col="grey")
+abline(v=q[2], lty=2, col="blue")
+
+plot(density(tmp_sub_danpos_out$fuzziness_score), main="filtered fuzziness distribution")
+abline(v=q, lty=3, col="grey")
+abline(v=q[2], lty=2, col="blue")
+
+smoothScatter(
+  tmp_sub_danpos_out$fuzziness_score, log2(tmp_sub_danpos_out$smt_value + 1),
+  ylab="log2(occupancy+1) (a.u)", 
+  ylim=range(log2(tmp_sub_danpos_out$smt_value + 1)), 
+  col=1, pch=1
+)
+abline(v=q, lty=3, col="grey")
+abline(v=q[2], lty=2, col="blue")
+
+barplot(round(table(tmp_sub_danpos_out_annot$annot.type)/nrow(tmp_sub_danpos_out)*100,2), las=2)
+tmp_d = density(log2(tmp_sub_danpos_out$smt_value + 1))
+
+plot(tmp_d$y, tmp_d$x, type="l", xlab="Density", ylab="",
+ylim=range(log2(tmp_sub_danpos_out$smt_value + 1))
+)
+
+foo = tmp_sub_danpos_out[tmp_sub_danpos_out$smt_value==min(tmp_sub_danpos_out[tmp_sub_danpos_out$grp==1,]$smt_value) & tmp_sub_danpos_out$grp==1,]
+head(foo)
+
+foo = tmp_sub_danpos_out[tmp_sub_danpos_out$smt_value==64 & tmp_sub_danpos_out$grp==1,]
+head(foo)
+
+# rsync -auvP cargo:~/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_mmq30.bam* ~/projects/datashare_epistorage/chip_hira_ssrp1/.
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r eval=TRUE, label="regions_filenames"}
+nb_rnd_feat = min(2500, min(table(tmp_sub_danpos_out$grp)))
+annot_stats = lapply(1:5, function(seed) {
+  lapply(sort(unique(tmp_sub_danpos_out$grp)), function(grp) {
+    regions_filename = paste0("danpos_", prefix, "_", nb_rnd_feat, "_grp", grp, "_rnd", seed,".bed")
+    print(paste0("Filtering ", nb_rnd_feat, " rnd nucleosomes in ", regions_filename, "..."))
+    feat = tmp_sub_danpos_out[tmp_sub_danpos_out$grp==grp,]
+    set.seed(seed)
+    feat = feat[sample(1:nrow(feat), nb_rnd_feat),]
+    feat[,2] = feat$smt_pos
+    feat[,3] = feat[,2] + 1
+    feat[,4] = rownames(feat)
+    feat[,5] = grp
+    feat[,6] = "+"
+    # print(head(feat))
+    dim(feat)
+    write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+    regions_filename 
+    ret = table(danpos_out_annot[danpos_out_annot$name %in% rownames(feat),]$annot.type)
+    ret = c(ret, grp=grp, rep=seed)
+    return(ret)
+  })
+}) 
+annot_stats = unlist(annot_stats, recursive=FALSE)
+annot_stats = do.call(rbind,annot_stats)
+
+regions_filenames_all = lapply(1:5, function(seed) {
+  regions_filenames = sapply(sort(unique(tmp_sub_danpos_out$grp)), function(grp) {
+    regions_filename = paste0("danpos_", prefix, "_", nb_rnd_feat, "_grp", grp, "_rnd", seed,".bed")
+    regions_filename 
+  })
+  regions_filenames
+}) 
+regions_filenames = regions_filenames_all[[1]]
+regions_filenames_all = unlist(regions_filenames_all)
+```
+
+# Annotations
+
+
+```{r results="verbatim"}
+print(table(tmp_sub_danpos_out$grp))
+```
+
+```{r label="boxplot annot"}
+# layout(matrix(1:18, 3), respect=TRUE)
+# layout(matrix(1:2, 1), respect=TRUE)
+layout(matrix(1:6, 2), respect=TRUE)
+sapply(rev(colnames(annot_stats))[-(1:2)],function(cn) {
+  boxplot(annot_stats[,cn]~annot_stats[,"grp"], main=cn)
+})
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Heatmap
+
+
+
+```{r label="blacklist"}
+options(scipen=999)
+
+# blacklist = rmsk
+blacklist = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
+blacklist = rbind(blacklist, list("chr19", 61266781, 61266782, "chr19:61266781-61266782", 1404, "+"))
+blacklist = rbind(blacklist, list("chr11", 3126500, 3200500, "Sfi1", 300, "-"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("Sfi1", "chr11", 3126500, 3200500, "-"))
+print(head(blacklist))
+dim(blacklist)
+blacklist_filename = "blacklist_file.bed"
+write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)    
+```
+
+
+
+
+
+```{r eval=TRUE, label="matrix_file"}
+dir.create("tmp", showWarnings=FALSE)
+matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")      
+
+# score_filenames
+score_filenames = c(
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_end-to-end_trim30_srt_30_4_RPKM.bw",
+
+  # nucs and ss in spermato
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp4_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp6_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn4_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn6_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp4_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp6_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn4_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn6_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+
+  # Spermato sonication input TH2B H2AL2 H3
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in1_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_srt_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_srt_30_4_RPKM.bw",
+
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  #
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+
+
+  # # Naked DNA
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/N_t1p_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/N_t2p_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/N_t1p_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/N_t2p_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+
+  # # GSE77277 R P H4K5ac H4K5bu H4K8ac H4K8bu input
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047212_end-to-end_trim30_srtsr_30_4_RPKM.bw", # S-H4K5ac_ChIPSeq (pachyten)
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047213_end-to-end_trim30_srtsr_30_4_RPKM.bw", # S-H4K5bu_ChIPSeq (pachyten)
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047214_end-to-end_trim30_srtsr_30_4_RPKM.bw", # S-H4K8ac_ChIPSeq (pachyten)
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047215_end-to-end_trim30_srtsr_30_4_RPKM.bw", # S-H4K8bu_ChIPSeq (pachyten)
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047207_end-to-end_trim30_srtsr_30_4_RPKM.bw", # R-H4K5ac_ChIPSeq
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047208_end-to-end_trim30_srtsr_30_4_RPKM.bw", # R-H4K5bu_ChIPSeq
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047209_end-to-end_trim30_srtsr_30_4_RPKM.bw", # R-H4K8ac_ChIPSeq
+  # "/home/fchuffar/projects/datashare/GSE77277/GSM2047210_end-to-end_trim30_srtsr_30_4_RPKM.bw", # R-H4K8bu_ChIPSeq
+
+  # # # Th2b tag GSE45915
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1119609_solid_srt_0_0_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1119610_solid_srt_0_0_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1119611_solid_srt_0_0_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1119612_solid_srt_0_0_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1179189_solid_srt_0_0_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE45915/GSM1179190_solid_srt_0_0_4_RPKM.bw",
+
+  # # Rando
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_Spe_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_Spe_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_ES2_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_ES1_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_ES2_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/Q_ES1_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM.bw",
+
+  # Fast
+  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/F_ast_end-to-end_trim30_srt_30_4_RPKM.bw"
+)
+brsl = arsl = 2000
+bin_size = 100
+matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
+  blacklist_filename = blacklist_filename,
+  bin_size = bin_size,
+  before_region_start_length = brsl, 
+  after_region_start_length = arsl,
+  FORCE_EXEC=TRUE, 
+  number_of_processors=32
+)
+# hm_out_filename = paste0("tmp/hm_", prefix, ".raw.png")
+# hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=matrix_file, out_filename=hm_out_filename, FORCE_EXEC=TRUE, color_map="YlOrRd")
+
+source("common.R")
+ordered_wig_signal = fast_matrix_file(matrix_file, GRP=TRUE)
+hm_out_filename = paste0("tmp/hm_", prefix, ".fasted.png")
+hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=FALSE, color_map="YlOrRd", sort_regions="descend")
+```
+
+```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}
+knitr::include_graphics(hm_out_filename)
+```
+
+
+
+
+
+
+
+
+
+
+```{r eval=TRUE, label="sorted_heatmap"}
+sort_matrix_file = function(matrix_file, GRP=FALSE) {
+  raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+  dim(raw_wig_signal)
+  # plot(apply(raw_wig_signal[,-(1:6)], 2, mean))
+  # abline(v=c(131,150), col=2)
+
+  # filter_according_to_column_nb = 5
+  # idx = ((filter_according_to_column_nb-1) * (brsl + arsl)/bin_size + 1):(filter_according_to_column_nb*(brsl + arsl)/bin_size)
+  # q = quantile(apply(as.matrix(raw_wig_signal[1:1000,-(1:6)][,idx]), 1, mean), probs=0.990)
+  # idx = which(as.vector(apply(as.matrix(raw_wig_signal[1:1000,-(1:6)][,idx]), 1,mean) > q))
+  # # raw_wig_signal[idx,1:6][]
+  # raw_wig_signal[idx,-(1:6)] = 0
+
+  sort_according_to_column_nb = 3
+  idx = ((sort_according_to_column_nb-1) * (brsl + arsl)/bin_size + 1):(sort_according_to_column_nb*(brsl + arsl)/bin_size)
+  score = apply(raw_wig_signal[,-(1:6)][,idx], 1, function(l){
+    which(l==max(l))[1]
+  })
+  mat_centred_on_peak = raw_wig_signal[,1:6]
+  mat_centred_on_peak[,2] = mat_centred_on_peak[,2] - brsl + score*bin_size 
+  mat_centred_on_peak[,3] = mat_centred_on_peak[,2] + 1 
+
+
+  grps = raw_wig_signal[,5]
+  system2(command="zcat", args=paste0(matrix_file, " | head -n1 ", 
+    "| sed -e 's/_end-to-end_trim30_srt_30_4_RPKM//g' ", 
+    "| sed -e 's/_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM/_nuc/g' ", 
+    "| sed -e 's/_end-to-end_trim30_fsmin025_fsmax075_srt_30_4_RPKM/_ss/g' ", 
+    "| sed -e 's/_srt_30_4_RPKM//g' ", 
+    "| sed -e 's/SRR1019858/GSM1253297/g' ", 
+    "| sed -e 's/SRR1019859/GSM1253298/g' ", 
+    "| sed -e 's/SRR1019860/GSM1253299/g' ", 
+    "| sed -e 's/SRR1019861/GSM1253300/g' ", 
+    "| sed -e 's/SRR1019862/GSM1253301/g' ", 
+    "| sed -e 's/SRR1019863/GSM1253302/g' ", 
+    "| sed -e 's/S_bn3/S_nuc_4/g' ", 
+    "| sed -e 's/S_bn1/S_nuc_12/g' ", 
+    "| sed -e 's/S_bn6/S_nuc_12/g' ", 
+    "| sed -e 's/S_bn5/S_sms_4/g' ", 
+    "| sed -e 's/S_bn2/S_sms_12/g' ", 
+    "| sed -e 's/S_pp2/S_WT_04/g' ", 
+    "| sed -e 's/S_pp4/S_WT_08/g' ", 
+    "| sed -e 's/S_pp6/S_WT_12/g' ", 
+    "| sed -e 's/S_nn2/S_KO_04/g' ", 
+    "| sed -e 's/S_nn4/S_KO_08/g' ", 
+    "| sed -e 's/S_nn6/S_KO_12/g' ", 
+    "> ", matrix_file, ".sort.txt"))
+  if (GRP) {
+    o = order(grps, score)
+  } else {
+    o = order(score)
+  }
+
+
+  write.table(raw_wig_signal[o,], paste0(matrix_file, ".sort.txt"), quote=FALSE, col.names=FALSE, row.names=FALSE, append=TRUE, sep="\t")
+  system2(command="rm", args=paste0(matrix_file, ".sort.txt.gz"))
+  system2(command="gzip", args=paste0(matrix_file, ".sort.txt"))  
+  ret = list(ordered_wig_signal=raw_wig_signal[o,] , centred_on_peak_bed=mat_centred_on_peak[o,])
+  return(ret)
+}
+
+
+ordered_wig_signal = sort_matrix_file(matrix_file, GRP=TRUE)[[1]]
+
+# ordered_wig_signal_file = paste0("tmp/ordered_wig_signal_", prefix, "_", thresh_smt, ".txt.gz")
+# saveRDS(ordered_wig_signal, ordered_wig_signal_file)
+#
+# brsl = arsl = 200
+# bin_size = 10
+# prefix = "S_pp2_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30"
+# thresh_smt = 96
+# data = readRDS(paste0("tmp/ordered_wig_signal_", prefix, "_", thresh_smt, ".txt.gz"))
+# dim(data)
+#
+# filter_according_to_column_nb = c(15)
+# idx = unlist(lapply(filter_according_to_column_nb, function(i) {((i-1) * (brsl + arsl)/bin_size + 1):(i*(brsl + arsl)/bin_size)}))
+# head(data[,c(1:6, idx + 7)])
+# d = log2(as.matrix(data[,-(1:6)]) + 1)
+# rownames(d) = data[,4]
+# d = d[1:5000,]
+# o = order(apply(d[,idx[11:30]], 1, mean))
+# d = d[o,]
+# plot(density(d))
+# idx = rownames(d[1:1000,])
+#
+# a = danpos_out_annot[danpos_out_annot$name %in% idx,]$annot.type
+# pa = prop.table(table(a))
+# b = danpos_out_annot[danpos_out_annot$name %in%  rownames(d),]$annot.type
+# pb = prop.table(table(b))
+#
+# genes = unique(danpos_out_annot[danpos_out_annot$annot.type %in% "mm10_genes_promoters" & danpos_out_annot$name%in% idx,]$annot.symbol)
+# write.table(genes, "genes.txt"    , row.names=FALSE, quote=FALSE, col.names=FALSE)
+#
+#
+# source("~/projects/epimedpipelines/results/commons.R")
+# foo = plot_expr_hm(d[1:1000,], hcmeth_cols=FALSE, hcmeth_rows=FALSE)
+# foo = plot_expr_hm(d[4500:5000,], hcmeth_cols=FALSE, hcmeth_rows=FALSE)
+#
+# genes = names(sort(table(danpos_out_annot[danpos_out_annot$name %in% idx,]$annot.symbol)))
+
+
+
+hm_out_filename_sorted = paste0("tmp/hm_", prefix, ".sorted.png")
+hm_out_filename_sorted  = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".sort.txt.gz"), out_filename=hm_out_filename_sorted, FORCE_EXEC=TRUE, color_map="YlOrRd")
+```
+
+```{r, echo=FALSE, out.width="100%", results="markup"}
+knitr::include_graphics(hm_out_filename_sorted)
+```
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
