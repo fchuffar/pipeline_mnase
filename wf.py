@@ -224,6 +224,9 @@ rule target:
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_srt_30_4_RPKM.bw",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_srt_30_4_RPKM.bw",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_srt_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_srt_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_srt_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_srt_0_4_RPKM.bw",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30_fsmin025_fsmax075_srt.bam",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30_fsmin025_fsmax075_srt.bam",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30_fsmin025_fsmax075_srt.bam",
@@ -479,6 +482,11 @@ rule target:
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30_srt_30_4_RPKM.bw",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30_srt_30_4_RPKM.bw",
       "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30_srt_30_4_RPKM.bw",
+
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in1_end-to-end_trim30_srt_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30_srt_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30_srt_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30_srt_0_4_RPKM.bw",
 
       # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_rn1_local_trimno.log",
       # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_rn1_local_trimno.log",
