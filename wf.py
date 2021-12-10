@@ -1,73 +1,72 @@
+import os 
+exec(open("config").read())
+
 localrules: target
 
 
 
-
+foo=version # patch for bug in target shell
 rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004219_2_Input_KO_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004219_2_Input_KO_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004220_3_SSRP1_CHIP_WT_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004220_3_SSRP1_CHIP_WT_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004221_4_SSRP1_CHIP_KO_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004221_4_SSRP1_CHIP_KO_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004222_5_HIRA_CHIP_WT_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004222_5_HIRA_CHIP_WT_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004223_6_HIRA_CHIP_KO_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004223_6_HIRA_CHIP_KO_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004225_8_Input_KO_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004225_8_Input_KO_2_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004226_9_SSRP1_CHIP_WT_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004226_9_SSRP1_CHIP_WT_2_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004227_10_SSRP1_CHIP_KO_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004227_10_SSRP1_CHIP_KO_2_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004228_11_HIRA_CHIP_WT_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004228_11_HIRA_CHIP_WT_2_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004229_12_HIRA_CHIP_KO_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004229_12_HIRA_CHIP_KO_2_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004230_13_Input_WT_1_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004230_13_Input_WT_1_2_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004231_14_Input_WT_2_1_fastxtrimf30.fastq.gz",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/S004231_14_Input_WT_2_2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m273_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m292_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m300_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m303_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m273_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m292_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m300_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m303_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m291_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m293_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m301_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m302_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m291_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m293_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m301_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m302_1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m273_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m292_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m300_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m303_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m273_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m292_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m300_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m303_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m291_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m293_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m301_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m302_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m291_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m293_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m301_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m302_2_fastxtrimf30.fastq.gz", 
 
-
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__KO_rep2_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/HIRA__WT_rep2_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_KO_rep2_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/Input_WT_rep2_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_KO_rep2_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep1_end-to-end_trim30.log",
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/SSRP1_WT_rep2_end-to-end_trim30.log",
-
-
-      # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1_spg/KO1_BRD4_end-to-end_trimno_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
 
     shell:"""
+multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30.log \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30.bam \
+  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip \
+
 echo workflow \"pipeline_mnase\" completed at `date` 
-multiqc --force -o ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/ -n multiqc_notrim \
-  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/raw/*_fastqc.zip \
-  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/*_end-to-end_trim30.log \
-  ~/projects/datashare_epistorage/chip_hira_ssrp1_spg/*_end-to-end_trim30.bam
           """
 
 

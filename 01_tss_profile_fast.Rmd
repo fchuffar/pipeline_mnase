@@ -106,26 +106,32 @@ write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, 
 
 
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
+  dir.create("tmp", showWarnings=FALSE)
+
   matrix_file = paste0("matrix_", prefix, ".txt.gz")
 
   # score_filenames
   score_filenames = c(
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
     NULL
   )
   brsl = arsl = 5000
-  bin_size = 10
+  bin_size = 100
   matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
     blacklist_filename = blacklist_filename,
     bin_size = bin_size,
