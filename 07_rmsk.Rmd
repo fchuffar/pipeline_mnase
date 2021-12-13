@@ -437,14 +437,22 @@ args = paste0(
   # "-a ", prefix, ".saf -M -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
   # "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
   # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  # Spermato sonication input TH2B H2AL2 H3
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in1_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_in2_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th1_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_th2_end-to-end_trim30.bam ",
-  # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H2A_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H31_end-to-end_trim30.bam ",
-  "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_H32_end-to-end_trim30.bam ",
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam "),
   ""
 )
 print(paste(cmd, args))
@@ -453,15 +461,16 @@ system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
 ```
 
 ```{r label="normalization"}
-# if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
-counts_summary = read.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
+if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
+counts_summary = mread.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
 rownames(counts_summary) = counts_summary[,1]
 counts_summary = counts_summary[,-1]
 colnames(counts_summary) = substr(colnames(counts_summary), 68, 72)
 print(counts_summary)
 
-counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
-rownames(counts) = counts[,1]
+counts = mread.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+# rownames(counts) = counts[,1]
+rownames(counts) = paste0(as.character(counts[,1]), "")
 counts = counts[,-(1:6)]
 colnames(counts) = substr(colnames(counts), 68, 72)
 print(counts)

@@ -60,6 +60,40 @@ rule target:
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PESF_30_4_None_SF1.33.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PESF_30_4_None_SF1.03.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PESF_30_4_None_SF1.55.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PESF_30_4_None_SF1.96.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PESF_30_4_None_SF1.09.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PESF_30_4_None_SF1.52.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PESF_30_4_None_SF1.41.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PESF_30_4_None_SF1.42.bw",
+
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.38.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.00.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.78.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF2.02.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.24.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.61.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.48.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.57.bw",
+
+
+
+
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam",
+
+
+
+
+
     shell:"""
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
   ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30.log \
@@ -161,77 +195,35 @@ bowtie2 \
 samtools sort -@ {threads} -T /dev/shm/{wildcards.sample}_{wildcards.localendtoend}_trim{wildcards.trim} -o {output.srtbam} {output.bam}
 samtools index {output.srtbam}
 cat {output.log}
-              """
+"""
 
-
-
-
-
-
-rule count_featurecounts:
-    input: "{prefix}.fastq.gz", 
-      P_mns="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_end-to-end_trim30.log",
-      R_mns="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_end-to-end_trim30.log",
-      C_nuc="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_end-to-end_trim30.log",
-      C_sms="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_end-to-end_trim30.log",
-      S_bn1="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_end-to-end_trim30.log",
-      S_bn3="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_end-to-end_trim30.log",
-      S_bn6="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_end-to-end_trim30.log",
-      S_bn2="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_end-to-end_trim30.log",
-      S_bn5="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_end-to-end_trim30.log",
-      S_bn4="/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_end-to-end_trim30.log",
-    
+rule saf_featurecounts:
+    input: 
+      saf_file="tss.saf",
     output: "{prefix}_fastxtrimf{trim}.count.txt"
-    threads: 1
+    threads: 32
     shell:"""
 /summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts \
-  -a nuc_feat.saf \
+  -a {input.saf} \
   -F SAF \
   --largestOverlap \
   -p -d 30 -D 200  \
   -O \
-  -Q ${mmq} \
-  -T 32 \
-  -o ${output} \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_end-to-end_trim30.bam \
-  /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_end-to-end_trim30.bam \
+  -Q {mmq} \
+  -T {threads} \
+  -o {output} \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam \
 
-    
-mmq=0
-# for mmq in 0 1 5 10 30
-# do
-  output=mixed_feat_count_${mmq}.txt
-  /summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts \
-    -a mixed_feat.saf \
-    -F SAF \
-    --largestOverlap \
-    -O \
-    -Q ${mmq} \
-    -T 32 \
-    -o ${output} \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_end-to-end_trim30.bam \
-    /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_end-to-end_trim30.bam \
-    # /home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_end-to-end_trim30.bam \
-
-# done
-
-
-    """
+"""
 
 rule bed_to_fasta:
     input: os.path.expanduser("{prefix}.bed")
@@ -676,6 +668,44 @@ bamCoverage \
   --binSize {wildcards.binsize} \
   --minMappingQuality {wildcards.mmq} \
   --normalizeUsing {wildcards.norm} \
+  -o {output}
+
+    """
+
+rule bigwig_coverage_advanced_PESF:
+    input: "{prefix}_srt.bam", 
+    output: "{prefix}_srt_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
+    threads: 32
+    shell:"""
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export TMPDIR=/dev/shm
+bamCoverage \
+  -b {input} \
+  --extendReads \
+  --numberOfProcessors {threads} \
+  --binSize {wildcards.binsize} \
+  --minMappingQuality {wildcards.mmq} \
+  --normalizeUsing None \
+  --scaleFactor {wildcards.sf} \
+  -o {output}
+
+    """
+
+rule bigwig_coverage_advanced_PESF_mmq30:
+    input: "{prefix}_srt_mmq30.bam", 
+    output: "{prefix}_srt_mmq30_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
+    threads: 32
+    shell:"""
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export TMPDIR=/dev/shm
+bamCoverage \
+  -b {input} \
+  --extendReads \
+  --numberOfProcessors {threads} \
+  --binSize {wildcards.binsize} \
+  --minMappingQuality {wildcards.mmq} \
+  --normalizeUsing None \
+  --scaleFactor {wildcards.sf} \
   -o {output}
 
     """

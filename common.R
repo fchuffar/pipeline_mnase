@@ -139,6 +139,7 @@ fast_matrix_file = function(matrix_file, GRP=FALSE) {
   # dim(raw_wig_signal)
 
   system2(command="zcat", args=paste0(matrix_file, " ", 
+    "| sed -e 's/end-to-end_trim30_srt_PESF_30_4_None_SF1.//g' ", 
     "| sed -e 's/_end-to-end_trim30_srt_PE_30_4_RPKM//g' ", 
     "| sed -e 's/_end-to-end_trim30_srt_30_4_RPKM//g' ", 
     "| sed -e 's/_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM/_nuc/g' ", 
@@ -161,6 +162,20 @@ fast_matrix_file = function(matrix_file, GRP=FALSE) {
     "| sed -e 's/S_nn2/S_KO_04/g' ", 
     "| sed -e 's/S_nn4/S_KO_08/g' ", 
     "| sed -e 's/S_nn6/S_KO_12/g' ", 
+
+    "| sed -e 's/nme2//g' ", 
+    "| sed -e 's/wt/WT/g' ", 
+    "| sed -e 's/ko/KO/g' ", 
+
+    "| sed -e 's/_m301//g' ", 
+    "| sed -e 's/_m302//g' ", 
+    "| sed -e 's/_m300//g' ", 
+    "| sed -e 's/_m303//g' ", 
+    "| sed -e 's/_m291//g' ", 
+    "| sed -e 's/_m293//g' ", 
+    "| sed -e 's/_m273//g' ", 
+    "| sed -e 's/_m292//g' ", 
+
     "| gzip > ", matrix_file, ".fast.txt.gz"))
     NULL
 
