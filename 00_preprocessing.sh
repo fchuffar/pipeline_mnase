@@ -138,3 +138,37 @@ bamCoverage -b cr_wt_notrim.srt.bam --extendReads --numberOfProcessors 32 --binS
 bamCoverage -b cr_g3_notrim.srt.bam --extendReads --numberOfProcessors 32 --binSize 4 --minMappingQuality 30 --normalizeUsing None --scaleFactor $sf_cr_g3_dm6 -o cr_g3_notrim_scalf.bw
 bamCoverage -b cr_g5_notrim.srt.bam --extendReads --numberOfProcessors 32 --binSize 4 --minMappingQuality 30 --normalizeUsing None --scaleFactor $sf_cr_g5_dm6 -o cr_g5_notrim_scalf.bw
 
+
+
+
+
+Acc1 Acaca "chr11:84190000-84200000"
+Acly       "chr11:100523000-100533000"
+Scd1       "chr19:44403000-44413000"
+Cebpa      "chr7:35115000-35125000"
+Ppargc1a   "chr5:51548000-51558000"
+Srebf1     "chr11:60216000-60226000"
+Pparg      "chr6:115356000-115366000"
+Ppara      "chr15:85731000-85741000"
+
+
+
+
+
+
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr11:84190000-84200000"       # Acc1 Acaca 
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr11:100523000-100533000"     # Acly       
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr19:44403000-44413000"       # Scd1       
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr7:35115000-35125000"        # Cebpa      
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr5:51548000-51558000"        # Ppargc1a   
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr11:60216000-60226000"       # Srebf1     
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr6:115356000-115366000"      # Pparg      
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 ~/projects/nme2/results/chip_domenico_tgml/igv_session.xml -p "chr15:85731000-85741000"       # Ppara      
+
+
+
+
+
+
+
+/Applications/IGV_2.4.16.app/Contents/MacOS/JavaAppLauncher -Xmx750m -jar /Applications/IGV_2.4.16.app/Contents/Java/igv.jar  -g mm10 igv_session.xml -p "chr11:84190000-84200000"       # Acc1 Acaca 

@@ -64,10 +64,10 @@ write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=
 
 ```{r label="tss_feature"}
 regions_filenames = c(
-  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q4.bed", 
-  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q3.bed", 
-  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q2.bed", 
-  "~/projects/atad2/results/GSE70314/abs_expr_lrpkm_q1.bed", 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q1_1000.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q2_1000.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q3_1000.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q4_1000.bed"), 
   NULL
 )
 ```
@@ -77,39 +77,28 @@ regions_filenames = c(
 # Heatmap
 
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
-matrix_file = paste0("matrix_", prefix, ".txt.gz")
+matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 # score_filenames
 score_filenames = c(
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"), 
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-
-  # # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-  # # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
-  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
   NULL
 )
-brsl = 500
+brsl = 1500
 arsl = 1500
 bin_size = 10
 prefix = "gene_profile_quantile_tss"
@@ -149,7 +138,7 @@ knitr::include_graphics(hm_out_filename)
 
 
 
-```{r hira_vs_fact, eval=TRUE}
+```{r hira_vs_fact, eval=FALSE}
 raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
 dim(raw_wig_signal)
 
@@ -189,7 +178,7 @@ for (q in 4:2) {
 ```
 
 
-```{r}
+```{r, eval=FALSE}
 pdf("08_quantile_input_figure_C.pdf", width=12, height=4)
 layout(matrix(1:3,1), respect=TRUE)
 for (q in 4:2) {
@@ -214,7 +203,7 @@ for (q in 4:2) {
 dev.off()
 ```
 
-```{r echo=FALSE, out.width="100%", results="asis"}
+```{r echo=FALSE, out.width="100%", results="asis", eval=FALSE}
 pdf_file = "08_quantile_input_figure_C.pdf"
 if (file.exists(pdf_file)) {
   cat(paste0("![](", pdf_file, ")"), "\n")
@@ -223,7 +212,7 @@ if (file.exists(pdf_file)) {
 
 
 
-```{r}
+```{r, eval=FALSE}
 pdf("08_quantile_input_figure_D.pdf", width=8, height=4)
 layout(matrix(c(1,1), 1), respect=TRUE)
 q = 4
@@ -250,7 +239,7 @@ dev.off()
 ```
 
 
-```{r echo=FALSE, out.width="100%", results="asis"}
+```{r echo=FALSE, out.width="100%", results="asis", eval=FALSE}
 pdf_file = "08_quantile_input_figure_D.pdf"
 if (file.exists(pdf_file)) {
   cat(paste0("![](", pdf_file, ")"), "\n")
@@ -288,7 +277,7 @@ with options: --binSize 4 --minMappingQuality 30 --normalizeUsing RPKM.
 
 **Quartile of expression**
 
-We filtered protein-coding genes from NCBI Reference Sequence Database (RefSeq) and we organise genes by quartile of absolute RPKM expression in si-scrumble samples of GSE70314 (GSM1723639 et GSM1723640). Quartile of expression genes were exported as bed files available in supplementary.
+We filtered protein-coding genes from NCBI Reference Sequence Database (RefSeq) and we organise genes by quartile of aboslute DESeq2 normalized expression in WT NFD 4 replicates. Quartile of expression genes were exported as bed files available in supplementary.
 
 **Blacklist**
 

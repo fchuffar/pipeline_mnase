@@ -108,7 +108,7 @@ saf_filename = paste0(prefix, ".saf")
 write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
 ```
 
-```{r label="featureCounts"}
+```{r label="featureCounts", eval=FALSE}
 mmq=30
 cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
@@ -161,7 +161,7 @@ dev.off()
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
   dir.create("tmp", showWarnings=FALSE)
 
-  matrix_file = paste0("matrix_", prefix, ".txt.gz")
+  matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 
   # score_filenames
   score_filenames = c(

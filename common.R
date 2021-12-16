@@ -139,7 +139,8 @@ fast_matrix_file = function(matrix_file, GRP=FALSE) {
   # dim(raw_wig_signal)
 
   system2(command="zcat", args=paste0(matrix_file, " ", 
-    "| sed -e 's/end-to-end_trim30_srt_PESF_30_4_None_SF1.//g' ", 
+    "| sed -e 's/end-to-end_trim30_srt_PESF_30_4_None_SF//g' ", 
+    "| sed -e 's/end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF//g' ", 
     "| sed -e 's/_end-to-end_trim30_srt_PE_30_4_RPKM//g' ", 
     "| sed -e 's/_end-to-end_trim30_srt_30_4_RPKM//g' ", 
     "| sed -e 's/_end-to-end_trim30_fsmin125_fsmax175_srt_30_4_RPKM/_nuc/g' ", 
