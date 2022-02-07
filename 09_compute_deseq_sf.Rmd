@@ -1,0 +1,184 @@
+---
+title: "DESeq2 scaliong factors"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+`r print(date())`
+
+
+
+```{r label="tss_feature"}
+# # Loading full data matrix form transcriptome
+# table_file = list.files("../highfatdiet/04_deseq2/tables/", "*.complete.txt", full.names=TRUE)[1]
+# d = read.table(table_file, header=TRUE)
+# rownames(d) = d$Id
+# keys = colnames(d)[grep("norm.", colnames(d), fixed=TRUE)]
+#
+# d$mean.scru = log2((d[,keys[1]] + d[,keys[2]] + d[,keys[3]] + d[,keys[4]]) / 4 + 1)
+# d = d[
+#   !is.na(d$mean.scru) &
+#   d$mean.scru>0,
+# ]
+
+prefix = "compute_deseq_sf"
+# feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
+feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+feat = feat[!is.na(feat$tx_end),]
+feat = feat[nchar(feat$chrom_text) <=5,]
+dim(feat)
+table(feat$type, useNA="ifany")
+table(feat$chrom_text, useNA="ifany")
+
+feat[feat[,1]=="chrMT",1] = "chrM"
+unique(feat[,1])
+
+feat = feat[feat$type%in%"protein-coding",]
+# feat = feat[rownames(feat) %in% rownames(d),]
+dim(feat)
+
+# BED
+head(feat[,1:6])
+dim(feat)
+
+# tss
+table(feat$strand, useNA="ifany")
+feat$tss = NA
+feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
+feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
+feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
+feat = feat[!duplicated(feat$tss_key),]
+dim(feat)
+
+unique(feat[,1])
+unique(feat$chrom_text)
+
+table(feat[,1])
+table(feat$chrom_text)
+
+
+# feat[,4] = feat[,5]
+regions_filenames = regions_filename = paste0(prefix, ".bed")
+write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+head(feat)
+dim(feat)
+```
+
+```
+
+```{r label="featureCounts", eval=TRUE}
+feat_saf = feat[,c(5,1:3, 6)]
+colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+feat_saf$Start = feat$tss
+head(feat_saf)
+feat_saf$Start = feat$tss - ifelse(feat_saf$Strand=="+", 800, 1500) 
+if (sum(feat_saf$Start<1)!=0) {
+  feat_saf[feat_saf$Start<1,]$Start = 1
+} 
+feat_saf$End = feat$tss + ifelse(feat_saf$Strand=="-", 800, 1500)  
+head(feat_saf)
+saf_filename = paste0(prefix, ".saf")
+write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+mmq=30
+cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
+args = paste0(
+  "-a ", prefix, ".saf -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam "),
+  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam "),
+  ""
+)
+print(paste(cmd, args))
+system2(cmd, args)
+system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
+
+
+raw_counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+colnames(raw_counts)[7:10]  = c("normal_chip_rep1", "normal_chip_rep2", "hghfat_chip_rep1", "hghfat_chip_rep2")
+head(raw_counts)
+
+countData = raw_counts[,7:10]
+head(countData)
+tail(countData)
+dim(countData)
+colData = data.frame(id=colnames(countData), cond=c("ND", "ND", "HFD", "HFD"))
+dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ cond)
+dds = DESeq2::estimateSizeFactors(dds)
+# dds = DESeq2::estimateDispersions(dds)
+# # rld = DESeq2::rlogTransformation(dds)
+#
+#
+#
+# dds =  DESeq2::DESeq(dds)
+# DESeq2::resultsNames(dds) # lists the coefficients
+# res = DESeq2::results(dds, name="cond_ND_vs_HFD")
+# dim(feat)
+# length(res)
+# rownames(res) = rownames(feat)
+# head(res)
+# # # or to shrink log fold changes association with condition:
+# # res <- lfcShrink(dds, coef="cond_ND_vs_HFD", type="apeglm")
+# # T
+
+```
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
