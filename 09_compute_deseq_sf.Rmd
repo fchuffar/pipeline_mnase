@@ -120,34 +120,21 @@ system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
 
 
 raw_counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
-colnames(raw_counts)[7:10]  = c("normal_chip_rep1", "normal_chip_rep2", "hghfat_chip_rep1", "hghfat_chip_rep2")
-head(raw_counts)
 
-countData = raw_counts[,7:10]
+colnames(raw_counts)[7:ncol(raw_counts)] = substr(do.call(rbind,strsplit(colnames(raw_counts)[7:ncol(raw_counts)], "\\."))[,7],1,23)
+
+countData = raw_counts[,7:ncol(raw_counts)]
 head(countData)
 tail(countData)
 dim(countData)
-colData = data.frame(id=colnames(countData), cond=c("ND", "ND", "HFD", "HFD"))
-dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ cond)
+colData = data.frame(id=colnames(countData))
+dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ 1)
 dds = DESeq2::estimateSizeFactors(dds)
-# dds = DESeq2::estimateDispersions(dds)
-# # rld = DESeq2::rlogTransformation(dds)
-#
-#
-#
-# dds =  DESeq2::DESeq(dds)
-# DESeq2::resultsNames(dds) # lists the coefficients
-# res = DESeq2::results(dds, name="cond_ND_vs_HFD")
-# dim(feat)
-# length(res)
-# rownames(res) = rownames(feat)
-# head(res)
-# # # or to shrink log fold changes association with condition:
-# # res <- lfcShrink(dds, coef="cond_ND_vs_HFD", type="apeglm")
-# # T
-
+dds$sizeFactor
+round(dds$sizeFactor,2)
 ```
 
+`r round(dds$sizeFactor,2)`
 
 # Session Information
 
