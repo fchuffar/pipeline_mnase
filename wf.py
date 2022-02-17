@@ -78,20 +78,52 @@ rule target:
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.48.bw",
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.57.bw",
 
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.13.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.48.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.70.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.77.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.31.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.08.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.95.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.79.bw",
 
 
 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.12.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.38.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.73.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.84.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.21.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.11.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.94.bw",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.81.bw",
+
+#> normal_chip_nme2wt_m301 normal_chip_nme2wt_m301 0.89   1.12
+#> normal_chip_nme2wt_m302 normal_chip_nme2wt_m302 0.73   1.38
+#> hghfat_chip_nme2wt_m300 hghfat_chip_nme2wt_m300 1.36   0.73
+#> hghfat_chip_nme2wt_m303 hghfat_chip_nme2wt_m303 1.18   0.84
+#> normal_chip_nme2ko_m291 normal_chip_nme2ko_m291 0.83   1.21
+#> normal_chip_nme2ko_m293 normal_chip_nme2ko_m293 0.90   1.11
+#> hghfat_chip_nme2ko_m273 hghfat_chip_nme2ko_m273 1.06   0.94
+#> hghfat_chip_nme2ko_m292 hghfat_chip_nme2ko_m292 1.23   0.81
+
+
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam",
       "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam",
-
-
-
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
 
 
     shell:"""

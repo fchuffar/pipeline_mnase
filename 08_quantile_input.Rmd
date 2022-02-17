@@ -64,10 +64,11 @@ write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=
 
 ```{r label="tss_feature"}
 regions_filenames = c(
-  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q1_1000.bed"), 
-  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q2_1000.bed"), 
-  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q3_1000.bed"), 
-  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q4_1000.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q4_0.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q3_0.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q2_0.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q1_0.bed"), 
+  paste0("~/projects/nme2/results/highfatdiet/abs_expr_q0_0.bed"), 
   NULL
 )
 ```
@@ -79,25 +80,20 @@ regions_filenames = c(
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
 matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 # score_filenames
-score_filenames = c(
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw"),
+score_filenames_scaled = paste0(c(
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
+  "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF",
   NULL
-)
+), sprintf("%.2f",df$inv_sf)
+, ".bw")
+
+score_filenames = score_filenames_scaled 
 brsl = 1500
 arsl = 1500
 bin_size = 10
@@ -138,115 +134,63 @@ knitr::include_graphics(hm_out_filename)
 
 
 
-```{r hira_vs_fact, eval=FALSE}
-raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
-dim(raw_wig_signal)
-
+```{r hira_vs_fact, eval=TRUE}
 con = gzfile(matrix_file)
 json = readLines(con, n=1)
 close(con)
 json = substr(json, 2, nchar(json))
 metadata = jsonlite::fromJSON(json, simplifyVector = FALSE)
-metadata$sample_boundaries
+# metadata$sample_boundaries
 metadata$group_boundaries
 
+raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+rownames(raw_wig_signal) = raw_wig_signal[,4]
+head(raw_wig_signal[,1:6])
+dim(raw_wig_signal)
+mat = as.matrix(raw_wig_signal[,-(1:6)])
+head(mat[,1:6])
+dim(mat)
 
-layout(matrix(1:6,2), respect=TRUE)
-for (q in 4:2) {
-  for (rep in 1:2) {
-    foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
-    dim(foo)
-    plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-10,10), main=paste0("Q", q, " rep", rep))
-    # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-    # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-    axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
-    bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
-    lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2)
-    # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
-    # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
+delta = (arsl + brsl) / bin_size
+foo = lapply(1:(ncol(mat) / delta), function(i) {
+  tmp_idx = ((i-1)*delta + 1):(i*delta)
+  print(tmp_idx)
+  mat[,tmp_idx]
+  # apply(mat[,tmp_idx], 1, mean, na.rm=TRUE)
+})
 
-    if  (rep==2) {
-      bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
-      lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3)
-      bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
-      lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4)
-      legend("topright", lty=1, col=3:4, paste0("KO, ChIP ", c("SSRP1", "HIRA")))
-    }
-    legend("bottomright", lty=1, col=1:2, paste0(c("WT", "KO")))
-  }
-}
-```
+mat_normal_wt = (foo[[1]] + foo[[2]]) / 2
+mat_hghfat_wt = (foo[[3]] + foo[[4]]) / 2
+mat_normal_ko = (foo[[5]] + foo[[6]]) / 2
+mat_hghfat_ko = (foo[[7]] + foo[[8]]) / 2
 
 
-```{r, eval=FALSE}
-pdf("08_quantile_input_figure_C.pdf", width=12, height=4)
-layout(matrix(1:3,1), respect=TRUE)
-for (q in 4:2) {
-  rep = 2
-  foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
-  dim(foo)
-  plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-8,12), main=paste0("Q", q, " rep", rep), xlab="", lwd=2)
-  # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-  # lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-  axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
-  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
-  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2, lwd=2)
-  # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
-  # lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
-
-  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
-  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3, lwd=2)
-  bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
-  lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4, lwd=2)
-  legend("topright", lty=1, col=1:4, c("WT, input", "KO, input", "KO, ChIP SSRP1", "KO, ChIP HIRA"), lwd=2)
-}
-dev.off()
-```
-
-```{r echo=FALSE, out.width="100%", results="asis", eval=FALSE}
-pdf_file = "08_quantile_input_figure_C.pdf"
-if (file.exists(pdf_file)) {
-  cat(paste0("![](", pdf_file, ")"), "\n")
-}
-```
-
-
-
-```{r, eval=FALSE}
-pdf("08_quantile_input_figure_D.pdf", width=8, height=4)
-layout(matrix(c(1,1), 1), respect=TRUE)
-q = 4
-rep = 2
-foo = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]]
-dim(foo)
-period= 180
-plot(apply(foo, 2, mean) - mean(apply(foo, 2, mean)), type="l", ylab="centered siganl", xaxt="n", ylim=c(-8,12), main=paste0("Q", q, " rep", rep, " period: ", period, "bp"), xlab="", lwd=2, xlim=c(0,100))
-abline(v=((-4:5) * period / 10) + 50+15, col="grey", lty=2)
-# lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) + 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-# lines(apply(foo, 2, mean) - mean(apply(foo, 2, mean)) - 2* apply(foo, 2, sd) / sqrt(nrow(foo)), lty=2)
-axis(1, c(0, 50, 100 , 150, 200), c("-500kb", "TSS", "+500kb", "+1000kb", "+1500kb"))
-bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+1]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]]
-lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=2, lwd=2)
-# lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) + 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
-# lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)) - 2* apply(bar, 2, sd) / sqrt(nrow(bar)), lty=2, col=2)
-
-bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+2]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]]
-lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=3, lwd=2)
-bar = raw_wig_signal[,-(1:6)][(metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]],(metadata$sample_boundaries[[(rep-1) * 2 + 1+3]]+1):metadata$sample_boundaries[[(rep-1) * 2 + 1+4]]]
-lines(apply(bar, 2, mean) - mean(apply(bar, 2, mean)), type="l", col=4, lwd=2)
-# legend("topleft", lty=1, col=1:4, c("WT, input", "KO, input", "KO, ChIP SSRP1", "KO, ChIP HIRA"), lwd=2)
-dev.off()
-```
-
-
-```{r echo=FALSE, out.width="100%", results="asis", eval=FALSE}
-pdf_file = "08_quantile_input_figure_D.pdf"
-if (file.exists(pdf_file)) {
-  cat(paste0("![](", pdf_file, ")"), "\n")
+idx_qs = list()
+for (q in 0:4) {
+  idx_qs[[paste0("q", q)]] = (metadata$group_boundaries[[-q+5]]+1):metadata$group_boundaries[[-q+6]]
 }
 
-```
 
+
+for (q in 0:4) {
+  layout(matrix(1:2, 1), respect=TRUE)
+  idx_q = idx_qs[[paste0("q", q)]]
+
+  mat_normal_wt_mean = apply(mat_normal_wt[idx_q,], 2, mean)
+  mat_hghfat_wt_mean = apply(mat_hghfat_wt[idx_q,], 2, mean)
+  mat_normal_ko_mean = apply(mat_normal_ko[idx_q,], 2, mean)
+  mat_hghfat_ko_mean = apply(mat_hghfat_ko[idx_q,], 2, mean)
+
+  plot(0,0,col=0, ylab="average signal (a.u.)", xaxt="n", ylim=c(0,70), xlim=c(0,delta), main=paste0("Q", q, " WT ND (black) HFD (red)"), xlab="")
+  axis(1, c(0, delta/2, delta), c("-1.5Kb", "TSS", "+1.5Kb"))  
+  lines(mat_normal_wt_mean, type="l", col=1)
+  lines(mat_hghfat_wt_mean, type="l", col=2)
+  plot(0,0,col=0, ylab="average signal (a.u.)", xaxt="n", ylim=c(0,70), xlim=c(0,delta), main=paste0("Q", q, " KO ND (black) HFD (red)"), xlab="")
+  axis(1, c(0, delta/2, delta), c("-1.5Kb", "TSS", "+1.5Kb"))  
+  lines(mat_normal_ko_mean, type="l", col=1)
+  lines(mat_hghfat_ko_mean, type="l", col=2)
+}
+```
 
 
 

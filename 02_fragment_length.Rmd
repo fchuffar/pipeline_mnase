@@ -1,5 +1,5 @@
 ---
-title: "Fragment sizes"
+title: "Fragment lengths"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
@@ -34,7 +34,7 @@ rsync -auvP dahu:~/projects/small_structs/results/hist_frag_size/ ~/projects/sma
 
 ```
 
-```{r label="bamPEFragmentSize", eval=TRUE}
+```{r label="bamPEFragmentSize", eval=FALSE}
 get_nb_reads = function(bam_file) {
   cmd = "samtools"
   args = paste0("view -c ", bam_file)
@@ -44,12 +44,23 @@ get_nb_reads = function(bam_file) {
 }
 
 bam_files = c(
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp4_end-to-end_trim30_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp6_end-to-end_trim30_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn4_end-to-end_trim30_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn6_end-to-end_trim30_srt_mmq30.bam"
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam"),
+  NULL
 )
 
 
@@ -77,8 +88,8 @@ bam_files = c(
 # rsync -auvP epidata:~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam ~/projects/datashare_epistorage/TGML_runs/bam_epimed/.
 # rsync -auvP epidata:~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam ~/projects/datashare_epistorage/TGML_runs/bam_epimed/.
 #
-bam_wt = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam")
-bam_ko = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam")
+# bam_wt = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam")
+# bam_ko = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam")
 # bam2 = mscanBam(bam_file)
 # names(bam[[1]])
 # length(bam[[1]]$qname)
@@ -108,18 +119,23 @@ nb_reads = unlist(nb_reads)
 nb_reads
 
 bam_files_filtered = c(
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp4_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp6_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn4_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn6_end-to-end_trim30_fsmin025_fsmax075_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp4_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp6_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn4_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam",
-  "~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn6_end-to-end_trim30_fsmin125_fsmax175_srt_mmq30.bam"
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam"),
+  NULL
 )
 
 nb_reads_filtered = lapply(bam_files_filtered, function(bam_file) {
@@ -173,6 +189,7 @@ df
 saveRDS(df, "df.rds")
 ```
 
+# Histograms
 
 ```{r echo=FALSE, out.width="100%", results="asis"}
 for (bam_file in bam_files) {
@@ -184,36 +201,48 @@ for (bam_file in bam_files) {
 
 
 
+# Results
 
 ```{r label="hists", eval=TRUE}
-# hist_file = "hist_end-to-end_trim30_srt.txt"
-# h = read.table(hist_file, stringsAsFactors=FALSE, header=TRUE)
-# h$stage =  substr(h[,3], 67, 71)
-# h = read.table("hist_S_pp6_end-to-end_trim30_srt.txt", stringsAsFactors=FALSE, header=TRUE)
+samples = c(
+  "normal_inpt_nme2wt_m301",
+  "normal_inpt_nme2wt_m302",
+  "hghfat_inpt_nme2wt_m300",
+  "hghfat_inpt_nme2wt_m303",
+  "normal_chip_nme2wt_m301",
+  "normal_chip_nme2wt_m302",
+  "hghfat_chip_nme2wt_m300",
+  "hghfat_chip_nme2wt_m303",
+  "normal_inpt_nme2ko_m291",
+  "normal_inpt_nme2ko_m293",
+  "hghfat_inpt_nme2ko_m273",
+  "hghfat_inpt_nme2ko_m292",
+  "normal_chip_nme2ko_m291",
+  "normal_chip_nme2ko_m293",
+  "hghfat_chip_nme2ko_m273",
+  "hghfat_chip_nme2ko_m292",
+  NULL
+)
+
 layout(matrix(1:2, 1), respect=TRUE)
-plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.05), xlim=c(1,250), main="H2AL2 WT")
-# stages = c("S_pp2",  "S_pp4",  "S_pp6",  "S_nn2",  "S_nn4",  "S_nn6" )
-stages = c("S_pp2",  "S_pp4",  "S_pp6")
-for (stage in stages) {
-  h = read.table(paste0("hist_", stage, "_end-to-end_trim30_srt.txt"), stringsAsFactors=FALSE, header=TRUE)
-  idx = h[,1] < 250 #& h$stage == stage
-  baz = stats::ksmooth(h[idx,1], h[idx,2]/sum(h[idx,2]), "normal", bandwidth = 5)
-  lines(baz, col=which(stages %in% stage))
+for (filter in c("inpt", "chip")) {
+  sub_samples = samples[grep(filter, samples)]
+  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.02), xlim=c(50,200), main=filter)
+  keys = substr(sub_samples, 1, 18)
+  cols = as.numeric(as.factor(substr(sub_samples, 1, 18)))
+  names(cols) = keys
+  
+  for (sample in sub_samples) {
+    key = substr(sample, 1, 18)
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_srt_mmq30.txt"), stringsAsFactors=FALSE, header=TRUE)
+    idx = h[,1] < 250 #& h$sample == sample
+    baz = stats::ksmooth(h[idx,1], h[idx,2]/sum(h[idx,2]), "normal", bandwidth = 5)
+    lines(baz, col=cols[key])
+  }  
+  legend("topleft", unique(keys), col=cols[unique(keys)], lty=1, cex=0.6)
 }
 
-abline(v=c(25, 75, 125, 175), lty=2)
-legend("topright", paste0("disgestion ", as.numeric(substr(stages, 5,5))*2, "min"), col=1:length(stages), lty=1)
-
-plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.05), xlim=c(1,250), main="H2AL2 KO")
-stages = c("S_nn2",  "S_nn4",  "S_nn6" )
-for (stage in stages) {
-  h = read.table(paste0("hist_", stage, "_end-to-end_trim30_srt.txt"), stringsAsFactors=FALSE, header=TRUE)
-  idx = h[,1] < 250 #& h$stage == stage
-  baz = stats::ksmooth(h[idx,1], h[idx,2]/sum(h[idx,2]), "normal", bandwidth = 5)
-  lines(baz, col=which(stages %in% stage))
-}
-abline(v=c(25, 75, 125, 175), lty=2)
-legend("topright", paste0("disgestion ", as.numeric(substr(stages, 5,5))*2, "min"), col=1:length(stages), lty=1)
+# legend("topright", paste0("disgestion ", as.numeric(substr(samples, 5,5))*2, "min"), col=1:length(samples), lty=1)
 ```
 
 
