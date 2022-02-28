@@ -1,0 +1,122 @@
+---
+title: "Material and Methods"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+
+
+# Material and Methods
+
+
+**Sequencing**
+
+The ChIP libraries were sequenced using the `r sequencer` sequencer, producing `r ifelse(srorpe=="PE", "paired-end 2x", "single-read 1x")``r seqlen`nt read length.
+Base calling was performed using RTA version 2.*
+
+**Trimming**
+
+Raw fastq files were processed by 5 prime trimming, keeping 30bp-length fragments, using `fastx_trimmer` [http://hannonlab.cshl.edu/fastx_toolkit/. Accessed 28 Feb. 2022.], with options -l 30 -Q33. 
+
+**Alignment**
+
+The trimmed fastq files were aligned on the `r annotation` `r species` `r version` genome using the `Bowtie2` aligner [PMID: 22388286], with options –end-to-end, –no-mixed, –no-discordant. 
+
+
+**Normalization**
+
+Raw ChIP counts of TSS +1500/-800bp of RefSeq genes were computed using `featureCounts` [PMID: 24227677], with option -a mm10_pc_tss8001500.saf -F SAF -s 0 -Q 30 -T 8 -o mm10_pc_tss8001500_count_30.txt, 
+
+[mm10_pc_tss8001500.saf](./mm10_pc_tss8001500.saf) [mm10_pc_tss8001500_count_30.txt](./mm10_pc_tss8001500_count_30.txt)
+
+For each sample, scale factor were computed on this features using `DESeq2` [PMID:20979621, PMID:25516281], assuming that the global level of Ac in the genes promoters is the same for all the samples.
+
+[deseq2_sf.xlsx](.\deseq2_sf.xlsx)
+
+The bam signal were normalized using and smoothed using `bamCoverage` (from `deepTools` suite [PMID: 24799436])
+with options: --binSize 4 --minMappingQuality 30 --normalizeUsing None --scaleFactor inv_sf
+where *inv_sf* is the inverse of the scaling factor previously computed
+  
+
+**Heatmap**
+
+We exclude from the analysis not only `GSAT_MM` and `SYNREP_MM` tagged loci in repeat masker but also *Sfi1* locus (chr11:3126500-3200500).
+
+The normalized ChIP signal were converted into a 10bp bin matrix of the signal 1.5Kb upstream and downstream protein-coding genes TSS, using `computeMatrix` (from `deepTools` suite [PMID: 24799436]), with options reference-point -R mm10_pc.bed --referencePoint TSS --binSize 10 --beforeRegionStartLength 1500 --afterRegionStartLength 1500 --sortRegions descend --blackListFileName blacklist_file.bed
+
+[mm10_pc.bed](./mm10_pc.bed) 
+[blacklist_file.bed](./blacklist_file.bed)
+
+Heatmaps were generated using `plotHeatmap` (`deepTools` suite [PMID: 24799436]) with options --colorMap YlOrRd --sortRegions descend.
+
+**Highly expressed genes TSS profiles**
+
+The normalized ChIP signal were converted into a 10bp bin matrix of the signal 1.5Kb upstream and downstream 25% more expressed (see Mat & Meth RNA-seq) protein-coding genes TSS, using `computeMatrix`.
+
+Profiles were generated using previously computed `computeMatrix` outputs and a custom R script [R Core Team (2019). *R: A language and environment for statistical computing*.]. 
+
+**Expression vs. Acetylation**
+
+The normalized ChIP signal were converted into a 25bp bin matrix of the signal 750bp upstream and 1500bp downstream protein-coding genes TSS, using `computeMatrix`.
+
+For each gene the mean signal over this locus over replic ated were consider.
+
+From Nme2 WT (resp. KO) HFD *vs.* ND DESeq2 analysis, log2Folfchanges were considered (see Mat & Meth RNA-seq).
+
+```
+
+
+
+
+
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
