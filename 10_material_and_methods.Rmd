@@ -28,7 +28,7 @@ Base calling was performed using RTA version 2.*
 
 **Trimming**
 
-Raw fastq files were processed by 5 prime trimming, keeping 30bp-length fragments, using `fastx_trimmer` [http://hannonlab.cshl.edu/fastx_toolkit/. Accessed 28 Feb. 2022.], with options -l 30 -Q33. 
+The raw fastq files were processed by 5 prime trimming, keeping 30bp-length fragments, using `fastx_trimmer` [http://hannonlab.cshl.edu/fastx_toolkit/. Accessed 28 Feb. 2022.], with options -l 30 -Q33. 
 
 **Alignment**
 
