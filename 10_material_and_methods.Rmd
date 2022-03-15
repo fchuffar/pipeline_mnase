@@ -32,53 +32,60 @@ The raw fastq files were processed by 5 prime trimming, keeping 30bp-length frag
 
 **Alignment**
 
-The trimmed fastq files were aligned on the `r annotation` `r species` `r version` genome using the `Bowtie2` aligner [PMID: 22388286], with options –end-to-end, –no-mixed, –no-discordant. 
+The trimmed fastq files were aligned on the `r annotation` `r species` `r version` genome using the `Bowtie2` aligner (Langmead and Salzberg 2012) [PMID: 22388286], with options –end-to-end, –no-mixed, –no-discordant. 
 
+**Processed data files format and content**
 
-**Selection of features corresponding to TSS and normalization**
+big wig files (.bw) containing normalized integrated aligned read count signals.
 
-Raw ChIP counts of TSS +1500/-800bp of RefSeq genes were computed using `featureCounts` [PMID: 24227677], with option -a mm10_pc_tss8001500.saf -F SAF -s 0 -Q 30 -T 8 -o mm10_pc_tss8001500_count_30.txt, 
+**Normalization**
+
+Raw ChIP counts of TSS +1500/-800bp of RefSeq genes were computed using `featureCounts` (Liao et al. 2014) [PMID: 24227677], with option -a mm10_pc_tss8001500.saf -F SAF -s 0 -Q 30 -T 8 -o mm10_pc_tss8001500_count_30.txt, 
 
 [mm10_pc_tss8001500.saf](./mm10_pc_tss8001500.saf) [mm10_pc_tss8001500_count_30.txt](./mm10_pc_tss8001500_count_30.txt)
 
-For each sample, scale factor were computed on this features using `DESeq2` [PMID:20979621, PMID:25516281], assuming that the global level of ChIP signal value (corresponding lysine acetylation in all genes promoters) should be equal in all samples.
-
-The scale factors are given in Supp. Table.
+For each sample, scale factor were computed on this features using `DESeq2` (Anders and Huber 2010; Love et al. 2014) [PMID:20979621, PMID:25516281], assuming that the global level of Ac in the genes promoters is the same for all the samples.
 
 [deseq2_sf.xlsx](.\deseq2_sf.xlsx)
 
-The bam signal were normalized using and smoothed using `bamCoverage` (from `deepTools` suite [PMID: 24799436])
+The bam signal were normalized using and smoothed using `bamCoverage` (from `deepTools` suite (Ramirez et al. 2014) [PMID: 24799436])
 with options: --binSize 4 --minMappingQuality 30 --normalizeUsing None --scaleFactor inv_sf
-where *inv_sf* is the inverse of the scaling factor previously computed
+where *inv_sf* is the inverse of the scaling factor previously computed.
   
 
 **Heatmap**
 
 Repeat masker tagged loci GSAT_MM and SYNREP_MM as well as the Sfi1 locus (chr11:3126500-3200500) and mitochondrial (chrM) genes were excluded from the analysis.
 
-The normalized ChIP signal were converted into a 10bp bin matrix of the signal 1.5Kb upstream and downstream protein-coding genes TSS, using `computeMatrix` (from `deepTools` suite [PMID: 24799436]), with options reference-point -R mm10_pc.bed --referencePoint TSS --binSize 10 --beforeRegionStartLength 1500 --afterRegionStartLength 1500 --sortRegions descend --blackListFileName blacklist_file.bed
+The normalized ChIP signal were converted into a 10bp bin matrix of the signal 1.5Kb upstream and downstream protein-coding genes TSS, using `computeMatrix` (from `deepTools` suite (Ramirez et al. 2014) [PMID: 24799436]), with options reference-point -R mm10_pc.bed --referencePoint TSS --binSize 10 --beforeRegionStartLength 1500 --afterRegionStartLength 1500 --sortRegions descend --blackListFileName blacklist_file.bed
 
 [mm10_pc.bed](./mm10_pc.bed) 
 [blacklist_file.bed](./blacklist_file.bed)
 
-Heatmaps were generated using `plotHeatmap` (`deepTools` suite [PMID: 24799436]) with options --colorMap YlOrRd --sortRegions descend.
+Heatmaps were generated using `plotHeatmap` (`deepTools` suite (Ramirez et al. 2014) [PMID: 24799436]) with options --colorMap YlOrRd --sortRegions descend.
 
 **Highly expressed genes TSS profiles**
 
 The normalized ChIP signal were converted into a 10bp bin matrix of the signal 1.5Kb upstream and downstream 25% more expressed (see Mat & Meth RNA-seq) protein-coding genes TSS, using `computeMatrix`.
 
-The ChIPseq profiles were generated using previously computed `computeMatrix` outputs and a custom R script [R Core Team (2019). *R: A language and environment for statistical computing*.]. 
+Profiles were generated using previously computed `computeMatrix` outputs and a custom R script [R Core Team (2019). *R: A language and environment for statistical computing*.]. 
 
 **Expression vs. Acetylation**
 
-The normalized ChIP signal were converted into a 25bp bin matrix of the signal 750bp upstream and 1500bp downstream protein-coding genes TSS, using `computeMatrix`.
+The normalized ChIP signal were converted into a 25bp bin matrix of the signal 750bp upstream and 1500bp downstream protein-coding genes TSS, using computeMatrix.
 
 For each gene and condition the mean signal over this region in all replicates was plotted.
 
-From Nme2 WT (resp. KO) HFD *vs.* ND DESeq2 analysis, log2Folfchanges were considered (see Mat & Meth RNA-seq).
+Fig 6H, the x-axis represents the log2 (fold changes) of the differential expression (DESeq2 normalized values) between HFD and ND respectively for Nme2 WT (upper panel) and KO (lower panel).
 
-```
 
+
+
+
+
+# Grant and Acknowledgements
+
+All (or most of) the computations presented in this paper were performed using the GRICAD infrastructure (https://gricad.univ-grenoble-alpes.fr), which is supported by Grenoble research communities.
 
 
 
