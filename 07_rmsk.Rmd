@@ -13,6 +13,7 @@ output:
 
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
 ```
 
 Lerat E, Casacuberta J, Chaparro C, Vieira C (2019) 
@@ -434,25 +435,8 @@ mmq=0
 cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
   "-a ", prefix, ".saf -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
-  # "-a ", prefix, ".saf -M -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  # "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam "),
-  # paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt_mmq30.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt_mmq30.bam "),
   ""
 )
 print(paste(cmd, args))

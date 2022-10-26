@@ -10,120 +10,19 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m273_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m292_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m300_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m303_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m273_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m292_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m300_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m303_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m291_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m293_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m301_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m302_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m291_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m293_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m301_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m302_1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m273_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2ko_m292_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m300_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_chip_nme2wt_m303_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m273_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2ko_m292_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m300_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/hghfat_inpt_nme2wt_m303_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m291_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2ko_m293_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m301_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_chip_nme2wt_m302_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m291_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2ko_m293_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m301_2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/raw/normal_inpt_nme2wt_m302_2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/dapseq/raw/ctl_d_h2b_R1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/dapseq/raw/ctl_d_h2b_R2_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/dapseq/raw/can_m_h2b_R1_fastxtrimf30.fastq.gz", 
+      "/home/fchuffar/projects/datashare/dapseq/raw/can_m_h2b_R2_fastxtrimf30.fastq.gz", 
 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw",
 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_PESF_30_4_None_SF1.33.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_PESF_30_4_None_SF1.03.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_PESF_30_4_None_SF1.55.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_PESF_30_4_None_SF1.96.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_PESF_30_4_None_SF1.09.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_PESF_30_4_None_SF1.52.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_PESF_30_4_None_SF1.41.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_PESF_30_4_None_SF1.42.bw",
+      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_mmq30.bam",
 
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.38.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.00.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.78.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF2.02.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.24.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.61.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.48.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.57.bw",
-
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.13.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.48.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.70.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.77.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.31.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.08.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.95.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.79.bw",
-
-
-
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.12.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.38.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.73.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.84.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.21.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF1.11.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.94.bw",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30_PESF_30_4_None_SF0.81.bw",
-
-#> normal_chip_nme2wt_m301 normal_chip_nme2wt_m301 0.89   1.12
-#> normal_chip_nme2wt_m302 normal_chip_nme2wt_m302 0.73   1.38
-#> hghfat_chip_nme2wt_m300 hghfat_chip_nme2wt_m300 1.36   0.73
-#> hghfat_chip_nme2wt_m303 hghfat_chip_nme2wt_m303 1.18   0.84
-#> normal_chip_nme2ko_m291 normal_chip_nme2ko_m291 0.83   1.21
-#> normal_chip_nme2ko_m293 normal_chip_nme2ko_m293 0.90   1.11
-#> hghfat_chip_nme2ko_m273 hghfat_chip_nme2ko_m273 1.06   0.94
-#> hghfat_chip_nme2ko_m292 hghfat_chip_nme2ko_m292 1.23   0.81
-
-
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/chip_domenico_tgml/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam",
 
 
     shell:"""
@@ -150,7 +49,7 @@ rule align_solid:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 bowtie --chunkmbs 1024 -t -p {threads} -C --sam \
   --trim3 20 \
   --fr \
@@ -169,7 +68,7 @@ rule awk_filter_fragment_length:
       bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_fsmin{fsmin}_fsmax{fsmax}_srt.bam.bai",
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 # https://www.biostars.org/p/65262/
 BAM={input.bam}
 fsmin={wildcards.fsmin}
@@ -188,7 +87,7 @@ rule mmq_filter_for_danpos:
       bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam.bai",
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 samtools view -bq 30 {input.bam} > {output.bam}
 samtools index {output.bam}
     """
@@ -212,7 +111,7 @@ rule align_bowtie:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 bowtie2 \
   -t \
   -p {threads} \
@@ -244,16 +143,16 @@ rule saf_featurecounts:
   -Q {mmq} \
   -T {threads} \
   -o {output} \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam \
-  /home/fchuffar/projects/datashare/chip_domenico_tgml/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam \
+  /home/fchuffar/projects/datashare/dapseq/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam \
 
 """
 
@@ -266,10 +165,10 @@ bedtools  getfasta -fi /home/fchuffar/projects/datashare/genomes/Mus_musculus/UC
   -bed ~/projects/small_structs/results/for_blastn.bed > \
   ~/projects/small_structs/results/for_blastn.fasta
 
-/summer/epistorage/miniconda3/bin/makeblastdb -in ~/projects/small_structs/results/for_blastn.fasta \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/makeblastdb -in ~/projects/small_structs/results/for_blastn.fasta \
   -dbtype nucl -parse_seqids -out  ~/projects/small_structs/results/for_blastn.blast.db
 
-/summer/epistorage/miniconda3/bin/blastn -db ~/projects/small_structs/results/for_blastn.blast.db \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db ~/projects/small_structs/results/for_blastn.blast.db \
   -num_threads=1 \
   -query ~/projects/small_structs/results/for_blastn.fasta \
   -outfmt "10 std sstrand" \
@@ -609,7 +508,7 @@ rule compile_blastdb:
     output: os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db")
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
+/summer/epistorage/miniconda3/envs/oct22_env/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
 touch {output}
     """
     
@@ -620,8 +519,8 @@ rule blastn_ggaat:
     output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
     threads: 1
     shell:"""
-gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/envs/oct22_env/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
 
@@ -632,8 +531,8 @@ rule blastn_unmapped_ggaat:
     output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
-cat {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+cat {input.query_fqgz} | /summer/epistorage/miniconda3/envs/oct22_env/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
 
@@ -661,7 +560,7 @@ rule count_bowtie:
     priority: 50000
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -674,7 +573,7 @@ rule bigwig_coverage_advanced_SR:
     output: "{prefix}_srt_SR_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -691,7 +590,7 @@ rule bigwig_coverage_advanced_PE:
     output: "{prefix}_srt_PE_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -709,7 +608,7 @@ rule bigwig_coverage_advanced_PESF:
     output: "{prefix}_srt_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -728,7 +627,7 @@ rule bigwig_coverage_advanced_PESF_mmq30:
     output: "{prefix}_srt_mmq30_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -751,7 +650,7 @@ rule fastqc:
             html="{prefix}_fastqc.html"
     threads: 1
     shell:"""
-    PATH="/summer/epistorage/miniconda3/bin:$PATH"
+    PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
     fastqc {input.fastqgz}
     """
 
@@ -772,7 +671,7 @@ rule index_genome:
     threads: 32
     shell:    """
 mkdir -p {output}
-/summer/epistorage/miniconda3/bin/STAR \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/STAR \
   --runThreadN `echo "$(({threads} * 2))"` \
   --runMode genomeGenerate \
   --genomeDir {output} \
@@ -797,7 +696,7 @@ rule align_trimed:
     threads: 32
     shell:"""
 cd {wildcards.prefix}
-/summer/epistorage/miniconda3/bin/STAR \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/STAR \
   --runThreadN {threads} \
   --genomeDir  {input.star_index} \
   --sjdbGTFfile {input.gtf} \
@@ -808,7 +707,7 @@ cd {wildcards.prefix}
   --outSAMtype BAM SortedByCoordinate
 sleep 30
 echo "indexing bam_file"
-/summer/epistorage/miniconda3/bin/samtools index {output}
+/summer/epistorage/miniconda3/envs/oct22_env/bin/samtools index {output}
     """
 
 
@@ -825,7 +724,7 @@ rule count_classic:
     # priority: 50
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
+/summer/epistorage/miniconda3/envs/oct22_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -837,7 +736,7 @@ rule count_classic:
 #     output: "{prefix}/{sample}_{sr_or_pe}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bw"
 #     threads: 4
 #     shell:"""
-# /summer/epistorage/miniconda3/bin/bamCoverage \
+# /summer/epistorage/miniconda3/envs/oct22_env/bin/bamCoverage \
 #   -b {input.bam_file} \
 #   --numberOfProcessors `echo "$(({threads} * 2))"` \
 #   --binSize 10 \
