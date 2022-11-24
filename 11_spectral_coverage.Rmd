@@ -19,15 +19,18 @@ source("config")
 # Experiment grouping
 
 ```{r label="params"}
-exp_grp = data.frame(
-  bw = c(
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw")
-    ),
-  id = c(
-    "ctl_d_h2b",
-    "can_m_h2b"
+samples = c(
+    "input_rep10",
+    "cth2b_rep11",
+    "cth2b_rep12",
+    "input_rep20",
+    "cth2b_rep21",
+    "cth2b_rep22"
   )
+exp_grp = data.frame(
+  bw = paste0("/home/fchuffar/projects/", datashare, "/", gse, "/", samples, "_end-to-end_trim30_srt_PE_0_4_RPKM.bw"),
+  id = samples,
+  stringsAsFactors=FALSE
 )
 rownames(exp_grp) = exp_grp$id
 
@@ -47,8 +50,8 @@ Mus_musculus/UCSC/mm10
 cat ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.dict | grep SN | cut -f2,3 | cut -d: -f2,3 | sed -e "s/LN://" > ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes
 ```
 
-```{r label="genome"}
-chr_sizes = read.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes", stringsAsFactors=FALSE)
+```{r genome}
+chr_sizes = read.table(paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/", version, ".chrom.sizes"), stringsAsFactors=FALSE)
 head(chr_sizes)
 dim(chr_sizes)
 chr_sizes = chr_sizes[chr_sizes[,1] != "chrM",]
@@ -147,7 +150,7 @@ compute_matrix_file = function(task) {
 
   # compute matrix
   matrix_file = paste0("tmp/matrix_", prefix, "_", win_size, ".txt.gz")
-  Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
+  Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
   matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filename, score_filename=score_filenames, out_filename=matrix_file, bin_size=format(win_size, scientific = FALSE) , region_body_length=format(win_size, scientific = FALSE), before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, number_of_processors=32)    
   print(matrix_file)
 }
@@ -270,7 +273,7 @@ if (!exists("counts")) {
 
 
 ```{r eval=TRUE, label="feat"}
-sample_of_interest = rownames(exp_grp)[2]
+sample_of_interest = rownames(exp_grp)
 for (i in sample_of_interest) {
   print(i)
   layout(matrix(1:2, 1), respect=TRUE)
@@ -331,16 +334,51 @@ sum(rpkm_wig_signal[,i])
 nrow(rpkm_wig_signal) * 10000
 
 layout(matrix(1:2, 1), respect=TRUE)
-
-thresh = 6
-plot(density(log2(rpkm_wig_signal[,"ctl_d_h2b"]+1), na.rm=TRUE), main=i)
-abline(v=thresh, lty=2)
-plot(density(log2(rpkm_wig_signal[,"can_m_h2b"]+1), na.rm=TRUE), main=i)
-abline(v=thresh, lty=2)
+thresh = 10
+for (smp in samples) {
+  plot(density(log2(rpkm_wig_signal[,smp]+1), na.rm=TRUE), main=smp)
+  abline(v=thresh, lty=2)
+}
 
 
 # feat
-feat = rpkm_wig_signal[log2(rpkm_wig_signal[,"ctl_d_h2b"]+1)>thresh | log2(rpkm_wig_signal[,"can_m_h2b"]+1)>thresh ,]
+feat = rpkm_wig_signal[
+  log2(rpkm_wig_signal[,samples[1]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[2]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[3]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[4]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[5]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[6]]+1)>thresh | 
+  FALSE,]
+feat
+  
+# feat[,"ctl_d_h2b"] = log2(feat[,"ctl_d_h2b"]+1)
+# feat[,"can_m_h2b"] = log2(feat[,"can_m_h2b"]+1)
+#
+
+feat$score = signif(
+  (
+  .25*log2(feat[,"cth2b_rep11"]+1) +
+  .25*log2(feat[,"cth2b_rep12"]+1) +
+  .25*log2(feat[,"cth2b_rep21"]+1) +
+  .25*log2(feat[,"cth2b_rep22"]+1) 
+  )
+  - (
+  .5*log2(feat[,"input_rep10"]+1) +
+  .5*log2(feat[,"input_rep20"]+1) 
+  )
+, 2)
+# log2(feat[,"can_m_h2b"] - feat[,"ctl_d_h2b"], 1)
+feat[rev(order(feat$score)),]
+
+#  chr9:2,994,058-3,054,054
+#  chr2:98,664,434-98,670,995
+# chr17:4,625,788-4,626,914
+# chr17:39,844,747-39,849,257 **
+# chr6:3,200,344-3,202,657
+# chr6:132,462,746-132,465,059
+
+
 
 dim(feat)
 BIG_MESSAGE=paste0 (

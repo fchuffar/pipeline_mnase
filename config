@@ -1,8 +1,8 @@
-gse="chip_domenico_tgml"
-project="nme2"
-species="Mus_musculus"
+gse="hsspz"
+project="small_structs"
+species="Homo_sapiens"
 annotation="UCSC"
-version="mm10"
+version="hg38"
 datashare="datashare"
 # GEO submission
 GSE_TARGET_NAME="GSE1"

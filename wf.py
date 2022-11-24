@@ -4,80 +4,78 @@ exec(open("config").read())
 localrules: target
 
 
+bws = [f"/home/fchuffar/projects/datashare/hsspz/{sample}_end-to-end_trim30_bowtie2_{species}_{version}_fsmin{lb:03d}_fsmax{lb+10:03d}_srt_PE_30_4_RPKM.bw" for sample in ["input_rep10","cth2b_rep11","cth2b_rep12","input_rep20","cth2b_rep21","cth2b_rep22"] for lb in [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]]
+
+
+
+
+
 
 foo=version # patch for bug in target shell
 rule target:
     threads: 1
     message: "-- Rule target completed. --"
-    input: 
-      "/home/fchuffar/projects/datashare/dapseq/raw/ctl_d_h2b_R1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/dapseq/raw/ctl_d_h2b_R2_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/dapseq/raw/can_m_h2b_R1_fastxtrimf30.fastq.gz", 
-      "/home/fchuffar/projects/datashare/dapseq/raw/can_m_h2b_R2_fastxtrimf30.fastq.gz", 
+    input:
+      "/home/fchuffar/projects/datashare/hsspz/raw/input_rep10_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/input_rep10_R2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep11_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep11_R2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep12_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep12_R2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/input_rep20_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/input_rep20_R2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep21_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep21_R2_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep22_R1_fastxtrimf30.fastq.gz",
+      "/home/fchuffar/projects/datashare/hsspz/raw/cth2b_rep22_R2_fastxtrimf30.fastq.gz",
 
-      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw",
-      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_PE_0_4_RPKM.bw",
 
-      "/home/fchuffar/projects/datashare/dapseq/ctl_d_h2b_end-to-end_trim30_srt_mmq30.bam",
-      "/home/fchuffar/projects/datashare/dapseq/can_m_h2b_end-to-end_trim30_srt_mmq30.bam",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_30_4_RPKM.bw",
 
+      "/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_"+species+"_"+version+"_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
+      "/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
 
+      # bws,
 
     shell:"""
+echo done.
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
-  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30.log \
-  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30.bam \
-  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30_bowtie2_"""+species+"""_"""+foo+""".log \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_end-to-end_trim30_bowtie2_"""+species+"""_"""+foo+""".bam \
+  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip
 
-echo workflow \"pipeline_mnase\" completed at `date` 
+echo workflow \"pipeline_mnase\" completed at `date`
           """
 
 
 
 
-rule align_solid:
-    input:
-      fastq_info="{prefix}/{sample}_solid.info",
-    output:
-      log    = "{prefix}/{sample}_solid.log",
-      bam    = "{prefix}/{sample}_solid.bam",
-      srtbam = "{prefix}/{sample}_solid_srt.bam",
-      bai    = "{prefix}/{sample}_solid_srt.bam.bai",
-      # bw     = "{prefix}/{sample}_solid_maqerr{maqerr}_srt_0_0_4_RPKM.bw",
-    threads: 32
-    message:  "--- mapping with bowtie2 ---"
-    shell:    """
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
-bowtie --chunkmbs 1024 -t -p {threads} -C --sam \
-  --trim3 20 \
-  --fr \
-  /home/fchuffar/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/BowtieIndexSolid/genome -f \
-  `cat {input.fastq_info}` \
-  2> {output.log}   | samtools view -bS - > {output.bam}
-samtools sort -@ 32 -T /dev/shm/{wildcards.sample}_solid -o {output.srtbam} {output.bam}
-samtools index {output.srtbam}
-    """
 
-rule awk_filter_fragment_length:
-    input:
-      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
-    output: 
-      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_fsmin{fsmin}_fsmax{fsmax}_srt.bam",
-      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_fsmin{fsmin}_fsmax{fsmax}_srt.bam.bai",
-    threads: 1
-    shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
-# https://www.biostars.org/p/65262/
-BAM={input.bam}
-fsmin={wildcards.fsmin}
-fsmax={wildcards.fsmax}
-BAM_OUT={output.bam}
-samtools view -h $BAM | awk '$9 < -'$fsmin' && $9 > -'$fsmax' || $9 > '$fsmin' && $9 < '$fsmax' || $1 ~ /^@/' | samtools view -bS - > $BAM_OUT
-ls -lha $BAM_OUT
-samtools index {output.bam}
-    """
+
+
+
+
 
 rule mmq_filter_for_danpos:
     input:
@@ -87,7 +85,7 @@ rule mmq_filter_for_danpos:
       bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt_mmq30.bam.bai",
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 samtools view -bq 30 {input.bam} > {output.bam}
 samtools index {output.bam}
     """
@@ -104,21 +102,21 @@ rule align_bowtie:
       # star_index="/home/fchuffar/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome",
       # gtf="/scratch_r730/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/genes.gtf",
     output:
-      log = "{prefix}/{sample}_{localendtoend}_trim{trim}.log",
-      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}.bam",
-      srtbam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
-      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam.bai"
+      log =    "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}.log",
+      bam =    "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}.bam",
+      srtbam = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_srt.bam",
+      bai =    "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_srt.bam.bai"
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 bowtie2 \
   -t \
   -p {threads} \
   --{wildcards.localendtoend} \
   --no-mixed \
   --no-discordant \
-  -x  /home/fchuffar/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome \
+  -x  /home/fchuffar/projects/datashare/genomes/{wildcards.species}/UCSC/{wildcards.version}/Sequence/Bowtie2Index/genome \
   `cat {input.fastq_info}` \
   2> {output.log} \
   | samtools view -bS - > {output.bam}
@@ -127,6 +125,111 @@ samtools sort -@ {threads} -T /dev/shm/{wildcards.sample}_{wildcards.localendtoe
 samtools index {output.srtbam}
 cat {output.log}
 """
+
+rule awk_filter_fragment_length:
+    input:
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_srt.bam",
+    output: 
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_fsmin{fsmin}_fsmax{fsmax}_srt.bam",
+      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_fsmin{fsmin}_fsmax{fsmax}_srt.bam.bai",
+    threads: 1
+    shell:"""
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+# https://www.biostars.org/p/65262/
+BAM={input.bam}
+fsmin={wildcards.fsmin}
+fsmax={wildcards.fsmax}
+BAM_OUT={output.bam}
+samtools view -h $BAM | awk '$9 < -'$fsmin' && $9 > -'$fsmax' || $9 > '$fsmin' && $9 < '$fsmax' || $1 ~ /^@/' | samtools view -bS - > $BAM_OUT
+ls -lha $BAM_OUT
+samtools index {output.bam}
+    """
+
+ruleorder: awk_filter_fragment_length > align_bowtie
+
+
+rule bigwig_coverage_advanced_SR:
+    input: "{prefix}_srt.bam", 
+    output: "{prefix}_srt_SR_{mmq}_{binsize}_{norm}.bw"
+    threads: 32
+    shell:"""
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export TMPDIR=/dev/shm
+bamCoverage \
+  -b {input} \
+  --numberOfProcessors {threads} \
+  --binSize {wildcards.binsize} \
+  --minMappingQuality {wildcards.mmq} \
+  --normalizeUsing {wildcards.norm} \
+  -o {output}
+
+    """
+
+rule bigwig_coverage_advanced_PE:
+    input: "{prefix}_srt.bam", 
+    output: "{prefix}_srt_PE_{mmq}_{binsize}_{norm}.bw"
+    threads: 32
+    shell:"""
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export TMPDIR=/dev/shm
+bamCoverage \
+  -b {input} \
+  --extendReads \
+  --numberOfProcessors {threads} \
+  --binSize {wildcards.binsize} \
+  --minMappingQuality {wildcards.mmq} \
+  --normalizeUsing {wildcards.norm} \
+  -o {output}
+
+    """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rule align_solid:
+    input:
+      fastq_info="{prefix}/{sample}_solid.info",
+    output:
+      log    = "{prefix}/{sample}_solid.log",
+      bam    = "{prefix}/{sample}_solid.bam",
+      srtbam = "{prefix}/{sample}_solid_srt.bam",
+      bai    = "{prefix}/{sample}_solid_srt.bam.bai",
+      # bw     = "{prefix}/{sample}_solid_maqerr{maqerr}_srt_0_0_4_RPKM.bw",
+    threads: 32
+    message:  "--- mapping with bowtie2 ---"
+    shell:    """
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+bowtie --chunkmbs 1024 -t -p {threads} -C --sam \
+  --trim3 20 \
+  --fr \
+  /home/fchuffar/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/BowtieIndexSolid/genome -f \
+  `cat {input.fastq_info}` \
+  2> {output.log}   | samtools view -bS - > {output.bam}
+samtools sort -@ 32 -T /dev/shm/{wildcards.sample}_solid -o {output.srtbam} {output.bam}
+samtools index {output.srtbam}
+    """
 
 rule saf_featurecounts:
     input: 
@@ -165,10 +268,10 @@ bedtools  getfasta -fi /home/fchuffar/projects/datashare/genomes/Mus_musculus/UC
   -bed ~/projects/small_structs/results/for_blastn.bed > \
   ~/projects/small_structs/results/for_blastn.fasta
 
-/summer/epistorage/miniconda3/envs/oct22_env/bin/makeblastdb -in ~/projects/small_structs/results/for_blastn.fasta \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/makeblastdb -in ~/projects/small_structs/results/for_blastn.fasta \
   -dbtype nucl -parse_seqids -out  ~/projects/small_structs/results/for_blastn.blast.db
 
-/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db ~/projects/small_structs/results/for_blastn.blast.db \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/blastn -db ~/projects/small_structs/results/for_blastn.blast.db \
   -num_threads=1 \
   -query ~/projects/small_structs/results/for_blastn.fasta \
   -outfmt "10 std sstrand" \
@@ -508,7 +611,7 @@ rule compile_blastdb:
     output: os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db")
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/envs/oct22_env/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
+/summer/epistorage/miniconda3/envs/mnase_env/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
 touch {output}
     """
     
@@ -519,8 +622,8 @@ rule blastn_ggaat:
     output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
     threads: 1
     shell:"""
-gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/envs/oct22_env/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/envs/mnase_env/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/envs/mnase_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
 
@@ -531,8 +634,8 @@ rule blastn_unmapped_ggaat:
     output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
-cat {input.query_fqgz} | /summer/epistorage/miniconda3/envs/oct22_env/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/envs/oct22_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+cat {input.query_fqgz} | /summer/epistorage/miniconda3/envs/mnase_env/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/envs/mnase_env/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
 
@@ -544,9 +647,10 @@ rule trim_fastxtoolkit:
     output: "{prefix}_fastxtrimf{trim}.fastq.gz"
     threads: 1
     shell:"""
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
 echo computing $tmpfile ...
-gunzip -c  {input.fastq} | /summer/epistorage/miniconda3/envs/fastx-toolkit_env/bin/fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
+gunzip -c  {input.fastq} | fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
 echo move $tmpfile to output.
 cp $tmpfile {output}
 rm $tmpfile
@@ -560,7 +664,7 @@ rule count_bowtie:
     priority: 50000
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/envs/oct22_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -568,47 +672,13 @@ rule count_bowtie:
 
 
           
-rule bigwig_coverage_advanced_SR:
-    input: "{prefix}_srt.bam", 
-    output: "{prefix}_srt_SR_{mmq}_{binsize}_{norm}.bw"
-    threads: 32
-    shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
-export TMPDIR=/dev/shm
-bamCoverage \
-  -b {input} \
-  --numberOfProcessors {threads} \
-  --binSize {wildcards.binsize} \
-  --minMappingQuality {wildcards.mmq} \
-  --normalizeUsing {wildcards.norm} \
-  -o {output}
-
-    """
-
-rule bigwig_coverage_advanced_PE:
-    input: "{prefix}_srt.bam", 
-    output: "{prefix}_srt_PE_{mmq}_{binsize}_{norm}.bw"
-    threads: 32
-    shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
-export TMPDIR=/dev/shm
-bamCoverage \
-  -b {input} \
-  --extendReads \
-  --numberOfProcessors {threads} \
-  --binSize {wildcards.binsize} \
-  --minMappingQuality {wildcards.mmq} \
-  --normalizeUsing {wildcards.norm} \
-  -o {output}
-
-    """
 
 rule bigwig_coverage_advanced_PESF:
     input: "{prefix}_srt.bam", 
     output: "{prefix}_srt_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -627,7 +697,7 @@ rule bigwig_coverage_advanced_PESF_mmq30:
     output: "{prefix}_srt_mmq30_PESF_{mmq}_{binsize}_None_SF{sf}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -650,7 +720,7 @@ rule fastqc:
             html="{prefix}_fastqc.html"
     threads: 1
     shell:"""
-    PATH="/summer/epistorage/miniconda3/envs/oct22_env/bin:$PATH"
+    PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
     fastqc {input.fastqgz}
     """
 
@@ -671,7 +741,7 @@ rule index_genome:
     threads: 32
     shell:    """
 mkdir -p {output}
-/summer/epistorage/miniconda3/envs/oct22_env/bin/STAR \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/STAR \
   --runThreadN `echo "$(({threads} * 2))"` \
   --runMode genomeGenerate \
   --genomeDir {output} \
@@ -696,7 +766,7 @@ rule align_trimed:
     threads: 32
     shell:"""
 cd {wildcards.prefix}
-/summer/epistorage/miniconda3/envs/oct22_env/bin/STAR \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/STAR \
   --runThreadN {threads} \
   --genomeDir  {input.star_index} \
   --sjdbGTFfile {input.gtf} \
@@ -707,7 +777,7 @@ cd {wildcards.prefix}
   --outSAMtype BAM SortedByCoordinate
 sleep 30
 echo "indexing bam_file"
-/summer/epistorage/miniconda3/envs/oct22_env/bin/samtools index {output}
+/summer/epistorage/miniconda3/envs/mnase_env/bin/samtools index {output}
     """
 
 
@@ -724,7 +794,7 @@ rule count_classic:
     # priority: 50
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/envs/oct22_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
+/summer/epistorage/miniconda3/envs/mnase_env/bin/htseq-count -f bam -r name -s no -m intersection-nonempty \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -736,7 +806,7 @@ rule count_classic:
 #     output: "{prefix}/{sample}_{sr_or_pe}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bw"
 #     threads: 4
 #     shell:"""
-# /summer/epistorage/miniconda3/envs/oct22_env/bin/bamCoverage \
+# /summer/epistorage/miniconda3/envs/mnase_env/bin/bamCoverage \
 #   -b {input.bam_file} \
 #   --numberOfProcessors `echo "$(({threads} * 2))"` \
 #   --binSize 10 \

@@ -44,22 +44,8 @@ get_nb_reads = function(bam_file) {
 }
 
 bam_files = c(
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt.bam"),
   NULL
 )
 
@@ -119,22 +105,8 @@ nb_reads = unlist(nb_reads)
 nb_reads
 
 bam_files_filtered = c(
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m301_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2wt_m302_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m300_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2wt_m303_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_inpt_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_inpt_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m291_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/normal_chip_nme2ko_m293_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m273_end-to-end_trim30_srt_mmq30.bam"),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/hghfat_chip_nme2ko_m292_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt_mmq30.bam"),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt_mmq30.bam"),
   NULL
 )
 
@@ -205,22 +177,8 @@ for (bam_file in bam_files) {
 
 ```{r label="hists", eval=TRUE}
 samples = c(
-  "normal_inpt_nme2wt_m301",
-  "normal_inpt_nme2wt_m302",
-  "hghfat_inpt_nme2wt_m300",
-  "hghfat_inpt_nme2wt_m303",
-  "normal_chip_nme2wt_m301",
-  "normal_chip_nme2wt_m302",
-  "hghfat_chip_nme2wt_m300",
-  "hghfat_chip_nme2wt_m303",
-  "normal_inpt_nme2ko_m291",
-  "normal_inpt_nme2ko_m293",
-  "hghfat_inpt_nme2ko_m273",
-  "hghfat_inpt_nme2ko_m292",
-  "normal_chip_nme2ko_m291",
-  "normal_chip_nme2ko_m293",
-  "hghfat_chip_nme2ko_m273",
-  "hghfat_chip_nme2ko_m292",
+  "ctl_d_h2b",
+  "can_m_h2b",
   NULL
 )
 
