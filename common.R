@@ -1,3 +1,23 @@
+if (!exists("mread.fasta")) {
+  mread.fasta = memoise::memoise(function(...) {
+    fasta = seqinr::read.fasta(...)
+    m_orig = as.matrix(do.call(rbind, fasta))
+    m_orig[m_orig=="n"] = NA
+    dim(m_orig)
+
+    m = m_orig[,]
+    # m = m_orig[,900:1000]
+    pwm = apply(m, 2, function(c){
+      # c = factor(c, levels=c("a", "c", "g", "t", "n"))
+      prop.table(table(c))
+    })
+    return(pwm)
+  })
+}
+
+
+
+
 draw_fig = function(signal) {
   layout(matrix(1:6, 2), respect=TRUE)
   alpha.f = 0.3
@@ -124,9 +144,8 @@ normalize_counts = function (count_filename) {
   ))
 }
 if (!exists("mnormalize_counts")) {mnormalize_counts = memoise::memoise(normalize_counts)}
-
-
-if (! exists("mreadgz")) {
+if (! exists("mread.table")) {mread.table = memoise::memoise(read.table)}
+if (! exists("mread.tablegz")) {
   mread.tablegz = memoise::memoise(function(matrix_file, ...) {
     read.table(gzfile(matrix_file), ...)
   })  
@@ -263,7 +282,7 @@ get_danpos_out = function (prefix, danpos_out_dir, algo = "positions") {
 }
 
 
-get_danpos_out_annot = function (prefix, danpos_out_dir, algo = "positions") {
+get_danpos_out_annot = function (prefix, danpos_out_dir, algo = "positions", genome = 'mm10') {
   danpos_out = mget_danpos_out(prefix, danpos_out_dir, algo=algo)
   feat = danpos_out
   # feat = feat[sample(1:nrow(feat), nb_rnd_feat),]
@@ -277,7 +296,7 @@ get_danpos_out_annot = function (prefix, danpos_out_dir, algo = "positions") {
   regions_filename = paste0("danpos_out_as_feat_", prefix, ".bed")
   write.table(feat[,1:6], file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)    
 
-  dm_regions = annotatr::read_regions(con=regions_filename, genome = 'mm10', format = 'bed')
+  dm_regions = annotatr::read_regions(con=regions_filename, genome = genome, format = 'bed')
   # Intersect the regions we read in with the annotations
   dm_annotated = annotatr::annotate_regions(
       regions = dm_regions,

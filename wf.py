@@ -4,7 +4,7 @@ exec(open("config").read())
 localrules: target
 
 
-bws = [f"/home/fchuffar/projects/datashare/hsspz/{sample}_end-to-end_trim30_bowtie2_{species}_{version}_fsmin{lb:03d}_fsmax{lb+10:03d}_srt_PE_30_4_RPKM.bw" for sample in ["input_rep10","cth2b_rep11","cth2b_rep12","input_rep20","cth2b_rep21","cth2b_rep22"] for lb in [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]]
+bws_vplot = [f"/home/fchuffar/projects/datashare/hsspz/{sample}_end-to-end_trim30_bowtie2_{species}_{version}_fsmin{lb:03d}_fsmax{lb+10:03d}_srt_PE_30_4_RPKM.bw" for sample in ["input_rep10","cth2b_rep11","cth2b_rep12","input_rep20","cth2b_rep21","cth2b_rep22"] for lb in [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190]]
 
 
 
@@ -56,7 +56,7 @@ rule target:
       "/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
       "/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_"+species+"_"+version+"_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw",
 
-      # bws,
+      bws_vplot,
 
     shell:"""
 echo done.

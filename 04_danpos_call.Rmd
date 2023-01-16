@@ -18,21 +18,72 @@ source("config")
 
 ```{r eval=FALSE, echo=FALSE}
 # peak calling with danpos2
-__conda_setup="$('/summer/epistorage/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-   eval "$__conda_setup"
-else
-   if [ -f "/summer/epistorage/miniconda3/etc/profile.d/conda.sh" ]; then
-       . "/summer/epistorage/miniconda3/etc/profile.d/conda.sh"
-   else
-       export PATH="/summer/epistorage/miniconda3/bin:$PATH"
-   fi
-fi
-unset __conda_setup
-
 conda activate danpos_env
 
-cd ~/projects/datashare_epistorage/TGML_runs/bam_epimed/
+cd ~/projects/small_structs/results/hsspz
+source config
+echo $gse
+echo $project
+
+cd ~/projects/datashare/${gse}
+
+# "input_rep10",
+# "cth2b_rep11",
+# "cth2b_rep12",
+# "input_rep20",
+# "cth2b_rep21",
+# "cth2b_rep22"
+
+# rm -Rf cth2b_rep1
+mkdir cth2b_rep1
+cd cth2b_rep1
+ln -s ../cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt.bam
+ln -s ../cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt.bam
+ls -lha
+cd ..
+mkdir input_rep1
+cd input_rep1
+ln -s ../input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt.bam
+ls -lha
+cd ..
+ls -lha *_rep1
+
+a=10
+q=20
+z=20
+jw=40
+jd=100
+
+danpos.py dpos -m 1 -e 1 -jw ${jw} -jd ${jd} -a ${a} -z ${z} -q ${q} -o danpos_out_cth2b_chip_input cth2b_rep1 -b input_rep1 > danpos_out_cth2b_chip_input.log &
+
+
+ls -lha /home/chuffarf/projects/datashare/hsspz/danpos_out_cth2b_chip_input/pooled/
+
+
+
+
+danpos_out_dir = "danpos_out_cth2b_chip_input"
+prefix = "ChIP_H3.bgsub.Fnor"
+abs_thresh_smt = 128
+quantile_thresh_smt = 0.05
+quantile_thresh_fuzziness = 0.95
+thresh_len = c(110, 300)
+algo="peaks"
+rmarkdown::render("04_danpos_call.Rmd", output_file=paste0("04_danpos_call_", 
+  danpos_out_dir, "_", 
+  prefix, "_", 
+  abs_thresh_smt, "_", 
+  quantile_thresh_smt, "_", 
+  quantile_thresh_fuzziness, "_", 
+  thresh_len[1], "_", thresh_len[2], "_", 
+  algo, ".html")
+)
+
+
+
+
+
+
 
 
 

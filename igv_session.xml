@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="hg38" hasGeneTrack="true" hasSequenceTrack="true" locus="chr21:7258725-7258844" nextAutoscaleGroup="6" path="/Users/florent/projects/small_structs/results/hsspz/igv_session.xml" version="8">
+    <Resources>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_snRNA.bed.gz.tbi" name="snRNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_snRNA.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_SINE.bed.gz.tbi" name="SINE" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_SINE.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RNA.bed.gz.tbi" name="RNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RNA.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Unknown.bed.gz.tbi" name="Unknown" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Unknown.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LINE.bed.gz.tbi" name="LINE" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LINE.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_scRNA.bed.gz.tbi" name="scRNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_scRNA.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_srpRNA.bed.gz.tbi" name="srpRNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_srpRNA.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_rRNA.bed.gz.tbi" name="rRNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_rRNA.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_DNA.bed.gz.tbi" name="DNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_DNA.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Satellite.bed.gz.tbi" name="Satellite" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Satellite.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RC.bed.gz.tbi" name="RC" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RC.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi" name="Simple_repeat" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Retroposon.bed.gz.tbi" name="Retroposon" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Retroposon.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Low_complexity.bed.gz.tbi" name="Low_complexity" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Low_complexity.bed.gz" trackLine="useScore=1"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw"/>
+        <Resource path="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LTR.bed.gz.tbi" name="LTR" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LTR.bed.gz" trackLine="useScore=1"/>
+        <Resource index="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_tRNA.bed.gz.tbi" name="tRNA" path="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_tRNA.bed.gz" trackLine="useScore=1"/>
+    </Resources>
+    <Panel height="720" name="DataPanel" width="1423">
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="4177.09" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2546.38" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2869.38" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3492.94" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3341.34" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="true" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" name="cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="3263.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="4" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" name="cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin025_fsmax075_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="29108.0" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track autoScale="false" autoscaleGroup="5" clazz="org.broad.igv.track.DataSourceTrack" fontSize="10" id="http://epimed.univ-grenoble-alpes.fr/downloads/florent/small_structs/results/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" name="cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin125_fsmax175_srt_PE_0_4_RPKM.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="815.213" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="694" name="FeaturePanel" width="1423">
+        <Track clazz="org.broad.igv.track.SequenceTrack" fontSize="10" id="Reference sequence" name="Reference sequence" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" colorScale="ContinuousColorScale;0.0;426.0;255,255,255;0,0,178" displayMode="EXPANDED" fontSize="10" height="35" id="hg38_genes" name="Gene" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="26051351" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz" name="Simple_repeat" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Satellite.bed.gz" name="Satellite" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="16411895" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LINE.bed.gz" name="LINE" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="50847794" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_DNA.bed.gz" name="DNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="8931797" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_SINE.bed.gz" name="SINE" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="24166939" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_LTR.bed.gz" name="LTR" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="102522831" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Low_complexity.bed.gz" name="Low_complexity" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_snRNA.bed.gz" name="snRNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_tRNA.bed.gz" name="tRNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Retroposon.bed.gz" name="Retroposon" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_srpRNA.bed.gz" name="srpRNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_rRNA.bed.gz" name="rRNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Unknown.bed.gz" name="Unknown" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RC.bed.gz" name="RC" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_scRNA.bed.gz" name="scRNA" visible="true"/>
+        <Track altColor="0,0,178" clazz="org.broad.igv.track.FeatureTrack" color="0,0,178" featureVisibilityWindow="2147483647" fontSize="10" id="https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_RNA.bed.gz" name="RNA" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.7428571428571429"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

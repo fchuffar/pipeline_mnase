@@ -14,21 +14,14 @@ output:
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 source("config")
+source("config.R")
 ```
 
 # Experiment grouping
 
 ```{r label="params"}
-samples = c(
-    "input_rep10",
-    "cth2b_rep11",
-    "cth2b_rep12",
-    "input_rep20",
-    "cth2b_rep21",
-    "cth2b_rep22"
-  )
 exp_grp = data.frame(
-  bw = paste0("/home/fchuffar/projects/", datashare, "/", gse, "/", samples, "_end-to-end_trim30_srt_PE_0_4_RPKM.bw"),
+  bw = paste0("/home/fchuffar/projects/", datashare, "/", gse, "/", samples, "_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_0_4_RPKM.bw"),
   id = samples,
   stringsAsFactors=FALSE
 )
@@ -108,8 +101,8 @@ dim(feat)
 
 ```{r}
 # win_sizes = round(1.2^c(70:130))
-win_sizes_min = 1000
-win_sizes_range_size = 100
+win_sizes_min = 10000
+win_sizes_range_size = 10
 win_sizes = (1:win_sizes_range_size) * win_sizes_min
 
 ```
@@ -278,7 +271,7 @@ for (i in sample_of_interest) {
   print(i)
   layout(matrix(1:2, 1), respect=TRUE)
   layout(matrix(c(1:4, rep(5,4)), 2), respect=TRUE)
-  sapply(c(1000, 5000, 10000, 20000), function(w) {
+  sapply(c(10000, 20000), function(w) {
     print(w)
     matrix_file = paste0("tmp/matrix_spectral_", w, ".txt.gz")
     tmp_d = counts[[matrix_file]]
@@ -323,7 +316,7 @@ for (i in sample_of_interest) {
   # axis(1, ((1:nrow(tmp_d)-1)/(nrow(tmp_d)-1))[idx], signif(seq(0,20, length.out=nrow(tmp_d))[idx], 2), las=2)
 }
 
-matrix_file = "tmp/matrix_spectral_1e+05.txt.gz"
+matrix_file = "tmp/matrix_spectral_10000.txt.gz"
 rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
 rpkm_wig_signal = as.data.frame(rpkm_wig_signal)
 colnames(rpkm_wig_signal) = c("chr", "start", "end", "name", "score", "strand", rownames(exp_grp))
@@ -334,7 +327,7 @@ sum(rpkm_wig_signal[,i])
 nrow(rpkm_wig_signal) * 10000
 
 layout(matrix(1:2, 1), respect=TRUE)
-thresh = 10
+thresh = 9
 for (smp in samples) {
   plot(density(log2(rpkm_wig_signal[,smp]+1), na.rm=TRUE), main=smp)
   abline(v=thresh, lty=2)
@@ -356,6 +349,16 @@ feat
 # feat[,"can_m_h2b"] = log2(feat[,"can_m_h2b"]+1)
 #
 
+
+
+
+
+```
+
+# Features and score
+
+```{r results="verbatim"}
+
 feat$score = signif(
   (
   .25*log2(feat[,"cth2b_rep11"]+1) +
@@ -369,8 +372,11 @@ feat$score = signif(
   )
 , 2)
 # log2(feat[,"can_m_h2b"] - feat[,"ctl_d_h2b"], 1)
-feat[rev(order(feat$score)),]
+feat[rev(order(feat$score)),1:6]
+```
 
+
+```{r}
 #  chr9:2,994,058-3,054,054
 #  chr2:98,664,434-98,670,995
 # chr17:4,625,788-4,626,914

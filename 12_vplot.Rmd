@@ -14,6 +14,7 @@ output:
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 source("config")
+source("common.R")
 ```
 
 `r print(date())`
@@ -45,12 +46,7 @@ if (species=="Mus_musculus" & version=="mm10") {
   # output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
   # file type returned: "gzip compressed"
 
-  if (!exists("rmsk_raw")) {
-    rmsk_raw = read.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
-  }
-  rmsk = rmsk_raw
-
-  # blacklist = rmsk
+  rmsk = mread.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
   blacklist = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
   blacklist = rbind(blacklist, list("chr19", 61266781, 61266782, "chr19:61266781-61266782", 1404, "+"))
   blacklist = rbind(blacklist, list("chr11", 3126500, 3200500, "Sfi1", 300, "-"))
@@ -60,11 +56,7 @@ if (species=="Mus_musculus" & version=="mm10") {
   blacklist_filename = "blacklist_file.bed"
   write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
 } else if (species=="Homo_sapiens" & version=="hg38"){
-  if (!exists("rmsk_raw")) {
-    rmsk_raw = read.table("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/rmsk.hg38.bed", skip=1, stringsAsFactors=FALSE)
-  }
-  rmsk = rmsk_raw
-  # blacklist = rmsk
+  rmsk = mread.table("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/rmsk.hg38.bed", skip=1, stringsAsFactors=FALSE)
   blacklist = rmsk[1,]
   blacklist = rbind(blacklist, list("chrM", 1, 20000, "chrM:1-20000", 20000, "+"))
   blacklist = blacklist[-1,]
@@ -131,8 +123,8 @@ mmq=30
 cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
   "-a ", prefix, ".saf -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam "),
+  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam "),
   ""
 )
 print(paste(cmd, args))
@@ -169,68 +161,68 @@ dev.off()
 
   # score_filenames
   score_filenames = c(
-    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
-    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt_PE_30_4_RPKM.bw"),
 
 
 
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin030_fsmax040_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin040_fsmax050_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin050_fsmax060_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin060_fsmax070_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin070_fsmax080_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin080_fsmax090_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin090_fsmax100_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin100_fsmax110_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin110_fsmax120_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin120_fsmax130_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin130_fsmax140_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin140_fsmax150_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin150_fsmax160_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin160_fsmax170_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin170_fsmax180_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin180_fsmax190_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_fsmin190_fsmax200_srt_PE_0_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin030_fsmax040_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin040_fsmax050_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin050_fsmax060_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin060_fsmax070_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin070_fsmax080_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin080_fsmax090_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin090_fsmax100_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin100_fsmax110_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin110_fsmax120_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin120_fsmax130_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin130_fsmax140_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin140_fsmax150_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin150_fsmax160_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin160_fsmax170_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin170_fsmax180_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin180_fsmax190_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin190_fsmax200_srt_PE_30_4_RPKM.bw"),
+
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin030_fsmax040_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin040_fsmax050_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin050_fsmax060_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin060_fsmax070_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin070_fsmax080_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin080_fsmax090_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin090_fsmax100_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin100_fsmax110_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin110_fsmax120_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin120_fsmax130_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin130_fsmax140_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin140_fsmax150_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin150_fsmax160_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin160_fsmax170_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin170_fsmax180_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin180_fsmax190_srt_PE_30_4_RPKM.bw"),
+    paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin190_fsmax200_srt_PE_30_4_RPKM.bw"),
     #
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin030_fsmax040_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin040_fsmax050_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin050_fsmax060_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin060_fsmax070_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin070_fsmax080_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin080_fsmax090_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin090_fsmax100_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin100_fsmax110_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin110_fsmax120_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin120_fsmax130_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin130_fsmax140_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin140_fsmax150_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin150_fsmax160_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin160_fsmax170_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin170_fsmax180_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin180_fsmax190_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_fsmin190_fsmax200_srt_PE_0_4_RPKM.bw"),
-    #
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin030_fsmax040_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin040_fsmax050_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin050_fsmax060_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin060_fsmax070_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin070_fsmax080_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin080_fsmax090_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin090_fsmax100_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin100_fsmax110_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin110_fsmax120_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin120_fsmax130_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin130_fsmax140_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin140_fsmax150_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin150_fsmax160_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin160_fsmax170_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin170_fsmax180_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin180_fsmax190_srt_PE_0_4_RPKM.bw"),
-    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_fsmin190_fsmax200_srt_PE_0_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin030_fsmax040_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin040_fsmax050_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin050_fsmax060_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin060_fsmax070_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin070_fsmax080_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin080_fsmax090_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin090_fsmax100_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin100_fsmax110_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin110_fsmax120_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin120_fsmax130_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin130_fsmax140_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin140_fsmax150_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin150_fsmax160_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin160_fsmax170_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin170_fsmax180_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin180_fsmax190_srt_PE_30_4_RPKM.bw"),
+    # paste0("/home/fchuffar/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_fsmin190_fsmax200_srt_PE_30_4_RPKM.bw"),
     NULL
   )
   brsl = arsl = 5000
