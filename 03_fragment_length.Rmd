@@ -223,11 +223,11 @@ for (sample in samples) {
 ```
 
 ```{r eval=TRUE, fig.height=4}
-plot_samples = function(samples){
+plot_samples = function(samples, mmq, trim=30){
   x_peak = c(           155, 270, 385, 450)
   x_cuts = c(      100) 
   x_band = c(30, 50, 125, 200)
-  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=paste(samples, mmq, collapse=" "), xaxt="n")  
+  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=paste0(paste(samples, collapse=" "), " (mmq", mmq, " trim", trim, ")"), xaxt="n")  
   abline(v=x_peak, lty=1)    
   abline(v=x_cuts, lty=3, col="grey")    
   abline(v=x_band, lty=2, col="grey")    
@@ -235,7 +235,7 @@ plot_samples = function(samples){
   i=0
   for (sample in samples) {
     i = i+1
-    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim", trim, "_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
     fact=1
     fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", 0)]
     baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
@@ -255,25 +255,42 @@ plot_samples = function(samples){
 
 ## Digestion
 
-```{r eval=TRUE, fig.height=8}
+```{r fig.height=8}
 layout(matrix(1:6, 2), respect=TRUE)
 for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1:3)])
-  plot_samples(samples[c(4:6)])
+  plot_samples(samples[c(1:3)], mmq)
+  plot_samples(samples[c(4:6)], mmq)
 }
 
 ```
 
-
-
-```{r eval=TRUE, fig.height=8}
+```{r fig.height=8}
 layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
 for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1,4)])
-  plot_samples(samples[c(2,5)])
-  plot_samples(samples[c(3,6)])
+  plot_samples(samples[c(1,4)], mmq)
+  plot_samples(samples[c(2,5)], mmq)
+  plot_samples(samples[c(3,6)], mmq)
 }
 ```
+
+```{r fig.height=8}
+layout(matrix(1:6, 2), respect=TRUE)
+for (mmq in c(30, 0)) {
+  plot_samples(samples[c(1:3)], mmq, trim=60)
+  plot_samples(samples[c(4:6)], mmq, trim=60)
+}
+
+```
+
+```{r fig.height=8}
+layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
+for (mmq in c(30, 0)) {
+  plot_samples(samples[c(1,4)], mmq, trim=60)
+  plot_samples(samples[c(2,5)], mmq, trim=60)
+  plot_samples(samples[c(3,6)], mmq, trim=60)
+}
+```
+
 
 
 # Material and Methods
