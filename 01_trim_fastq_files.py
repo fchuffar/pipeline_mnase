@@ -1,6 +1,14 @@
 import os 
 exec(open("config").read())
 
+def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
+  files = [f for f in os.listdir(os.path.expanduser(src_dir)) if re.match("^.*"+src_suffix+"$", f)]
+  files = [x.replace(src_suffix, dest_suffix) for x in files ]
+  return [os.path.join(os.path.expanduser(dest_dir), f) for f in files]
+
+fastq_trim30_R1 = get_files("~/projects/datashare/"+gse+"/raw", "R1.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R1_fastxtrimf30.fastq.gz")
+fastq_trim30_R2 = get_files("~/projects/datashare/"+gse+"/raw", "R2.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R2_fastxtrimf30.fastq.gz")
+
 localrules: target
 
 foo=version # patch for bug in target shell
@@ -8,56 +16,8 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input:
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R2_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R1_001_fastxtrimf30.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R2_001_fastxtrimf30.fastq.gz", 
-
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R2_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R1_001_fastxtrimf60.fastq.gz", 
-      "/home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R2_001_fastxtrimf60.fastq.gz", 
-
+      fastq_trim30_R1,
+      fastq_trim30_R2,
 
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
