@@ -1,3 +1,27 @@
+get_nb_reads_core = function(bam_file, args) {
+  cmd = "samtools"
+  args = paste0(args, bam_file)
+  print(paste(cmd, args))
+  nb_reads = as.numeric(system2(cmd, args, stdout=TRUE))
+  return(nb_reads)
+}
+if  (!exists("mget_nb_reads_core")) {
+  mget_nb_reads_core = memoise::memoise(get_nb_reads_core)    
+}
+
+get_nb_reads = function(bam_file) {
+  args = "view -c "
+  mget_nb_reads_core(bam_file, args)
+}
+
+get_nb_mapped_reads_primary_aligned = function(bam_file) {
+  args = "view -c -F 260 "
+  mget_nb_reads_core(bam_file, args)
+}
+
+
+
+
 if (!exists("mread.fasta")) {
   mread.fasta = memoise::memoise(function(...) {
     fasta = seqinr::read.fasta(...)

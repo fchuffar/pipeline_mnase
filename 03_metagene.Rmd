@@ -1,5 +1,5 @@
 ---
-title: "TSS profiles protein-coding transcripts"
+title: "Meta-Gene Analysis"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
@@ -14,15 +14,14 @@ output:
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 source("config")
+source("config.R")
 source("common.R")
 ```
-
-`r print(date())`
 
 # Params
 
 ```{r label="params"}
-prefix = "tss_profile_fast"
+prefix = "metagene"
 ```
 
 ```{r label="blacklist", eval=TRUE}
@@ -97,7 +96,6 @@ unique(feat[,1])
 # feat[feat[,1]=="chrMT",1] = "chrM"
 unique(feat[,1])
 
-
 feat = feat[feat$type%in%"protein-coding",]
 feat = feat[!feat[,1]%in%"chrM",]
 regions_filenames = regions_filename = paste0(prefix, ".bed")
@@ -105,47 +103,7 @@ write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, 
 
 head(feat)
 dim(feat)
-
-feat_saf = feat[,c(5,1:3, 6)]
-colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
-feat_saf$Start = feat$tss - 5000
-if (sum(feat_saf$Start<1)>0) {
-  feat_saf[feat_saf$Start<1,]$Start = 1
-}
-feat_saf$End = feat$tss + 5000  
-head(feat_saf)
-saf_filename = paste0(prefix, ".saf")
-write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
 ```
-
-```{r label="featureCounts", eval=FALSE}
-mmq=30
-cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
-args = paste0(
-  "-a ", prefix, ".saf -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/ctl_d_h2b_end-to-end_trim30_srt.bam "),
-  paste0("/home/fchuffar/projects/", datashare, "/", gse, "/can_m_h2b_end-to-end_trim30_srt.bam "),
-  ""
-)
-print(paste(cmd, args))
-system2(cmd, args)
-system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
-
-tab = read.table("tss_count_30.txt", header=TRUE)
-colnames(tab) = substr(colnames(tab), 55, 72)
-head(tab)
-
-pdf()
-layout(matrix(1:2,1), respect=TRUE)
-apply(tab[,-(1:6)], 2, function(cln) {
-  plot(density(log2(cln+1)))
-  plot(density(cln, from=-100, to=1000))
-})
-dev.off()
-
-```
-
-
 
 
 
@@ -155,24 +113,24 @@ dev.off()
 
 
 ```{r, label="computeMatrix tss_keys", eval=TRUE}
-  dir.create("tmp", showWarnings=FALSE)
+dir.create("tmp", showWarnings=FALSE)
 
-  matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
+matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 
-  # score_filenames
-  score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_PE_30_4_RPKM.bw")
-  brsl = arsl = 5000
-  bin_size = 100
-  Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
-  matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
-    blacklist_filename = blacklist_filename,
-    bin_size = bin_size,
-    before_region_start_length = brsl,
-    after_region_start_length = arsl,
-    FORCE_EXEC=TRUE,
-    number_of_processors=32,
-    sort_regions="descend"
-  )
+# score_filenames
+score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_PE_30_4_RPKM.bw")
+brsl = arsl = 5000
+bin_size = 100
+Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
+matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
+  blacklist_filename = blacklist_filename,
+  bin_size = bin_size,
+  before_region_start_length = brsl,
+  after_region_start_length = arsl,
+  FORCE_EXEC=TRUE,
+  number_of_processors=32,
+  sort_regions="descend"
+)
 ```
 
 
@@ -189,14 +147,13 @@ knitr::include_graphics(hm_out_filename)
 
 
 
+```{r, eval=FALSE}
 raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
 foo = apply(raw_wig_signal[,-(1:6)], 1, max)
 rev(sort(foo))[1:6]
-
 head(raw_wig_signal[rev(rank(foo)),])
-
 table(raw_wig_signal[,1])
-
+```
 
 
 
@@ -205,7 +162,6 @@ table(raw_wig_signal[,1])
 
 ```{r results="verbatim"}
 sessionInfo()
-date()
 ```
 
 

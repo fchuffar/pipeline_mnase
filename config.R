@@ -1,8 +1,8 @@
 samples = c(
-  "input_rep10",
-  "cth2b_rep11",
-  "cth2b_rep12",
-  "input_rep20",
-  "cth2b_rep21",
-  "cth2b_rep22"
+  "S_pp2",
+  "S_pp4",
+  "S_pp6",
+  "S_nn2",
+  "S_nn4",
+  "S_nn6"
 )

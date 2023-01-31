@@ -1,0 +1,928 @@
+---
+title: "MNase coverage"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+source("config.R")
+```
+
+# Experiment grouping
+
+```{r label="params"}
+exp_grp = data.frame(
+  bw = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin200_fsmax500_srt_PE_0_4_RPKM.bw"),
+  id = samples,
+  stringsAsFactors=FALSE
+)
+rownames(exp_grp) = exp_grp$id
+
+prefix = "spectral"
+score_filenames = exp_grp$bw
+# score_filenames = score_filenames[sapply(score_filenames, file.exists)]
+
+```
+
+
+
+## Genome
+
+Mus_musculus/UCSC/mm10
+
+```
+cat ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.dict | grep SN | cut -f2,3 | cut -d: -f2,3 | sed -e "s/LN://" > ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes
+```
+
+```{r genome}
+chr_sizes = read.table(paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/", version, ".chrom.sizes"), stringsAsFactors=FALSE)
+head(chr_sizes)
+dim(chr_sizes)
+chr_sizes = chr_sizes[chr_sizes[,1] != "chrM",]
+chr_sizes = chr_sizes[c(11:19, 1:10, 20:21),]
+genome = data.frame(chr=chr_sizes[,1], beg=1, end=chr_sizes[,2], name1=chr_sizes[,1], name2=chr_sizes[,1], stringsAsFactorsnd="+", stringsAsFactors=FALSE)
+
+rownames(genome) = NULL
+print(genome)
+dim(genome)
+
+# bamCoverage \
+#   -b ~/projects/datashare_epistorage/TGML_runs/bam_mnase/CS_Nuc.bam \
+#   --numberOfProcessors 12 \
+#   --binSize 10 \
+#   --minMappingQuality 30 \
+#   --normalizeUsing RPKM \
+#   -o ~/projects/datashare_epistorage/TGML_runs/bam_mnase/CS_Nuc.bw
+```
+
+```{r, results="verbatim", echo=TRUE}
+genome
+```
+
+## Features
+
+```{r label="features"}
+# features
+slice_genome = function(win_size, genome) {
+  feat = epimedtools::monitored_apply(genome, 1, function(l) {
+    beg = seq(1, as.numeric(l[[3]]), by=win_size)
+    end = beg + win_size
+    ret = data.frame(chr=l[[1]], beg=beg, end=end, name1=l[[5]], name2=paste0(l[[4]], "_feat", 1:length(beg)), strand=l[[6]], stringsAsFactors=FALSE)
+    return(ret)
+  })
+  feat = do.call(rbind, feat)
+  feat[,4] = paste0("feat_", 1:nrow(feat))
+  rownames(feat) = feat[,4]
+  feat[,2] = format(feat[,2], scientific = FALSE)
+  feat[,3] = format(feat[,3], scientific = FALSE)
+  head(feat)
+  dim(feat)
+  feat
+}
+```
+
+```{r results="verbatim"}
+feat = slice_genome(10000, genome)
+head(feat)
+dim(feat)
+```
+
+
+# Data
+
+```{r}
+# win_sizes = round(1.2^c(70:130))
+win_sizes_min = 10000
+win_sizes_range_size = 10
+win_sizes = (1:win_sizes_range_size) * win_sizes_min
+```
+
+Genome is sliced into features according to a size of window w, $w \in$ `r range(win_sizes)`.
+
+
+
+```{r label="functions"}
+tasks = lapply(win_sizes, function(win_size) {
+  list(
+    win_size=win_size
+  )
+})
+tasks
+
+compute_matrix_file = function(task) {
+  # task = tasks[[1]]
+  # task = tasks[[20]]
+  print(date())
+  print(task)
+  # parameters
+  win_size = task$win_size
+
+  # features
+  regions_filename = paste0("tmp/features_", prefix, "_", win_size, ".bed")
+  if (!file.exists(regions_filename)) {
+    print(paste0("Computing ", regions_filename))
+    feat = slice_genome(win_size, genome)
+    # prefix = paste0("win_size_", win_size)
+    dir.create("tmp", showWarnings=FALSE)
+    write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+    print(regions_filename)    
+  }
+  # features = read.table(regions_filename)
+  # head(features)
+  # dim(features)
+
+  # compute matrix
+  matrix_file = paste0("tmp/matrix_", prefix, "_", win_size, ".txt.gz")
+  Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH")
+  matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filename, score_filename=score_filenames, out_filename=matrix_file, bin_size=format(win_size, scientific = FALSE) , region_body_length=format(win_size, scientific = FALSE), before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, number_of_processors=32)    
+  print(matrix_file)
+}
+
+```
+
+
+```{r label="bot"}
+if (substr(Sys.info()["nodename"], 1, 4) == "luke" | substr(Sys.info()["nodename"], 1, 4) == "dahu") {
+  if (!exists("DEBUG")) {
+      task_out_filenames = bot::run_engine(tasks, compute_matrix_file, nb_proc=10)    
+      # stop("EFN (batch using bot)")
+  } else {
+    if (DEBUG==FALSE) {
+      task_out_filenames = bot::run_engine(tasks, compute_matrix_file, nb_proc=1)    
+      stop("EFN (batch using bot with DEBUG == FALSE)")
+    } else {
+      print(tasks)
+      print("(DEBUG == TRUE)")
+      task = tasks[[win_sizes_range_size]]
+      # foo = compute_matrix_file(task)
+      # foo = compute_matrix_file(tasks[[1]])
+      # task_out_filenames = bot::run_engine(tasks[1:2], compute_matrix_file, DEBUG=TRUE)
+      # task_out_filenames = bot::run_engine(tasks, compute_matrix_file, nb_proc=1)
+      # # oarsub --project epimed -l /core=4,walltime=48:00:00 -I
+      # # cd ~/projects/small_structs/results/
+      # # R
+      # # knitr::purl("01_get_coverage.Rmd")
+      # #
+      # # knitr::purl("01_")
+      # #
+      # # cd ~/projects/small_structs/results/; Rscript 01_get_coverage.R
+      # # oarsub --project epimed -l /nodes=1/core=32,walltime=48:00:00 "cd ~/projects/small_structs/results/; /summer/epistorage/miniconda3/bin/Rscript 01_get_coverage.R"
+    }
+  }
+}
+
+
+if (! exists("mread.tablegz")) {
+  mread.tablegz = memoise::memoise(function(matrix_file, ...) {
+    read.table(gzfile(matrix_file), ...)
+  })  
+}
+
+matrix_files = list.files("tmp", pattern="matrix_spectral_*", full.names=TRUE) 
+ws = sort(as.numeric(do.call(rbind, strsplit(do.call(rbind, strsplit(matrix_files, "_"))[,3], "\\."))[,1]))# [-(1:3)]
+# ws = ws[ws>10000]
+# lambda
+# ws = intersect(win_sizes[!duplicated(signif(log10(win_sizes),2))], ws)
+ws = intersect(win_sizes, ws)
+matrix_files = paste0("tmp/matrix_spectral_", ws, ".txt.gz")
+matrix_files
+# plot(0, 0, col=0, xlim=c(0,12), ylim=c(0,2))
+# layout(matrix(1:12,3), respect=TRUE)
+# layout(matrix(1:12,3), respect=TRUE)
+
+print("Loading ChIPseq data... (matrix_files)")
+foo = sapply(matrix_files, function(matrix_file) {
+  # matrix_file="tmp/matrix_spectral_10000.txt.gz"
+  # print(matrix_file)
+  # rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
+  # head(rpkm_wig_signal)
+  # exp_grp$rpkm = apply(rpkm_wig_signal[(1:length(score_filenames)) + 6], 2, sum) * 10000# * 150
+  # exp_grp$rpkm
+  # pairs(log2(exp_grp[,-1]+1))
+  # layout(matrix(1:6, 2), respect=TRUE)
+  # plot(log2(exp_grp$rpkm+1), log2(exp_grp$nb_reads_total))
+  # plot(log2(exp_grp$rpkm+1), log2(exp_grp$nb_reads_exactly_1_time + 1))
+  # plot(log2(exp_grp$rpkm+1), exp_grp$overall_alignment_rate)
+
+  print(matrix_file)
+  rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
+
+  dim(rpkm_wig_signal)[1]  
+})
+plot(ws, foo, xlab="window size", ylab="nb. of features")
+```
+
+
+
+
+
+```{r label="slicing"}
+print(paste0("Slicing ChIPseq data... (matrix_files)"))
+if (!exists("counts")) {
+  counts = lapply(matrix_files, function(matrix_file) {
+    print(matrix_file)
+    # matrix_file = matrix_files[5]
+    rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
+    tmp_d = as.matrix(rpkm_wig_signal[,7:ncol(rpkm_wig_signal)])
+    tmp_d[300:310,]
+    tmp_d[600:610,]
+    colnames(tmp_d) = rownames(exp_grp)
+    apply(tmp_d, 2, sum)
+    breaks = (0:1000) / 50
+    counts = apply(tmp_d, 2, function(c) {
+      # c = tmp_d[,1]
+      sig = log2(c+1)
+      table(cut(sig, breaks=breaks))
+    })
+    rownames(counts) = paste0("cnt_", breaks[-2])
+    colnames(counts) = rownames(exp_grp)
+    head(counts)
+    dim(counts)
+    return(counts)
+  })
+  names(counts) = matrix_files
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r eval=TRUE, label="feat"}
+sample_of_interest = rownames(exp_grp)
+for (i in sample_of_interest) {
+  print(i)
+  # layout(1, respect=TRUE)
+  # layout(matrix(1:2, 1), respect=TRUE)
+  # layout(matrix(c(1:4, rep(5,4)), 2), respect=TRUE)
+  # sapply(c(10000, 20000), function(w) {
+  #   print(w)
+  #   matrix_file = paste0("tmp/matrix_spectral_", w, ".txt.gz")
+  #   tmp_d = counts[[matrix_file]]
+  #   at = barplot(tmp_d[,i], main=matrix_file, las=2, ylim=c(0,50), xaxt="n")
+  #   idx = c(1,(1:10)*100 + 1)
+  #   # idx[1] = 0
+  #   label = (0:1000) / 50
+  #   axis(1, at[idx], label[idx], las=2)
+  #   # axis(1, , signif(seq(0,20, length.out=length(idx)), 2), las=2)
+  # })
+  # heatmap
+  tmp_d = as.matrix(sapply(counts,function(d) {
+    # d = counts[[matrix_file]]
+    d[,i]
+  }))
+  # label = (1:1000) / 50
+  # colnames(tmp_d) = label
+  head(tmp_d)
+  dim(tmp_d)
+  q = sort(unique(quantile(tmp_d, probs=seq(0,1,length.out=20), na.rm=TRUE)))
+  q = c(-1,q)
+  colors=c("royalblue", "springgreen", "yellow", "red")
+  cols = colorRampPalette(colors)(length(q)-1)
+  # # colnames(tmp_d)[idx] = label[idx]
+  # image(tmp_d, col=cols, breaks=q, main=i, useRaster=FALSE, xaxt="n")
+  # # idx[1] = 0
+  # idx = c(1,(1:10)*100)
+  # at = seq(0,1, length.out=nrow(tmp_d))
+  # axis(1, at[idx], substr(rownames(tmp_d)[idx], 5,1000), las=2)
+  # # idx = unique(floor((1:(nrow(tmp_d)-1))/10) * 10) + 1
+  # # axis(1, ((1:nrow(tmp_d)-1)/(nrow(tmp_d)-1))[idx], signif(seq(0,20, length.out=nrow(tmp_d))[idx], 2), las=2)
+  #
+  layout(1, respect=TRUE)
+  image(tmp_d, col=cols, breaks=q, xaxt="n", yaxt="n", main=i, useRaster=FALSE)
+  idx = c(1,(1:10)*100)
+  at = seq(0,1, length.out=nrow(tmp_d))
+  axis(1, at[idx], substr(rownames(tmp_d)[idx], 5,1000), las=2)
+  idx = 1:ncol(tmp_d)
+  idx = unique(c(1,floor(seq(1, ncol(tmp_d), l=10))))
+  axis(2, ((1:ncol(tmp_d)-1)/(ncol(tmp_d)-1))[idx], colnames(tmp_d)[idx], las=2)
+  # idx = unique(floor((1:(nrow(tmp_d)-1))/10) * 10) + 1
+  # axis(1, ((1:nrow(tmp_d)-1)/(nrow(tmp_d)-1))[idx], signif(seq(0,20, length.out=nrow(tmp_d))[idx], 2), las=2)
+}
+
+matrix_file = "tmp/matrix_spectral_10000.txt.gz"
+rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
+rpkm_wig_signal = as.data.frame(rpkm_wig_signal)
+colnames(rpkm_wig_signal) = c("chr", "start", "end", "name", "score", "strand", rownames(exp_grp))
+head(rpkm_wig_signal)
+dim(rpkm_wig_signal)
+
+sum(rpkm_wig_signal[,i])
+nrow(rpkm_wig_signal) * 10000
+
+layout(matrix(1:2, 1), respect=TRUE)
+thresh = 9
+for (smp in samples) {
+  plot(density(log2(rpkm_wig_signal[,smp]+1), na.rm=TRUE), main=smp)
+  abline(v=thresh, lty=2)
+}
+
+
+
+
+
+
+# feat
+feat = rpkm_wig_signal[
+  log2(rpkm_wig_signal[,samples[1]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[2]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[3]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[4]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[5]]+1)>thresh | 
+  log2(rpkm_wig_signal[,samples[6]]+1)>thresh | 
+  FALSE,]
+feat
+  
+# feat[,"ctl_d_h2b"] = log2(feat[,"ctl_d_h2b"]+1)
+# feat[,"can_m_h2b"] = log2(feat[,"can_m_h2b"]+1)
+#
+
+
+```
+
+```{r, fig.height=4}
+layout(1)
+
+for (chr in unique(rpkm_wig_signal$chr)) {
+  print(chr)
+  foo = rpkm_wig_signal[rpkm_wig_signal$chr == chr,]
+  matplot(foo[rownames(exp_grp)], lty=1, main=chr, type="l") ; 
+}
+
+```
+
+
+# Features and score
+
+```{r results="verbatim"}
+# feat$score = signif(
+#   (
+#   .25*log2(feat[,"cth2b_rep11"]+1) +
+#   .25*log2(feat[,"cth2b_rep12"]+1) +
+#   .25*log2(feat[,"cth2b_rep21"]+1) +
+#   .25*log2(feat[,"cth2b_rep22"]+1)
+#   )
+#   - (
+#   .5*log2(feat[,"input_rep10"]+1) +
+#   .5*log2(feat[,"input_rep20"]+1)
+#   )
+# , 2)
+# # log2(feat[,"can_m_h2b"] - feat[,"ctl_d_h2b"], 1)
+# feat[rev(order(feat$score)),1:6]
+# ```
+#
+#
+# ```{r}
+# #  chr9:2,994,058-3,054,054
+# #  chr2:98,664,434-98,670,995
+# # chr17:4,625,788-4,626,914
+# # chr17:39,844,747-39,849,257 **
+# # chr6:3,200,344-3,202,657
+# # chr6:132,462,746-132,465,059
+#
+#
+#
+# dim(feat)
+# BIG_MESSAGE=paste0 (
+#   signif(sum(feat[,sample_of_interest])/sum(rpkm_wig_signal[,i]), 2)*100, "% of aligned reads over ",
+#   signif(nrow(feat)/nrow(rpkm_wig_signal)*100, 1), "% of the annotated genome."
+# )
+# print(BIG_MESSAGE)
+#
+#
+# for (i in rownames(exp_grp)) {
+#   print(paste0(i, " ", signif(sum(feat[,i])/sum(rpkm_wig_signal[,i]), 2)*100, "% of aligned reads"))
+# }
+# exp_grp$rpkm_outlier_rates = sapply(rownames(exp_grp), function(i){signif(sum(feat[,i])/sum(rpkm_wig_signal[,i]), 2)*100})
+#
+# write.table(feat, file="feat.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+# regions_filename = c("feat.bed")#,"danpos_4000_low_fuzz.bed")
+#
+#
+#
+#
+# # matrix_file = paste0("matrix_", prefix, "_feat_10000", ".txt.gz")
+# # Sys.setenv(PATH="/summer/epistorage/miniconda3/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
+# # score_filename_detail = c(
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_RPKM.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_None.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_RPKM.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_None.bw",
+# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_RPKM.bw",
+# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_None.bw",
+# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_RPKM.bw",
+# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_None.bw",
+# #
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_0_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_30_4.bw",
+# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_30_4.bw"
+# # )
+# #
+# # matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filename, score_filename=score_filename_detail, out_filename=matrix_file, bin_size=10, region_body_length=format(10000, scientific = FALSE), before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, number_of_processors=32)
+# # print(matrix_file)
+# # hm_out_filename = paste0("tmp/hm_", prefix, "_feat_10000", ".png")
+# # hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=matrix_file, out_filename=hm_out_filename, FORCE_EXEC=FALSE)
+# ```
+#
+#
+#
+#
+#
+#
+#
+# ```{r label="fat_feat", eval=TRUE}
+# fat_feat = lapply(unique(feat[,1]), function(chr) {
+#   d = feat[feat[,1]==chr,]
+#   i = intervals::Intervals(c(d[,2], d[,3]), type="Z")
+#   c = intervals::close_intervals(intervals::reduce(i))
+#   # cl = intervals::clusters(i, 20000 + 1000)
+#   c = intervals::close_intervals( intervals::contract( intervals::reduce(intervals::expand(i, 10000)), 10000) )
+#   dim(c)
+#
+#   df = data.frame(chr, c[,1], c[,2], ".", ".", "+")
+#   return(df)
+# })
+# fat_feat = do.call(rbind, fat_feat)
+# fat_feat[,4] = paste0("ff_", 1:nrow(fat_feat))
+# fat_feat$len = fat_feat[,3] - fat_feat[,2]
+# fat_feat$score = fat_feat$len / 10000
+# head(fat_feat)
+# dim(fat_feat)
+# fat_feat[,1] = as.character(fat_feat[,1])
+# fat_feat = fat_feat[order(fat_feat[,1], fat_feat[,2]),]
+# write.table(fat_feat, file="fat_feat.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+# fat_feat_saf = fat_feat[,1:5]
+# colnames(fat_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# fat_feat_saf[,1] = paste0(fat_feat[,1], ":", fat_feat[,2], "-", fat_feat[,3])
+# fat_feat_saf[,2] = fat_feat[,1]
+# fat_feat_saf[,3] = fat_feat[,2]
+# fat_feat_saf[,4] = fat_feat[,3]
+# fat_feat_saf[,5] = fat_feat[,6]
+# fat_feat_saf
+# write.table(fat_feat_saf, file="fat_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+# ```
+#
+#
+#
+#
+#
+# ```{r label="counts", eval=FALSE}
+# # rmsk = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+# # rmsk = rmsk[nchar(rmsk[,1])<=5,]
+# # rmsk[,1] = as.character(rmsk[,1])
+# # rmsk = rmsk[order(rmsk[,1], rmsk[,2], rmsk[,3]),]
+# # rmsk = rmsk[!duplicated(rmsk[,1:3]),]
+# # # write.table(rmsk, file="rmsk.bed", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+# # sat_feat = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#
+# # sat_feat_saf = sat_feat[1:5]
+# # colnames(sat_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# # sat_feat_saf[,1] = paste0(sat_feat[,4], "_", sat_feat[,1], ":", sat_feat[,2], "-", sat_feat[,3])
+# # sat_feat_saf[,2] = sat_feat[,1]
+# # sat_feat_saf[,3] = sat_feat[,2]
+# # sat_feat_saf[,4] = sat_feat[,3]
+# # sat_feat_saf[,5] = sat_feat[,6]
+# # sat_feat_saf = rbind(sat_feat_saf, list("Rn45s_chr17:39842997-39848829", "chr17", 39842997, 39848829, "+"))
+# # sat_feat_saf
+# # write.table(sat_feat_saf, file="sat_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+#
+#
+#
+#
+# # sat2_feat = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#
+# # sat2_feat_saf = sat2_feat[1:5]
+# # colnames(sat2_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# # sat2_feat_saf[,1] = paste0(sat2_feat[,4])
+# # # sat2_feat_saf[,1] = paste0(sat2_feat[,4], "_", sat2_feat[,1], ":", sat2_feat[,2], "-", sat2_feat[,3])
+# # sat2_feat_saf[,2] = sat2_feat[,1]
+# # sat2_feat_saf[,3] = sat2_feat[,2]
+# # sat2_feat_saf[,4] = sat2_feat[,3]
+# # sat2_feat_saf[,5] = sat2_feat[,6]
+# # sat2_feat_saf = rbind(sat2_feat_saf, list("Rn45s", "chr17", 39842997, 39848829, "+"))
+# # sat2_feat_saf
+# # write.table(sat2_feat_saf, file="sat2_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+#
+#
+# # hkg_feat = read.table("~/projects/small_structs/results/mm10.HouseKeepingGene.bed", skip=1, stringsAsFactors=FALSE)
+# # hkg_feat = hkg_feat[,1:6]
+# # hkg_feat$tss = apply(hkg_feat, 1, function(l) {
+# #   if (l[[6]] == "+") {
+# #     as.numeric(l[[2]])
+# #   } else {
+# #     as.numeric(l[[3]])
+# #   }
+# # })
+# # hkg_feat = hkg_feat[!duplicated(hkg_feat$tss),]
+# # head(hkg_feat)
+# # dim(hkg_feat)
+# #
+# # hkg_feat_saf = hkg_feat[1:5]
+# # colnames(hkg_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# # hkg_feat_saf[,1] = paste0(hkg_feat[,1], ":", hkg_feat[,2], "-", hkg_feat[,3])
+# # hkg_feat_saf[,2] = hkg_feat[,1]
+# # hkg_feat_saf[,3] = hkg_feat$tss-1000
+# # hkg_feat_saf[,4] = hkg_feat$tss+1000
+# # hkg_feat_saf[,5] = "+"
+# # hkg_feat_saf
+# # write.table(hkg_feat_saf, file="hkg_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+#
+# # nuc_feat = read.table("~/projects/small_structs/results/danpos_4000_low_fuzz.bed", skip=1, stringsAsFactors=FALSE)
+# # head(nuc_feat)
+# # dim(nuc_feat)
+# #
+# # nuc_feat_saf = nuc_feat[1:5]
+# # colnames(nuc_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# # nuc_feat_saf[,1] = paste0(nuc_feat[,1], ":", nuc_feat[,2], "-", nuc_feat[,3])
+# # nuc_feat_saf[,2] = nuc_feat[,1]
+# # nuc_feat_saf[,3] = nuc_feat[,2]
+# # nuc_feat_saf[,4] = nuc_feat[,3]
+# # nuc_feat_saf[,5] = "+"
+# # head(nuc_feat_saf)
+# # write.table(nuc_feat_saf, file="nuc_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+#
+#
+#
+#
+# layout(matrix(1:6, 2), respect=TRUE)
+#
+# for (prefix in c("fat_feat", "sat_feat", "sat2_feat")){ #}, "hkg_feat", "nuc_feat")) {
+#   cnts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
+#   rownames(cnts) = cnts[,1]
+#   cnts = cnts[,-(1:6)]
+#   colnames(cnts) = substr(do.call(rbind, strsplit(colnames(cnts), "\\."))[,8], 1, 5)
+#
+#   cnts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE)
+#   rownames(cnts_summary) = cnts_summary[,1]
+#   cnts_summary = cnts_summary[,-1]
+#   colnames(cnts_summary) = substr(do.call(rbind, strsplit(colnames(cnts_summary), "\\."))[,8], 1, 5)
+#
+#   cnts = rbind(cnts, cnts_summary)
+#   cnts = as.matrix(cnts)
+#   cnts
+#
+#   nb_reads_total = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",] + cnts["Unassigned_Unmapped",])
+#   nb_reads_aligned = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",])
+#
+#   # cnts[-((nrow(cnts) - 11):nrow(cnts)),]
+#   # cnts[((nrow(cnts) - 11):nrow(cnts)),]
+#   # cnts[1,] / nb_reads_total[1]
+#   # t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total
+#   # (t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total)[1,]
+#
+#   rpm_total = log2(
+#     t((
+#      t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total * 1000000
+#     ))
+#   + 1)
+#   rpm_aligned = log2(
+#     t((
+#      t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_aligned * 1000000
+#     ))
+#   + 1)
+#   if  (prefix=="sat_feat") {
+#     tmp_fact = as.factor(do.call(rbind,strsplit(rownames(rpm_total), "_"))[,1])
+#     matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix)
+#     # legend("topright", col=1:3, lty=1, levels(tmp_fact))
+#     axis(1, 1:10, colnames(rpm_total), las=2)
+#     matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix)
+#     legend("topright", col=1:3, lty=1, levels(tmp_fact))
+#     axis(1, 1:10, colnames(rpm_aligned), las=2)
+#   } else {
+#     matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(1, alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix)
+#     axis(1, 1:10, colnames(rpm_total), las=2)
+#     matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(1, alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix)
+#     axis(1, 1:10, colnames(rpm_aligned), las=2)
+#   }
+# }
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# prefix = "sat_feat"
+#
+# cnts_0 = read.table(paste0(prefix, "_count_0.txt"), header=TRUE)
+# rownames(cnts_0) = cnts_0[,1]
+# cnts_0 = cnts_0[,-(1:6)]
+# colnames(cnts_0) = substr(do.call(rbind, strsplit(colnames(cnts_0), "\\."))[,8], 1, 5)
+# cnts = cnts_0
+#
+# # cnts_1 = read.table(paste0(prefix, "_count_1.txt"), header=TRUE)
+# # rownames(cnts_1) = cnts_1[,1]
+# # cnts_1 = cnts_1[,-(1:6)]
+# # colnames(cnts_1) = substr(do.call(rbind, strsplit(colnames(cnts_1), "\\."))[,8], 1, 5)
+# # cnts = cnts_0 - cnts_1
+#
+#
+# cnts_summary = read.table(paste0(prefix, "_count_0.txt.summary"), header=TRUE)
+# rownames(cnts_summary) = cnts_summary[,1]
+# cnts_summary = cnts_summary[,-1]
+# colnames(cnts_summary) = substr(do.call(rbind, strsplit(colnames(cnts_summary), "\\."))[,8], 1, 5)
+#
+# cnts = rbind(cnts, cnts_summary)
+# cnts = as.matrix(cnts)
+# cnts
+#
+# nb_reads_total = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",] + cnts["Unassigned_Unmapped",])
+# nb_reads_aligned = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",])
+#
+# # cnts[-((nrow(cnts) - 11):nrow(cnts)),]
+# # cnts[((nrow(cnts) - 11):nrow(cnts)),]
+# # cnts[1,] / nb_reads_total[1]
+# # t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total
+# # (t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total)[1,]
+#
+# rpm_total = log2(
+#   t((
+#    t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total * 1000000
+#   ))
+# + 1)
+# rpm_aligned = log2(
+#   t((
+#    t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_aligned * 1000000
+#   ))
+# + 1)
+# tmp_fact = as.factor(do.call(rbind,strsplit(rownames(rpm_total), "_"))[,1])
+# matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix, ylim=c(0,16))
+# # legend("topright", col=1:3, lty=1, levels(tmp_fact))
+# axis(1, 1:10, colnames(rpm_total), las=2)
+# matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix, ylim=c(0,16))
+# legend("topright", col=1:3, lty=1, levels(tmp_fact))
+# axis(1, 1:10, colnames(rpm_aligned), las=2)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# prefix = "sat_feat"
+#
+# cnts = read.table(paste0(prefix, "_count_0.txt"), header=TRUE)
+# rownames(cnts) = cnts[,1]
+# cnts = cnts[,-(1:6)]
+# colnames(cnts) = substr(do.call(rbind, strsplit(colnames(cnts), "\\."))[,8], 1, 5)
+#
+# cnts_1 = read.table(paste0(prefix, "_count_1.txt"), header=TRUE)
+# rownames(cnts_1) = cnts_1[,1]
+# cnts_1 = cnts_1[,-(1:6)]
+# colnames(cnts_1) = substr(do.call(rbind, strsplit(colnames(cnts_1), "\\."))[,8], 1, 5)
+#
+# cnts_0 = read.table(paste0(prefix, "_count_0.txt"), header=TRUE)
+# rownames(cnts_0) = cnts_0[,1]
+# cnts_0 = cnts_0[,-(1:6)]
+# colnames(cnts_0) = substr(do.call(rbind, strsplit(colnames(cnts_0), "\\."))[,8], 1, 5)
+#
+# cnts = cnts_0 - cnts_1
+#
+# keys = do.call(rbind,strsplit(rownames(cnts), "_"))[,1]
+#
+#
+# cnts = rbind(
+#   SYNREP = apply(cnts[keys=="SYNREP",],2,sum),
+#   GSAT   = apply(cnts[keys=="GSAT",],2,sum),
+#   Rn45s  = cnts[keys=="Rn45s",]
+# )
+#
+#
+#
+# # cnts = cnts_0
+# cnts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE)
+# rownames(cnts_summary) = cnts_summary[,1]
+# cnts_summary = cnts_summary[,-1]
+# colnames(cnts_summary) = substr(do.call(rbind, strsplit(colnames(cnts_summary), "\\."))[,8], 1, 5)
+#
+# cnts = rbind(cnts, cnts_summary)
+# cnts = as.matrix(cnts)
+# cnts
+#
+# nb_reads_total = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",] + cnts["Unassigned_Unmapped",])
+# nb_reads_aligned = (cnts["Assigned",] + cnts["Unassigned_NoFeatures",])
+#
+# # cnts[-((nrow(cnts) - 11):nrow(cnts)),]
+# # cnts[((nrow(cnts) - 11):nrow(cnts)),]
+# # cnts[1,] / nb_reads_total[1]
+# # t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total
+# # (t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total)[1,]
+#
+# rpm_total = log2(
+#   t((
+#    t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_total * 1000000
+#   ))
+# + 1)
+# rpm_aligned = log2(
+#   t((
+#    t(cnts[-((nrow(cnts) - 11):nrow(cnts)),]) / nb_reads_aligned * 1000000
+#   ))
+# + 1)
+# tmp_fact = as.factor(do.call(rbind,strsplit(rownames(rpm_total), "_"))[,1])
+# matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix, ylim=c(0,16))
+# # legend("topright", col=1:3, lty=1, levels(tmp_fact))
+# axis(1, 1:10, colnames(rpm_total), las=2)
+# matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix, ylim=c(0,16))
+# legend("topright", col=1:3, lty=1, levels(tmp_fact))
+# axis(1, 1:10, colnames(rpm_aligned), las=2)
+#
+#
+# layout(1, respect=TRUE)
+# for (k in 1:3) {
+#   cond = factor(
+#     c("P_mns", "R_mns", "C_nuc", "C_sms", "S_nuc_12", "S_nuc_4", "S_nuc_12", "S_ss_12", "S_ss_4", "S_int_4"),
+#     levels = c("P_mns", "R_mns", "C_nuc", "C_sms", "S_nuc_4", "S_nuc_12", "S_int_4", "S_int_12", "S_ss_4", "S_ss_12")
+#   )
+#   d = data.frame(rpm=rpm_aligned[k,], cond=cond)
+#   b = boxplot(rpm~cond, d, las=2, ylim=c(0,16), ylab="log2(RPM + 1) (aligned)", border=k, add=k!=1)
+#   # lines(b$stats[3,])
+# }
+# legend("topright", col=1:3, lty=1, rownames(rpm_aligned)[1:3])
+# ```
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# ```{r eval=TRUE, label="bedmap"}
+#
+# # system2("bedmap",  "--ec  --bp-ovr 10 --delim '\t' --echo --indicator --echo-map-id fat_feat.bed rmsk.bed > repeats.bed")
+# #
+# # repeats = read.table("repeats.bed", stringsAsFactors=FALSE, sep="\t")
+# # colnames(repeats) = c("chr", "start", "end", "name", "score", "strand", "len")
+# # rownames(repeats) = paste0(repeats[,1], ":", repeats[,2], "-", repeats[,3])
+# # repeats$GSAT_MM = NA
+# # repeats[grep("GSAT_MM", repeats[,10]),]$GSAT_MM = "GSAT_MM"
+# # repeats$SYNREP_MM = NA
+# # repeats[grep("SYNREP_MM", repeats[,10]),]$SYNREP_MM = "SYNREP_MM"
+# # # repeats$mm10_locus = paste0(repeats[,1], ":", repeats[,2], "-", repeats[,3])
+# # repeats$score = repeats[,7]/10000
+# # ```
+# #
+# # # Results
+# #
+# #   - chr1:84,612,159-85,977,843
+# #   - chr1:84960001-88310001
+# #   - chr1:83,903,630-89,366,372
+# #   - chr14:19,412,677-19,422,677
+# #   - chr17:39,834,632-39,855,369
+# #
+# #
+# # ```{r label="results", results="verbatim"}
+# # print(BIG_MESSAGE)
+# #
+# # repeats[,-(6:10)]
+# #
+# # feat
+# #
+# # exp_grp
+# ```
+#
+# ## Biblio
+#
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5538826/
+#
+# SYNREP_MM minor satellite repeats
+#
+# chr6:103640001-103650001
+#
+# ## LINE1
+#
+# Molecular organization and evolution of the D17Leh80-like loci in the mouse t complex.
+# Filippov VA., Fedorova EV., Rogozin IB., Kholodilov NG., Ruvinsky AO.
+# Institute of Cytology and Genetics, Siberian Branch of the Academy of Sciences of the USSR, Novosibirsk.
+# Mamm. Genome 3(1): 11-16 (1992 )
+#
+#
+# ```
+# GAATTCATCAGACCTTCAAAAAGACGCATCACCAATACTCTTCAATTCAGTTCACAAAGTAGAAACAGAAGGAACCCAACCCAATTCCTTCTACGAAGCCACAGTTACACTGAGTATTCTCACTTGGAGATGGAGCAGTTTCTGTCTCTTCAGGAACTTTGCACAATTTTCATTCAGGAAAACTTCATAAGAGATTTTTTTCCACTTGAACCATGTTTAGTGGTGTTTCAACCAGATTTAAAAACTGGAAAAAAAAAAAAAGATACTACTGATCTCTCCTCCAAATAGAGCAGCTCCATATGTTACAGCTCTTTTTGTGAATTC
+# ```
+#
+#
+#
+#
+#
+# ## GSAT
+#
+# Major (gamma) satellite DNA sequence (mus musculus) 234bp Rudert et al. Mammalian Genome (1995)/Vissel et al. Genomics (1989)
+#
+# Casanova et al. Cell Report (2013)
+#
+#   -   RT-PCR Primer F : GACGACTTGAAAAATGACGAAATC
+#   -   RT-PCR Primer R : CATATTCCAGGTCCTTCAGTGTGC
+#
+#
+# ```
+# ATATTTCACGTCCTAAAGTGTGTATTTCTCATTTTCCGTAATTTTCAGTTTTCTCACCATATTCCAGGTCCTTCAGTGGGCATTTCTCATTTTTCACGTTTTTTAGTGATTTCGTCATTTTTCAAGTCGTCAAGTGGATGTTTCTCATTTTCCTTGATTTTCAGTTTTCTTGCCATATTCCACATCCTACAGTGGACATTTCTAAATTTTCCACCTTTTTCAGTTTTCCTCGCC (T3)
+#
+# TATAAAGTGCAGCATTTCACACATAAAGAGTAAAAGGCATTAAAAGTCAAAAGAGTGGTATAAGGTCCAGGAGGTCACCCGTAAAGAGTAAAAAGTGCAAAAAATCACTAAAGCAGTAAAAAGTTCAGCAGTTCACCTACAAAGAGTAAAAGGAACTAAAAGTCAAAAGAACGGTATAAGGTGTAGGATGTCACCTGTAAAGATTTAAAAGGTGGAAAAAGTCAAAAGGAGCGG  (T7)
+# ```
+#
+#
+# ## SINE
+#
+# ```
+# CATGTCTGTAGTCTCAGGGTTGTGGAGGTAGAGACAGGAGGGTGTCTCGGCTTCTTTAACCAGCCAGTCTACAGAATTAGTAAG
+```
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

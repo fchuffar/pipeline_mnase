@@ -1,0 +1,315 @@
+---
+title: "The Reads Trail"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=12, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+source("config.R")
+source("common.R")
+``` 
+
+```{r}
+
+# chuffarf@luke41:~$ cat ~/projects/datashare/mmspz/S_pp6_end-to-end_trim60_bowtie2_Mus_musculus_mm10.log
+# Time loading reference: 00:00:01
+# Time loading forward index: 00:00:03
+# Time loading mirror index: 00:00:03
+# Multiseed full-index search: 00:26:17
+# 62340945 reads; of these:
+#   62340945 (100.00%) were paired; of these:
+#     33879337 (54.35%) aligned concordantly 0 times
+#     16394494 (26.30%) aligned concordantly exactly 1 time
+#     12067114 (19.36%) aligned concordantly >1 times
+# 45.65% overall alignment rate
+# Time searching: 00:26:26
+# Overall time: 00:26:26
+# chuffarf@luke41:~$ cat ~/projects/datashare/mmspz/S_pp6_end-to-end_trim30_bowtie2_Mus_musculus_mm10.log
+# Time loading reference: 00:00:01
+# Time loading forward index: 00:00:03
+# Time loading mirror index: 00:00:03
+# Multiseed full-index search: 00:24:21
+# 62340945 reads; of these:
+#   62340945 (100.00%) were paired; of these:
+#     23403328 (37.54%) aligned concordantly 0 times
+#     19600856 (31.44%) aligned concordantly exactly 1 time
+#     19336761 (31.02%) aligned concordantly >1 times
+# 62.46% overall alignment rate
+# Time searching: 00:24:30
+# Overall time: 00:24:30
+
+bam_file = "/home/fchuffar/projects/datashare/mmspz/S_pp6_end-to-end_trim60_bowtie2_Mus_musculus_mm10_srt.bam"
+get_nb_reads(bam_file)
+get_nb_mapped_reads_primary_aligned(bam_file)
+bam_file = "/home/fchuffar/projects/datashare/mmspz/S_pp6_end-to-end_trim30_bowtie2_Mus_musculus_mm10_srt.bam"
+get_nb_reads(bam_file)
+get_nb_mapped_reads_primary_aligned(bam_file)
+
+bam_files = c(
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq30.bam")
+
+)
+
+max_frag_len = 500
+dir.create("hist_frag_size", showWarnings=FALSE)
+options =   paste0("--numberOfProcessors 32 --maxFragmentLength ", max_frag_len, " --binSize 10000 --distanceBetweenBins 1000000")
+nb_reads = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  cmd = "/summer/epistorage/miniconda3/envs/mnase_env/bin/bamPEFragmentSize"
+  args = paste0("-b ", bam_file, " -o hist_frag_size/", prefix, ".png --outRawFragmentLengths hist_frag_size/", prefix, ".txt ", options)
+  print(paste(cmd, args))
+  if (!file.exists(paste0("hist_frag_size/", prefix, ".txt"))) {
+    system2(cmd, args)
+  } else {
+    print("file exists.")
+  }
+  nb_reads = get_nb_reads(bam_file)
+  nb_apped_reads_primary_aligned = get_nb_mapped_reads_primary_aligned(bam_file)
+  ret = c(prefix=nb_reads)
+  ret[prefix] = nb_reads
+  ret
+})
+nb_reads = unlist(nb_reads)
+nb_reads
+
+
+
+
+bam_files = c(
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        
+)
+  
+nb_reads_raw = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  nb_reads_raw = get_nb_reads(bam_file)
+  ret = c()
+  ret[prefix] = nb_reads_raw
+  ret
+})
+nb_reads_raw = unlist(nb_reads_raw)
+nb_reads_raw
+
+nb_reads_pa = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  nb_reads_pa = get_nb_mapped_reads_primary_aligned(bam_file)
+  ret = c()
+  ret[prefix] = nb_reads_pa
+  ret
+})
+nb_reads_pa = unlist(nb_reads_pa)
+nb_reads_pa
+
+
+bam_files = c(
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq0.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                        
+)
+  
+nb_reads_mmq0 = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  nb_reads_mmq0 = get_nb_mapped_reads_primary_aligned(bam_file)
+  ret = c()
+  ret[prefix] = nb_reads_mmq0
+  ret
+})
+nb_reads_mmq0 = unlist(nb_reads_mmq0)
+nb_reads_mmq0
+
+
+bam_files = c(
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq.bam")                        
+)
+nb_reads_mmq1 = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  nb_reads_mmq1 = get_nb_mapped_reads_primary_aligned(bam_file)
+  ret = c()
+  ret[prefix] = nb_reads_mmq1
+  ret
+})
+nb_reads_mmq1 = unlist(nb_reads_mmq1)
+nb_reads_mmq1
+
+bam_files = c(
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq.bam")                        
+)
+nb_reads_mmq30 = lapply(bam_files, function(bam_file) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  print(prefix)
+  nb_reads_mmq30 = get_nb_mapped_reads_primary_aligned(bam_file)
+  ret = c()
+  ret[prefix] = nb_reads_mmq30
+  ret
+})
+nb_reads_mmq30 = unlist(nb_reads_mmq30)
+nb_reads_mmq30
+
+
+df = data.frame(
+  raw   = nb_reads_raw  ,
+  pa    = nb_reads_pa   ,
+  mmq0  = nb_reads_mmq0 ,
+  mmq1  = nb_reads_mmq1 ,
+  mmq30 = nb_reads_mmq30
+)
+# rownames(df) = rownames(df)
+
+df$pa / df$raw
+df$pa / df$mmq0
+
+```
+
+
+
+
+
+# Results
+
+## Samples
+
+```{r label="hists", eval=TRUE, fig.height=4}
+
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin025_fsmax075_srt.bam")      ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin025_fsmax075_srt_mmq30.bam"),
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin125_fsmax175_srt.bam")      ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin125_fsmax175_srt_mmq30.bam")
+
+
+
+layout(matrix(1:3, 1), respect=TRUE)
+for (sample in samples) {
+  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=sample)  
+  abline(v=c(150, 270, 385), lty=1)    
+  abline(v=c(      100, 125), lty=3, col="grey")    
+  abline(v=c(30, 75, 200, 450), lty=2, col="grey")    
+
+  i=0
+  for (mmq in c(0, 30)) {
+    i = i+1
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
+    fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", 0)]
+    baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
+    lines(baz, col=adjustcolor(i, alpha.f=.6), lty=1, lwd=5)
+    lines(h[,1], h[,2]/sum(h[,2])*fact, col=i, lty=1)
+  }
+}
+
+# legend("topright", paste0("disgestion ", as.numeric(substr(samples, 5,5))*2, "min"), col=1:length(samples), lty=1)
+```
+
+```{r eval=TRUE, fig.height=4}
+plot_samples = function(samples){
+  x_peak = c(           155, 270, 385, 450)
+  x_cuts = c(      100) 
+  x_band = c(30, 50, 125, 200)
+  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=paste(samples, mmq, collapse=" "), xaxt="n")  
+  abline(v=x_peak, lty=1)    
+  abline(v=x_cuts, lty=3, col="grey")    
+  abline(v=x_band, lty=2, col="grey")    
+  axis(1, c(x_peak, x_cuts, x_band), las=2)
+  i=0
+  for (sample in samples) {
+    i = i+1
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
+    fact=1
+    fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", 0)]
+    baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
+    lines(baz, col=adjustcolor(i, alpha.f=.6), lty=1, lwd=3)
+  }
+  legend("topright", samples, col=1:length(samples), lty=1)
+}
+#
+# layout(matrix(1:3, 1), respect=TRUE)
+# for (sample in samples) {
+#   plot_samples = function(samples)
+# }
+```
+
+
+
+
+## Digestion
+
+```{r eval=TRUE, fig.height=8}
+layout(matrix(1:6, 2), respect=TRUE)
+for (mmq in c(30, 0)) {
+  plot_samples(samples[c(1:3)])
+  plot_samples(samples[c(4:6)])
+}
+
+```
+
+
+
+```{r eval=TRUE, fig.height=8}
+layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
+for (mmq in c(30, 0)) {
+  plot_samples(samples[c(1,4)])
+  plot_samples(samples[c(2,5)])
+  plot_samples(samples[c(3,6)])
+}
+```
+
+
+# Material and Methods
+
+Fragment size distribution were optain using `bamPEFragmentSize` with options `r options`.
+
+
+
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

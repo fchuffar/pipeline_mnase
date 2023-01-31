@@ -1,0 +1,237 @@
+---
+title: "Fragment lengths"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+source("config.R")
+source("common.R")
+``` 
+
+```{r eval=FALSE}
+samtools view -bq 30 S_pp2_end-to-end_trim30_srt.bam > S_pp2_end-to-end_trim30_srt_mmq30.bam &
+samtools view -bq 30 S_pp4_end-to-end_trim30_srt.bam > S_pp4_end-to-end_trim30_srt_mmq30.bam &
+samtools view -bq 30 S_pp6_end-to-end_trim30_srt.bam > S_pp6_end-to-end_trim30_srt_mmq30.bam &
+samtools view -bq 30 S_nn2_end-to-end_trim30_srt.bam > S_nn2_end-to-end_trim30_srt_mmq30.bam &
+samtools view -bq 30 S_nn4_end-to-end_trim30_srt.bam > S_nn4_end-to-end_trim30_srt_mmq30.bam &
+samtools view -bq 30 S_nn6_end-to-end_trim30_srt.bam > S_nn6_end-to-end_trim30_srt_mmq30.bam &
+
+samtools index S_pp2_end-to-end_trim30_srt_mmq30.bam &
+samtools index S_pp4_end-to-end_trim30_srt_mmq30.bam &
+samtools index S_pp6_end-to-end_trim30_srt_mmq30.bam &
+samtools index S_nn2_end-to-end_trim30_srt_mmq30.bam &
+samtools index S_nn4_end-to-end_trim30_srt_mmq30.bam &
+samtools index S_nn6_end-to-end_trim30_srt_mmq30.bam &
+
+rsync -auvP dahu:~/projects/small_structs/results/hist_frag_size/ ~/projects/small_structs/results/hist_frag_size/
+
+```
+
+```{r label="bamPEFragmentSize", eval=TRUE}
+nb_reads_cache_filename = "df.rds"
+if (!file.exists(nb_reads_cache_filename)) {
+  get_nb_reads = function(bam_file) {
+    cmd = "samtools"
+    args = paste0("view -c ", bam_file)
+    print(paste(cmd, args))
+    nb_reads = as.numeric(system2(cmd, args, stdout=TRUE))
+    return(nb_reads)
+  }
+
+  bam_files = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")
+
+
+  # if (!exists("mscanBam")) {
+  #   mscanBam = function(f) {
+  #     library("Rsamtools")
+  #     mscanBam = memoise::memoise(scanBam)
+  #     memoise::memoise(Rsamtools::scanBam(f))
+  #   }
+  # }
+  #
+  # if (! exists("mscanBam")) {
+  #   library("Rsamtools")
+  #   mscanBam = memoise::memoise(scanBam)
+  # }
+  #
+  # bam_file = "~/projects/datashare_epistorage/TGML_runs/bam_epimed/F_ast_end-to-end_trim30.bam"
+  # bam = Rsamtools::scanBam(bam_file)
+  # bam = mscanBam(bam_file)
+
+
+
+  # rsync -auvP epidata:~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam ~/projects/datashare_epistorage/TGML_runs/bam_epimed/.
+  # rsync -auvP epidata:~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam ~/projects/datashare_epistorage/TGML_runs/bam_epimed/.
+  #
+  # bam_wt = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_pp2_end-to-end_trim30_srt_mmq30.bam")
+  # bam_ko = Rsamtools::scanBam("~/projects/datashare_epistorage/TGML_runs/bam_epimed/S_nn2_end-to-end_trim30_srt_mmq30.bam")
+  # bam2 = mscanBam(bam_file)
+  # names(bam[[1]])
+  # length(bam[[1]]$qname)
+  # b = bam[[1]]
+
+  dir.create("hist_frag_size", showWarnings=FALSE)
+  options =   paste0("--numberOfProcessors 32 --maxFragmentLength 500 --binSize 10000 --distanceBetweenBins 1000000")
+  nb_reads_raw = lapply(bam_files, function(bam_file) {
+    prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+    print(prefix)
+    cmd = "/summer/epistorage/miniconda3/envs/mnase_env/bin/bamPEFragmentSize"
+    args = paste0("-b ", bam_file, " -o hist_frag_size/", prefix, ".png --outRawFragmentLengths hist_frag_size/", prefix, ".txt ", options)
+    print(paste(cmd, args))
+    if (substr(Sys.info()["nodename"], 1, 4) %in% c("luke", "dahu", "epid")) {
+      system2(cmd, args)
+    }
+    if (substr(Sys.info()["nodename"], 1, 4) %in% c("luke", "dahu", "epid")) {
+      nb_reads_raw = get_nb_reads(bam_file)
+    } else {
+      nb_reads_raw = NA
+    }
+    ret = c()
+    ret[prefix] = nb_reads_raw
+    return(ret)
+  })
+  nb_reads_raw = unlist(nb_reads_raw)
+  nb_reads_raw
+
+  bam_files_filtered = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")
+
+  nb_reads_filtered = lapply(bam_files_filtered, function(bam_file) {
+    prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+    print(prefix)
+    if (substr(Sys.info()["nodename"], 1, 4) %in% c("luke", "dahu", "epid")) {
+      nb_reads = get_nb_reads(bam_file)
+    } else {
+      nb_reads = NA
+    }
+    ret = c()
+    ret[prefix] = nb_reads
+    return(ret)
+  })
+  nb_reads_filtered = unlist(nb_reads_filtered)
+  nb_reads_filtered
+
+
+  nb_reads_all = c(nb_reads_raw, nb_reads_filtered)
+
+  samples = unique(do.call(rbind,strsplit(names(nb_reads_all), "_end-to-end_trim30_|\\.bam"))[,])
+  samples
+  rows = unique(samples[,1])
+  cols = unique(samples[,2])
+  rows 
+  cols 
+
+  df = data.frame(row.names=rows)
+  for (col in cols) {
+    df[[col]] = NA  
+  }
+  df
+
+  for (nb in names(nb_reads_all)) {
+    sample = strsplit(nb, "_end-to-end_trim30_|\\.bam")
+    sample
+    row = sample[[1]][1]
+    col = sample[[1]][2]
+    row
+    col 
+    df[row,col] = nb_reads_all[[nb]]    
+  }
+
+  colnames(df) = c("total", "ss", "nuc")
+  df
+  df$ss_p = df$ss / df$total
+  df$nuc_p = df$nuc / df$total
+  df$ss_nuc_p = df$ss_p + df$nuc_p 
+  df
+
+  saveRDS(df, nb_reads_cache_filename)  
+}
+df = readRDS(nb_reads_cache_filename)
+```
+
+# Histograms
+
+```{r echo=FALSE, out.width="100%", results="asis"}
+for (bam_file in bam_files) {
+  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+  cat(paste0("![](", "hist_frag_size/", prefix, ".png", ")"), "\n")
+}
+```
+
+
+
+
+# Results
+
+```{r label="hists", eval=TRUE}
+
+layout(matrix(1:2, 1), respect=TRUE)
+for (filter in c("inpt", "chip")) {
+  sub_samples = samples[grep(filter, samples)]
+  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.02), xlim=c(50,200), main=filter)
+  keys = substr(sub_samples, 1, 18)
+  cols = as.numeric(as.factor(substr(sub_samples, 1, 18)))
+  names(cols) = keys
+  
+  for (sample in sub_samples) {
+    key = substr(sample, 1, 18)
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_srt_mmq30.txt"), stringsAsFactors=FALSE, header=TRUE)
+    idx = h[,1] < 250 #& h$sample == sample
+    baz = stats::ksmooth(h[idx,1], h[idx,2]/sum(h[idx,2]), "normal", bandwidth = 5)
+    lines(baz, col=cols[key])
+  }  
+  legend("topleft", unique(keys), col=cols[unique(keys)], lty=1, cex=0.6)
+}
+
+# legend("topright", paste0("disgestion ", as.numeric(substr(samples, 5,5))*2, "min"), col=1:length(samples), lty=1)
+```
+
+
+
+
+# Material and Methods
+
+Fragment size distribution were optain using `bamPEFragmentSize` with options `r options`.
+
+
+
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
