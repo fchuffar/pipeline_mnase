@@ -1,6 +1,6 @@
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/small_structs/results/mmspz
+cd ~/projects/albicans/results/GSE55819
 source config
 echo $gse
 echo $project
@@ -11,11 +11,11 @@ rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/res
 # 2. Put raw fastq file in ~/projects/datashare/${gse}/raw
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
-rsync -auvP ~/projects/datashare_epistorage/TGML_runs/fastq/201911039_R30*_SK/fastq/S0036*_Spz_*_*min-1*_R*_001.fastq.gz .
-
+# done previously using https://github.com/fchuffar/gse2study
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
-ls -lha ~/projects/datashare/${gse}/raw/*S0036*_Spz_*_*min-1*_R*_001.fastq.gz
+cd ~/projects/${project}/results/${gse}/
+ls -lha ~/projects/datashare/${gse}/raw/*.fastq.gz
 ## set targets in 01_trim_fastq_files.py, then launch pipeline on a node:
 snakemake -k -s 01_trim_fastq_files.py --cores 16 -pn
 ## or on the dahu cluster:
@@ -24,19 +24,13 @@ snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epi
 
 # 4. Design. Link here samples and fastqz unsing .info file.
 cd  /home/chuffarf/projects/datashare/${gse}
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz   "  > S_pp2_trim30.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R2_001_fastxtrimf30.fastq.gz   "  > S_pp4_trim30.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R1_001_fastxtrimf30.fastq.gz  -2  /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R2_001_fastxtrimf30.fastq.gz "  > S_pp6_trim30.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R2_001_fastxtrimf30.fastq.gz   "  > S_nn2_trim30.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R2_001_fastxtrimf30.fastq.gz   "  > S_nn4_trim30.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R1_001_fastxtrimf30.fastq.gz  -2  /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R2_001_fastxtrimf30.fastq.gz "  > S_nn6_trim30.info
-
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf60.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf60.fastq.gz   "  > S_pp2_trim60.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R1_001_fastxtrimf60.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-165166_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003634_Spz_pos_pos_8min-172173_R2_001_fastxtrimf60.fastq.gz   "  > S_pp4_trim60.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R1_001_fastxtrimf60.fastq.gz  -2  /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-165167_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003635_Spz_pos_pos_12min-172174_R2_001_fastxtrimf60.fastq.gz "  > S_pp6_trim60.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R1_001_fastxtrimf60.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-165168_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003636_Spz_neg_neg_4min-172175_R2_001_fastxtrimf60.fastq.gz   "  > S_nn2_trim60.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R1_001_fastxtrimf60.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-165169_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003637_Spz_neg_neg_8min-172176_R2_001_fastxtrimf60.fastq.gz   "  > S_nn4_trim60.info
-echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R1_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R1_001_fastxtrimf60.fastq.gz  -2  /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-165170_R2_001_fastxtrimf60.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003638_Spz_neg_neg_12min-172177_R2_001_fastxtrimf60.fastq.gz "  > S_nn6_trim60.info
+echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647907_fastxtrimf30.fastq.gz "  > GSM1542419_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647908_fastxtrimf30.fastq.gz "  > GSM1542420_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647909_fastxtrimf30.fastq.gz "  > GSM1542421_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647910_fastxtrimf30.fastq.gz "  > GSM1542422_trim30.info
+# echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz   "  > S_pp2_trim30.info
+## and set samples there:
+cat config.R
 
 
 
@@ -48,11 +42,12 @@ snakemake -k -s 02_align_fastq_files.py --cores 16 -pn
 snakemake -k -s 02_align_fastq_files.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 
-
+#/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf 
+# cat /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed
 # 6. 03_metagene.Rmd and so on
 ## set samples in the config.R file then under R:
 rmarkdown::render("03_metagene.Rmd")
-rmarkdown::render("04_fragment_length.Rmd")
+rmarkdown::render("03_fragment_length.Rmd")
 # source(knitr::purl("05_spectral_coverage.Rmd"))
 rmarkdown::render("05_spectral_coverage.Rmd")
 

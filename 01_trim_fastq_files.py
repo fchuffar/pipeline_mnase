@@ -9,6 +9,9 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
 fastq_trim30_R1 = get_files("~/projects/datashare/"+gse+"/raw", "R1.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R1_fastxtrimf30.fastq.gz")
 fastq_trim30_R2 = get_files("~/projects/datashare/"+gse+"/raw", "R2.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R2_fastxtrimf30.fastq.gz")
 
+# fastq_trim30 = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastxtrimf30.fastq.gz")
+
+
 localrules: target
 
 foo=version # patch for bug in target shell
@@ -16,8 +19,12 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input:
-      fastq_trim30_R1,
-      fastq_trim30_R2,
+      "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647907_fastxtrimf30.fastq.gz",
+      "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647908_fastxtrimf30.fastq.gz",
+      "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647909_fastxtrimf30.fastq.gz",
+      "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647910_fastxtrimf30.fastq.gz",
+      # fastq_trim30_R1,
+      # fastq_trim30_R2,
 
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"

@@ -63,8 +63,18 @@ if (species=="Mus_musculus" & version=="mm10") {
   dim(blacklist)
   blacklist_filename = "blacklist_file.bed"
   write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
+} else if (species=="Candida_albicans" & version=="SC5314.A22"){
+  blacklist_filename=NULL
+  # rmsk = mread.table("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/rmsk.hg38.bed", skip=1, stringsAsFactors=FALSE)
+  # blacklist = rmsk[1,]
+  # blacklist = rbind(blacklist, list("chrM", 1, 20000, "chrM:1-20000", 20000, "+"))
+  # blacklist = blacklist[-1,]
+  # print(head(blacklist))
+  # dim(blacklist)
+  # blacklist_filename = "blacklist_file.bed"
+  # write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
 } else {  
-  stop("genome not Homo_sapiens hg38 nor Mus_musculus mm10")
+  stop("genome not Homo_sapiens hg38 nor Mus_musculus mm10 nor Candida_albicans SC5314.A22")
 }
 ```
 
@@ -74,35 +84,37 @@ if (species=="Mus_musculus" & version=="mm10") {
 
 
 ```{r label="tss_feature"}
-feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
-feat = feat[!is.na(feat$tx_end),]
-# feat = feat[nchar(feat$chrom_text) <=5,]
-dim(feat)
-table(feat$type, useNA="ifany")
-table(feat$chrom_text, useNA="ifany")
+regions_filenames = "/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed"
 
-# tss
-table(feat$strand, useNA="ifany")
-feat$tss = NA
-feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
-feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
-feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
-sum(duplicated(feat$tss_key))
-feat = feat[!duplicated(feat$tss_key),]
-dim(feat)
-
-unique(feat[,1])
-
-# feat[feat[,1]=="chrMT",1] = "chrM"
-unique(feat[,1])
-
-feat = feat[feat$type%in%"protein-coding",]
-feat = feat[!feat[,1]%in%"chrM",]
-regions_filenames = regions_filename = paste0(prefix, ".bed")
-write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
-
-head(feat)
-dim(feat)
+# feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+# feat = feat[!is.na(feat$tx_end),]
+# # feat = feat[nchar(feat$chrom_text) <=5,]
+# dim(feat)
+# table(feat$type, useNA="ifany")
+# table(feat$chrom_text, useNA="ifany")
+#
+# # tss
+# table(feat$strand, useNA="ifany")
+# feat$tss = NA
+# feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
+# feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
+# feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
+# sum(duplicated(feat$tss_key))
+# feat = feat[!duplicated(feat$tss_key),]
+# dim(feat)
+#
+# unique(feat[,1])
+#
+# # feat[feat[,1]=="chrMT",1] = "chrM"
+# unique(feat[,1])
+#
+# feat = feat[feat$type%in%"protein-coding",]
+# feat = feat[!feat[,1]%in%"chrM",]
+# regions_filenames = regions_filename = paste0(prefix, ".bed")
+# write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+#
+# head(feat)
+# dim(feat)
 ```
 
 
@@ -118,7 +130,7 @@ dir.create("tmp", showWarnings=FALSE)
 matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 
 # score_filenames
-score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_PE_30_4_RPKM.bw")
+score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
 brsl = arsl = 5000
 bin_size = 100
 Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
