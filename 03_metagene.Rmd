@@ -18,7 +18,6 @@ source("config.R")
 source("common.R")
 ```
 
-# Params
 
 ```{r label="params"}
 prefix = "metagene"
@@ -120,14 +119,17 @@ regions_filenames
 
 
 
+```{r results="verbatim"}
+print(regions_filenames)
+```
+
+
 
 # Samples
 
 ```{r results="verbatim"}
 system("cat config.R", intern=TRUE)
 ```
-
-
 
 # Heatmap
 
