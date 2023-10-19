@@ -124,7 +124,7 @@ regions_filenames
 # Samples
 
 ```{r results="verbatim"}
-system("cat config.R")
+system("cat config.R", intern=TRUE)
 ```
 
 
