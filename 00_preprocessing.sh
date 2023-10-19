@@ -1,6 +1,6 @@
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/albicans/results/GSE55819
+cd ~/projects/mouse_spermato/results/GSE77277
 source config
 echo $gse
 echo $project
@@ -13,6 +13,30 @@ mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
 # done previously using https://github.com/fchuffar/gse2study
 
+## download fastq files
+# wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
+sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
+echo $sra
+srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
+echo $srrs
+echo $srrs | wc
+
+conda activate sra_env
+echo "checking" $srrs >> checking_srrs_report.txt
+for srr in $srrs
+do
+  FILE=${srr}.fastq
+  if [ -f $FILE ]; then
+     echo "File $FILE exists."
+  else
+     echo "File $FILE does not exist."
+     fasterq-dump --threads 16 -p --temp /dev/shm --split-files --outdir ./ ${srr}
+  fi
+done
+cat checking_srrs_report.txt
+gzip *.fastq
+
+
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
 cd ~/projects/${project}/results/${gse}/
 ls -lha ~/projects/datashare/${gse}/raw/*.fastq.gz
@@ -24,12 +48,23 @@ snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epi
 
 # 4. Design. Link here samples and fastqz unsing .info file.
 cd  /home/chuffarf/projects/datashare/${gse}
-echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647907_fastxtrimf30.fastq.gz "  > GSM1542419_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647908_fastxtrimf30.fastq.gz "  > GSM1542420_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647909_fastxtrimf30.fastq.gz "  > GSM1542421_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE55819/raw/SRR1647910_fastxtrimf30.fastq.gz "  > GSM1542422_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126242_fastxtrimf30.fastq.gz "  > GSM2047206_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126243_fastxtrimf30.fastq.gz "  > GSM2047207_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126244_fastxtrimf30.fastq.gz "  > GSM2047208_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126245_fastxtrimf30.fastq.gz "  > GSM2047209_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126246_fastxtrimf30.fastq.gz "  > GSM2047210_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126247_fastxtrimf30.fastq.gz "  > GSM2047211_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126248_fastxtrimf30.fastq.gz "  > GSM2047212_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126249_fastxtrimf30.fastq.gz "  > GSM2047213_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126250_fastxtrimf30.fastq.gz "  > GSM2047214_trim30.info
+echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126251_fastxtrimf30.fastq.gz "  > GSM2047215_trim30.info
+
 # echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz   "  > S_pp2_trim30.info
 ## and set samples there:
+
+cat  *_trim30.info
+
+cd ~/projects/${project}/results/${gse}/
 cat config.R
 
 

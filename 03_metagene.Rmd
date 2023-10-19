@@ -84,7 +84,8 @@ if (species=="Mus_musculus" & version=="mm10") {
 
 
 ```{r label="tss_feature"}
-regions_filenames = "/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed"
+regions_filenames = paste0("/home/fchuffar/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+regions_filenames
 
 # feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
 # feat = feat[!is.na(feat$tx_end),]
@@ -105,19 +106,26 @@ regions_filenames = "/home/fchuffar/projects/datashare/genomes/Candida_albicans/
 #
 # unique(feat[,1])
 #
-# # feat[feat[,1]=="chrMT",1] = "chrM"
+# feat[feat[,1]=="chrMT",1] = "chrM"
 # unique(feat[,1])
 #
 # feat = feat[feat$type%in%"protein-coding",]
 # feat = feat[!feat[,1]%in%"chrM",]
-# regions_filenames = regions_filename = paste0(prefix, ".bed")
-# write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+# # regions_filenames = regions_filename = paste0(prefix, ".bed")
+# write.table(feat[,1:6], file=regions_filenames, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
 #
 # head(feat)
 # dim(feat)
 ```
 
 
+
+
+# Samples
+
+```{r results="verbatim"}
+system("cat config.R")
+```
 
 
 
