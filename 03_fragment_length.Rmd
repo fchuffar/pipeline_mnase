@@ -47,9 +47,9 @@ source("common.R")
 # Time searching: 00:24:30
 # Overall time: 00:24:30
 
-bam_file = "/home/fchuffar/projects/datashare/mmspz/S_pp6_end-to-end_trim60_bowtie2_Mus_musculus_mm10_srt.bam"
-get_nb_reads(bam_file)
-get_nb_mapped_reads_primary_aligned(bam_file)
+# bam_file = "/home/fchuffar/projects/datashare/mmspz/S_pp6_end-to-end_trim60_bowtie2_Mus_musculus_mm10_srt.bam"
+# get_nb_reads(bam_file)
+# get_nb_mapped_reads_primary_aligned(bam_file)
 bam_file = "/home/fchuffar/projects/datashare/mmspz/S_pp6_end-to-end_trim30_bowtie2_Mus_musculus_mm10_srt.bam"
 get_nb_reads(bam_file)
 get_nb_mapped_reads_primary_aligned(bam_file)
@@ -57,12 +57,12 @@ get_nb_mapped_reads_primary_aligned(bam_file)
 bam_files = c(
   paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
   paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq30.bam")
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq30.bam")
 
 )
 

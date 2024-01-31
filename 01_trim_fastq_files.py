@@ -8,7 +8,7 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
 
 fastq_trim30_R1 = get_files("~/projects/datashare/"+gse+"/raw", "R1.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R1_fastxtrimf30.fastq.gz")
 fastq_trim30_R2 = get_files("~/projects/datashare/"+gse+"/raw", "R2.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R2_fastxtrimf30.fastq.gz")
-fastq_trim30 = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastxtrimf30.fastq.gz")
+# fastq_trim30 = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastxtrimf30.fastq.gz")
 
 
 localrules: target
@@ -18,7 +18,7 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input:
-      fastq_trim30,
+      # fastq_trim30,
       fastq_trim30_R1,
       fastq_trim30_R2,
       # "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647907_fastxtrimf30.fastq.gz",
@@ -28,8 +28,9 @@ rule target:
 
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-multiqc --force -o . -n multiqc_notrim \
-  ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip
+multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ . -n multiqc_trim_fastq_files \
+  ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip \
+  ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
 
 echo workflow \"01_trim_fastq_files.py\" completed at `date`.
           """
@@ -42,7 +43,7 @@ rule trim_fastxtoolkit:
       fastqc="{prefix}_fastqc.zip",
     output: 
       fastq="{prefix}_fastxtrimf{trim}.fastq.gz",
-      fastqc="{prefix}_fastxtrimf{trim}_fastqc.zip",
+      # fastqc="{prefix}_fastxtrimf{trim}_fastqc.zip",
     threads: 1
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
@@ -63,6 +64,7 @@ rule fastqc:
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 fastqc {input.fastqgz}
+fastq_screen --aligner bowtie2 --threads {threads} {input.fastqgz}
 """
 
 

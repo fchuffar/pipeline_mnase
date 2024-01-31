@@ -1,0 +1,6 @@
+project="epispores"
+gse="atacseq_govin_2023spoatacseq1"
+species="Saccharomyces_cerevisiae"
+annotation="UCSC"
+version="sacCer3"
+sr_or_pe="PE"

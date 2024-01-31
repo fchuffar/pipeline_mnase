@@ -9,7 +9,7 @@ exec(open("config.R").read())
 foo=version 
 bam_srt = [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt.bam"             for sample in samples for trim in ["30"]]#, "60"]]
 bam_mmq = [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt_mmq{mmq}.bam"    for sample in samples for trim in ["30"] for mmq in ["0", "30"]]
-bw =      [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim30_bowtie2_{species}_{annotation}_{foo}_srt_SR_30_4_RPKM.bw"     for sample in samples]
+bw =      [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim30_bowtie2_{species}_{annotation}_{foo}_srt_{sr_or_pe}_30_4_RPKM.bw"     for sample in samples]
 
 localrules: target
 

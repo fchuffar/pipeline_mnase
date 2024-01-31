@@ -1,6 +1,1 @@
-gse="GSE77277"
-project="mouse_spermato"
-species="Mus_musculus"
-annotation="UCSC"
-version="mm10"
-sr_or_pe="SR"
+config.sacCer3

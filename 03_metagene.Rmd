@@ -64,16 +64,10 @@ if (species=="Mus_musculus" & version=="mm10") {
   write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
 } else if (species=="Candida_albicans" & version=="SC5314.A22"){
   blacklist_filename=NULL
-  # rmsk = mread.table("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/rmsk.hg38.bed", skip=1, stringsAsFactors=FALSE)
-  # blacklist = rmsk[1,]
-  # blacklist = rbind(blacklist, list("chrM", 1, 20000, "chrM:1-20000", 20000, "+"))
-  # blacklist = blacklist[-1,]
-  # print(head(blacklist))
-  # dim(blacklist)
-  # blacklist_filename = "blacklist_file.bed"
-  # write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
-} else {  
-  stop("genome not Homo_sapiens hg38 nor Mus_musculus mm10 nor Candida_albicans SC5314.A22")
+} else if (species=="Saccharomyces_cerevisiae" & version=="sacCer3"){
+  blacklist_filename=NULL
+} else {
+  stop("genome not Homo_sapiens hg38 nor Mus_musculus mm10 nor Candida_albicans SC5314.A22 nor Saccharomyces_cerevisiae sacCer3")
 }
 ```
 
