@@ -1,5 +1,6 @@
-gse="hsspz"
-project="small_structs"
+gse="atacseq_cometh_lot4"
+project="cometh"
 species="Homo_sapiens"
 annotation="UCSC"
 version="hg38"
+sr_or_pe="PE"

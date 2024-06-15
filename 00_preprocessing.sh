@@ -1,6 +1,6 @@
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/mouse_spermato/results/GSE77277
+cd ~/projects/cometh/results/atacseq_cometh_lot4
 source config
 echo $gse
 echo $project
@@ -38,6 +38,8 @@ gzip *.fastq
 
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
+source ~/conda_config.sh 
+conda activate mnase_env
 cd ~/projects/${project}/results/${gse}/
 ls -lha ~/projects/datashare/${gse}/raw/*.fastq.gz
 ## set targets in 01_trim_fastq_files.py, then launch pipeline on a node:
@@ -48,16 +50,20 @@ snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epi
 
 # 4. Design. Link here samples and fastqz unsing .info file.
 cd  /home/chuffarf/projects/datashare/${gse}
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126242_fastxtrimf30.fastq.gz "  > GSM2047206_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126243_fastxtrimf30.fastq.gz "  > GSM2047207_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126244_fastxtrimf30.fastq.gz "  > GSM2047208_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126245_fastxtrimf30.fastq.gz "  > GSM2047209_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126246_fastxtrimf30.fastq.gz "  > GSM2047210_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126247_fastxtrimf30.fastq.gz "  > GSM2047211_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126248_fastxtrimf30.fastq.gz "  > GSM2047212_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126249_fastxtrimf30.fastq.gz "  > GSM2047213_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126250_fastxtrimf30.fastq.gz "  > GSM2047214_trim30.info
-echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126251_fastxtrimf30.fastq.gz "  > GSM2047215_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/01_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/01_R2_fastxtrimf30.fastq.gz " > 01_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/02_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/02_R2_fastxtrimf30.fastq.gz " > 02_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/03_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/03_R2_fastxtrimf30.fastq.gz " > 03_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/04_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/04_R2_fastxtrimf30.fastq.gz " > 04_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/05_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/05_R2_fastxtrimf30.fastq.gz " > 05_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/06_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/06_R2_fastxtrimf30.fastq.gz " > 06_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/07_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/07_R2_fastxtrimf30.fastq.gz " > 07_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/08_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/08_R2_fastxtrimf30.fastq.gz " > 08_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/09_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/09_R2_fastxtrimf30.fastq.gz " > 09_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/10_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/10_R2_fastxtrimf30.fastq.gz " > 10_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/11_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/11_R2_fastxtrimf30.fastq.gz " > 11_trim30.info
+echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/12_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/12_R2_fastxtrimf30.fastq.gz " > 12_trim30.info
+
+# echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126242_fastxtrimf30.fastq.gz "  > GSM2047206_trim30.info
 
 # echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz   "  > S_pp2_trim30.info
 ## and set samples there:
@@ -79,7 +85,10 @@ snakemake -k -s 02_align_fastq_files.py --jobs 50 --cluster "oarsub --project ep
 
 #/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf 
 # cat /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed
+# cat /home/fchuffar/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.bed
 # 6. 03_metagene.Rmd and so on
+source ~/conda_config.sh 
+conda activate mnase_env
 ## set samples in the config.R file then under R:
 rmarkdown::render("03_metagene.Rmd")
 rmarkdown::render("03_fragment_length.Rmd")

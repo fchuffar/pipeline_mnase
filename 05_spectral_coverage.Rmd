@@ -21,7 +21,7 @@ source("config.R")
 
 ```{r label="params"}
 exp_grp = data.frame(
-  bw = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin200_fsmax500_srt_PE_0_4_RPKM.bw"),
+  bw = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw"),
   id = samples,
   stringsAsFactors=FALSE
 )

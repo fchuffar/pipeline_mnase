@@ -55,14 +55,14 @@ get_nb_reads(bam_file)
 get_nb_mapped_reads_primary_aligned(bam_file)
 
 bam_files = c(
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
-  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  
-  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        ,
-  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                   ,
-  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq1.bam")                   ,
-  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq30.bam")
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")                        ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq0.bam")                   ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq1.bam")                   ,
+  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam")                  
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")                        ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq0.bam")                   ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq1.bam")                   ,
+  # paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam")
 
 )
 
@@ -92,11 +92,8 @@ nb_reads
 
 
 
-bam_files = c(
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt.bam")                        
-)
-  
+bam_files = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")
+
 nb_reads_raw = lapply(bam_files, function(bam_file) {
   prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
   print(prefix)
@@ -120,11 +117,8 @@ nb_reads_pa = unlist(nb_reads_pa)
 nb_reads_pa
 
 
-bam_files = c(
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq0.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq0.bam")                        
-)
-  
+bam_files = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq0.bam")
+
 nb_reads_mmq0 = lapply(bam_files, function(bam_file) {
   prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
   print(prefix)
@@ -137,25 +131,21 @@ nb_reads_mmq0 = unlist(nb_reads_mmq0)
 nb_reads_mmq0
 
 
-bam_files = c(
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq1.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq.bam")                        
-)
-nb_reads_mmq1 = lapply(bam_files, function(bam_file) {
-  prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
-  print(prefix)
-  nb_reads_mmq1 = get_nb_mapped_reads_primary_aligned(bam_file)
-  ret = c()
-  ret[prefix] = nb_reads_mmq1
-  ret
-})
-nb_reads_mmq1 = unlist(nb_reads_mmq1)
-nb_reads_mmq1
+# bam_files = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq1.bam")
+#
+# nb_reads_mmq1 = lapply(bam_files, function(bam_file) {
+#   prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
+#   print(prefix)
+#   nb_reads_mmq1 = get_nb_mapped_reads_primary_aligned(bam_file)
+#   ret = c()
+#   ret[prefix] = nb_reads_mmq1
+#   ret
+# })
+# nb_reads_mmq1 = unlist(nb_reads_mmq1)
+# nb_reads_mmq1
 
-bam_files = c(
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                        ,
-  paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim60_bowtie2_", species, "_", version, "_srt_mmq.bam")                        
-)
+bam_files = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam")        
+
 nb_reads_mmq30 = lapply(bam_files, function(bam_file) {
   prefix = rev(strsplit(bam_file, "/|\\.")[[1]])[2]
   print(prefix)
@@ -172,7 +162,6 @@ df = data.frame(
   raw   = nb_reads_raw  ,
   pa    = nb_reads_pa   ,
   mmq0  = nb_reads_mmq0 ,
-  mmq1  = nb_reads_mmq1 ,
   mmq30 = nb_reads_mmq30
 )
 # rownames(df) = rownames(df)
@@ -188,16 +177,15 @@ df$pa / df$mmq0
 
 # Results
 
-## Samples
 
 ```{r label="hists", eval=TRUE, fig.height=4}
 
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam")                        ,
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq30.bam")                  ,
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin025_fsmax075_srt.bam")      ,
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin025_fsmax075_srt_mmq30.bam"),
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin125_fsmax175_srt.bam")      ,
-# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_fsmin125_fsmax175_srt_mmq30.bam")
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")                        ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam")                  ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_fsmin025_fsmax075_srt.bam")      ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_fsmin025_fsmax075_srt_mmq30.bam"),
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_fsmin125_fsmax175_srt.bam")      ,
+# paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_fsmin125_fsmax175_srt_mmq30.bam")
 
 
 
@@ -211,8 +199,8 @@ for (sample in samples) {
   i=0
   for (mmq in c(0, 30)) {
     i = i+1
-    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
-    fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", 0)]
+    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
+    fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", 0)]
     baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
     lines(baz, col=adjustcolor(i, alpha.f=.6), lty=1, lwd=5)
     lines(h[,1], h[,2]/sum(h[,2])*fact, col=i, lty=1)
@@ -223,72 +211,72 @@ for (sample in samples) {
 ```
 
 ```{r eval=TRUE, fig.height=4}
-plot_samples = function(samples, mmq, trim=30){
-  x_peak = c(           155, 270, 385, 450)
-  x_cuts = c(      100) 
-  x_band = c(30, 50, 125, 200)
-  plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=paste0(paste(samples, collapse=" "), " (mmq", mmq, " trim", trim, ")"), xaxt="n")  
-  abline(v=x_peak, lty=1)    
-  abline(v=x_cuts, lty=3, col="grey")    
-  abline(v=x_band, lty=2, col="grey")    
-  axis(1, c(x_peak, x_cuts, x_band), las=2)
-  i=0
-  for (sample in samples) {
-    i = i+1
-    h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim", trim, "_bowtie2_", species, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
-    fact=1
-    fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt_mmq", 0)]
-    baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
-    lines(baz, col=adjustcolor(i, alpha.f=.6), lty=1, lwd=3)
-  }
-  legend("topright", samples, col=1:length(samples), lty=1)
-}
+# plot_samples = function(samples, mmq, trim=30){
+#   x_peak = c(           155, 270, 385, 450)
+#   x_cuts = c(      100)
+#   x_band = c(30, 50, 125, 200)
+#   plot(0, 0, col=0, ylab="", xlab="", ylim=c(0,0.03), xlim=c(0,max_frag_len), main=paste0(paste(samples, collapse=" "), " (mmq", mmq, " trim", trim, ")"), xaxt="n")
+#   abline(v=x_peak, lty=1)
+#   abline(v=x_cuts, lty=3, col="grey")
+#   abline(v=x_band, lty=2, col="grey")
+#   axis(1, c(x_peak, x_cuts, x_band), las=2)
+#   i=0
+#   for (sample in samples) {
+#     i = i+1
+#     h = read.table(paste0("hist_frag_size/", sample, "_end-to-end_trim", trim, "_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", mmq, ".txt"), stringsAsFactors=FALSE, header=TRUE)
+#     fact=1
+#     fact = nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", mmq)] / nb_reads[paste0(sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq", 0)]
+#     baz = stats::ksmooth(h[,1], h[,2]/sum(h[,2])*fact, "normal", bandwidth = 5)
+#     lines(baz, col=adjustcolor(i, alpha.f=.6), lty=1, lwd=3)
+#   }
+#   legend("topright", samples, col=1:length(samples), lty=1)
+# }
+# #
+# # layout(matrix(1:3, 1), respect=TRUE)
+# # for (sample in samples) {
+# #   plot_samples = function(samples)
+# # }
+# ```
 #
-# layout(matrix(1:3, 1), respect=TRUE)
-# for (sample in samples) {
-#   plot_samples = function(samples)
+#
+#
+#
+# ## Digestion
+#
+# ```{r fig.height=8}
+# layout(matrix(1:6, 2), respect=TRUE)
+# for (mmq in c(30, 0)) {
+#   plot_samples(samples[c(1:3)], mmq)
+#   plot_samples(samples[c(4:6)], mmq)
+# }
+#
+# ```
+#
+# ```{r fig.height=8}
+# layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
+# for (mmq in c(30, 0)) {
+#   plot_samples(samples[c(1,4)], mmq)
+#   plot_samples(samples[c(2,5)], mmq)
+#   plot_samples(samples[c(3,6)], mmq)
 # }
 ```
 
-
-
-
-## Digestion
-
 ```{r fig.height=8}
-layout(matrix(1:6, 2), respect=TRUE)
-for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1:3)], mmq)
-  plot_samples(samples[c(4:6)], mmq)
-}
-
-```
-
-```{r fig.height=8}
-layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
-for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1,4)], mmq)
-  plot_samples(samples[c(2,5)], mmq)
-  plot_samples(samples[c(3,6)], mmq)
-}
-```
-
-```{r fig.height=8}
-layout(matrix(1:6, 2), respect=TRUE)
-for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1:3)], mmq, trim=60)
-  plot_samples(samples[c(4:6)], mmq, trim=60)
-}
-
-```
-
-```{r fig.height=8}
-layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
-for (mmq in c(30, 0)) {
-  plot_samples(samples[c(1,4)], mmq, trim=60)
-  plot_samples(samples[c(2,5)], mmq, trim=60)
-  plot_samples(samples[c(3,6)], mmq, trim=60)
-}
+# layout(matrix(1:6, 2), respect=TRUE)
+# for (mmq in c(30, 0)) {
+#   plot_samples(samples[c(1:3)], mmq, trim=60)
+#   plot_samples(samples[c(4:6)], mmq, trim=60)
+# }
+#
+# ```
+#
+# ```{r fig.height=8}
+# layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
+# for (mmq in c(30, 0)) {
+#   plot_samples(samples[c(1,4)], mmq, trim=60)
+#   plot_samples(samples[c(2,5)], mmq, trim=60)
+#   plot_samples(samples[c(3,6)], mmq, trim=60)
+# }
 ```
 
 
