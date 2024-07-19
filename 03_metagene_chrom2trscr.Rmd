@@ -1,0 +1,252 @@
+---
+title: "Meta-Gene Analysis"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+source("config.R")
+source("common.R")
+```
+
+
+```{r label="params"}
+prefix = "chrom2trscr"
+```
+
+```{r label="blacklist", eval=TRUE}
+options(scipen=999)
+if (species=="Mus_musculus" & version=="mm10") {
+  # https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
+  # downloading UCSC rmsk data as BED
+  # BED formatted UCSC track content can be obtained from UCSC table broswer.
+  # The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
+  #
+  # the assembly "Feb.2009 GRCh37/hg19"
+  # the group "repeats and variations"
+  # the track "RepeatMasker"
+  # and finally the table "rmsk"
+  # As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
+  #
+  # region: "genome"
+  # ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
+  #
+  # output format: "BED - browser extensibke format"
+  # output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
+  # file type returned: "gzip compressed"
+
+  rmsk = mread.table("~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+  blacklist = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
+  blacklist = rbind(blacklist, list("chr19", 61266781, 61266782, "chr19:61266781-61266782", 1404, "+"))
+  blacklist = rbind(blacklist, list("chr11", 3126500, 3200500, "Sfi1", 300, "-"))
+  # sat2_feat_saf = rbind(sat2_feat_saf, list("Sfi1", "chr11", 3126500, 3200500, "-"))
+  print(head(blacklist))
+  dim(blacklist)
+  blacklist_filename = "blacklist_file.bed"
+  write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
+} else if (species=="Homo_sapiens" & version=="hg38"){
+  rmsk = mread.table("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/rmsk.hg38.bed", skip=1, stringsAsFactors=FALSE)
+  blacklist = rmsk[1,]
+  blacklist = rbind(blacklist, list("chrM", 1, 20000, "chrM:1-20000", 20000, "+"))
+  blacklist = blacklist[-1,]
+  print(head(blacklist))
+  dim(blacklist)
+  blacklist_filename = "blacklist_file.bed"
+  write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
+} else if (species=="Candida_albicans" & version=="SC5314.A22"){
+  blacklist_filename=NULL
+} else if (species=="Saccharomyces_cerevisiae" & version=="sacCer3"){
+  blacklist_filename=NULL
+  blacklist = data.frame("chrM", 1, 85779, "chrM:1-8577919", 85778, "+")
+  print(head(blacklist))
+  dim(blacklist)
+  blacklist_filename = "blacklist_file.bed"
+  write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
+} else {
+  stop("genome not Homo_sapiens hg38 nor Mus_musculus mm10 nor Candida_albicans SC5314.A22 nor Saccharomyces_cerevisiae sacCer3")
+}
+```
+
+
+
+
+# Features (TSS)
+
+
+```{r label="tss_feature"}
+regions_filenames = paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+regions_filenames
+# genes = read.table(regions_filenames, stringsAsFactors=FALSE)
+#
+# regions_filenames = sapply(unique(grp_files), function(grp_file) {
+#   regions_filename = paste0("genes_", grp_file, ".bed")
+#   foo = read.table(grp_file, header=TRUE, stringsAsFactors=FALSE)
+#   grp_idx = foo[,1]
+#
+#   write.table(genes[genes[,4] %in% grp_idx,1:6], file=regions_filename, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
+#   regions_filename
+# })
+```
+
+
+```{r results="verbatim"}
+print(regions_filenames)
+```
+
+
+
+# Samples
+
+```{r results="verbatim"}
+system("cat config.R", intern=TRUE)
+```
+
+# Compute matrix
+
+```{r, label="computeMatrix tss_keys", eval=TRUE}
+dir.create("tmp", showWarnings=FALSE)
+matrix_filename = paste0("tmp/matrix_", prefix, ".txt.gz")
+# score_filenames
+score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+brsl = arsl = 1000
+bin_size = 10
+
+cmd = "computeMatrix"
+args = paste0("reference-point -S ", paste0(score_filenames, collapse=" "),  
+              " -R ", paste0(regions_filenames, collapse=" "), 
+              " --outFileName ", matrix_filename, " --referencePoint TSS --binSize ", bin_size, "  --beforeRegionStartLength ", brsl, " --afterRegionStartLength ", arsl, " --numberOfProcessors 32 --sortRegions descend --blackListFileName blacklist_file.bed")
+print(paste(cmd, args))
+msystem2(cmd, args)
+
+```
+
+# Heatmap
+
+
+
+```{r heatmap, eval=TRUE}
+hm_out_filename = paste0("tmp/hm_metagene_", prefix, ".png")
+cmd = "plotHeatmap"
+args = paste0("--matrixFile ", matrix_filename, " --outFileName ", hm_out_filename, " --colorMap YlOrRd --sortRegions descend  --samplesLabel ", paste0(samples, collapse=" "), " --kmeans 4  --outFileSortedRegions feat_kmeans4_", prefix, ".bed.csv")
+print(paste(cmd, args))
+system2(cmd, args)
+```
+
+```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}
+knitr::include_graphics(hm_out_filename)
+```
+
+
+
+
+# Profile
+
+
+```{r profile}
+pf_out_filename = paste0("tmp/pf_metagene_", prefix, ".png")
+cmd = "plotProfile"
+args = paste0("--matrixFile tmp/matrix_", prefix, ".txt.gz --outFileName ", pf_out_filename, "  --perGroup --samplesLabel ", paste0(samples, collapse=" "), " --kmeans 4 ")
+print(paste(cmd, args))
+system2(cmd, args)
+```
+
+
+
+```{r, echo=FALSE, out.width="100%", results="markup"}
+knitr::include_graphics(pf_out_filename)
+```
+
+
+
+
+
+
+
+
+
+# Transcriptome
+
+```{r volcano, echo=TRUE}
+# palette(c("black", "blue", "cyan", "green3", "orange"))
+palette(c("blue", "cyan", "green3", "orange")) 
+
+table_file = list.files("../rnaseq_mmspg/04_deseq2/tables", "*.complete.txt", full.names=TRUE)[1]
+rownames(df) = df$Id
+df = read.table(table_file, header=TRUE)
+df$meanR = apply(log2(df[,c("R_h2al2WT_rep1", "R_h2al2WT_rep2", "R_h2al2WT_rep3")] + 1), 1, mean)
+df$sdR = apply(log2(df[,c("R_h2al2WT_rep1", "R_h2al2WT_rep2", "R_h2al2WT_rep3")] + 1), 1, sd)
+df = df[order(df$meanR),]
+q = rev(quantile(df$meanR, c(0, .25, .5, .75)))
+df$grp = 1
+idx = df$meanR<q[1] ; df[idx,]$grp = df[idx,]$grp + 1
+idx = df$meanR<q[2] ; df[idx,]$grp = df[idx,]$grp + 1
+idx = df$meanR<q[3] ; df[idx,]$grp = df[idx,]$grp + 1
+
+table(df$grp)
+
+
+# gs =  sample(rownames(df)[df$grp==5])[1:100]
+layout(1, respect=TRUE)
+main = rev(strsplit(substr(table_file, 1, nchar(table_file)-13), "/")[[1]])[1]
+plot(df$sdR, df$meanR, 
+  xlab="sd", ylab="mean", 
+  col=adjustcolor(abs(df$grp), alpha.f=0.3),
+  main=main 
+)
+legend("topright", col=names(table(df$grp)), paste0("grp", names(table(df$grp)), " (", table(df$grp), ")"), pch=1)
+
+regions = sort(unique(df$grp))
+grp_files = sapply(regions, function(i) {
+  grp_file = paste0("grp", i, "_", prefix, ".txt")
+  tmp_df = df[df$grp==i,]
+  write.table(tmp_df, grp_file)
+  grp_file
+})
+
+```
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
