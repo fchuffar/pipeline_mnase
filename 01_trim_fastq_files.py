@@ -6,8 +6,8 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
   files = [x.replace(src_suffix, dest_suffix) for x in files ]
   return [os.path.join(os.path.expanduser(dest_dir), f) for f in files]
 
-fastq_trim30_R1 = get_files("~/projects/datashare/"+gse+"/raw", "R1.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R1_fastxtrimf30.fastq.gz")
-fastq_trim30_R2 = get_files("~/projects/datashare/"+gse+"/raw", "R2.fastq.gz", "~/projects/datashare/"+gse+"/raw", "R2_fastxtrimf30.fastq.gz")
+fastq_trim30_R1 = get_files("~/projects/datashare/"+gse+"/raw", "1.fastq.gz", "~/projects/datashare/"+gse+"/raw", "1_fastxtrimf30.fastq.gz")
+fastq_trim30_R2 = get_files("~/projects/datashare/"+gse+"/raw", "2.fastq.gz", "~/projects/datashare/"+gse+"/raw", "2_fastxtrimf30.fastq.gz")
 # fastq_trim30 = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastxtrimf30.fastq.gz")
 
 
@@ -39,32 +39,33 @@ echo workflow \"01_trim_fastq_files.py\" completed at `date`.
 
 rule trim_fastxtoolkit:
     input:
-      fastq="{prefix}.fastq.gz", 
-      fastqc="{prefix}_fastqc.zip",
+      fastqgz="{path}/raw/{prefix}.fastq.gz", 
+      fastqc="{path}/raw/{prefix}_fastqc.zip",
     output: 
-      fastq="{prefix}_fastxtrimf{trim}.fastq.gz",
+      fastqgz="{path}/raw/{prefix}_fastxtrimf{trim}.fastq.gz",
       # fastqc="{prefix}_fastxtrimf{trim}_fastqc.zip",
     threads: 1
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
 echo computing $tmpfile ...
-gunzip -c  {input.fastq} | fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
+gunzip -c  {input.fastqgz} | fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
 echo move $tmpfile to output.
-cp $tmpfile {output.fastq}
+cp $tmpfile {output.fastqgz}
 rm $tmpfile
-fastqc {output.fastq}
+fastqc {output.fastqgz}
+fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
     """
 
 rule fastqc:
-    input:  fastqgz="{prefix}.fastq.gz"
-    output: zip="{prefix}_fastqc.zip",
-            html="{prefix}_fastqc.html"
+    input:  fastqgz="{path}/raw/{prefix}.fastq.gz"
+    output: zip="{path}/raw/{prefix}_fastqc.zip",
+            html="{path}/raw/{prefix}_fastqc.html"
     threads: 1
     shell:"""
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 fastqc {input.fastqgz}
-fastq_screen --aligner bowtie2 --threads {threads} {input.fastqgz}
+fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
 """
 
 

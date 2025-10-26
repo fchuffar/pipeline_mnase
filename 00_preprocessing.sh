@@ -1,6 +1,6 @@
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/cometh/results/atacseq_cometh_lot4
+cd ~/projects/atacclock/results/GSE193140
 source config
 echo $gse
 echo $project
@@ -12,29 +12,6 @@ rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/res
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
 # done previously using https://github.com/fchuffar/gse2study
-
-## download fastq files
-# wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
-sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
-echo $sra
-srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
-echo $srrs
-echo $srrs | wc
-
-conda activate sra_env
-echo "checking" $srrs >> checking_srrs_report.txt
-for srr in $srrs
-do
-  FILE=${srr}.fastq
-  if [ -f $FILE ]; then
-     echo "File $FILE exists."
-  else
-     echo "File $FILE does not exist."
-     fasterq-dump --threads 16 -p --temp /dev/shm --split-files --outdir ./ ${srr}
-  fi
-done
-cat checking_srrs_report.txt
-gzip *.fastq
 
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
@@ -48,30 +25,47 @@ snakemake -k -s 01_trim_fastq_files.py --cores 16 -pn
 snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 
+
 # 4. Design. Link here samples and fastqz unsing .info file.
-cd  /home/chuffarf/projects/datashare/${gse}
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/01_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/01_R2_fastxtrimf30.fastq.gz " > 01_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/02_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/02_R2_fastxtrimf30.fastq.gz " > 02_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/03_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/03_R2_fastxtrimf30.fastq.gz " > 03_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/04_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/04_R2_fastxtrimf30.fastq.gz " > 04_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/05_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/05_R2_fastxtrimf30.fastq.gz " > 05_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/06_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/06_R2_fastxtrimf30.fastq.gz " > 06_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/07_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/07_R2_fastxtrimf30.fastq.gz " > 07_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/08_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/08_R2_fastxtrimf30.fastq.gz " > 08_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/09_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/09_R2_fastxtrimf30.fastq.gz " > 09_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/10_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/10_R2_fastxtrimf30.fastq.gz " > 10_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/11_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/11_R2_fastxtrimf30.fastq.gz " > 11_trim30.info
-echo " -1 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/12_R1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/atacseq_cometh_lot4/raw/12_R2_fastxtrimf30.fastq.gz " > 12_trim30.info
-
-# echo " -U /home/chuffarf/projects/datashare/GSE77277/raw/SRR3126242_fastxtrimf30.fastq.gz "  > GSM2047206_trim30.info
-
-# echo " -1  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R1_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R1_001_fastxtrimf30.fastq.gz    -2  /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-165165_R2_001_fastxtrimf30.fastq.gz, /home/chuffarf/projects/datashare/mmspz/raw/S003633_Spz_pos_pos_4min-172172_R2_001_fastxtrimf30.fastq.gz   "  > S_pp2_trim30.info
-## and set samples there:
-
+## SR or PE?
+ls -lha ~/projects/datashare/${gse}/raw
+if [[ -f ${srr}_2.fastq || -f ${srr}_2.fastq.gz ]]; then
+  sequencing_read_type=PE
+else
+  sequencing_read_type=SR
+fi
+echo $sequencing_read_type
+## metadata linking sample and raw files
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${srp} | cut -f10 | cut -f1 -d_ | uniq`
+echo $gsms
+echo $gsms | wc
+cd ~/projects/datashare/${gse}/
+for gsm in $gsms
+do
+  echo ${gsm}  
+  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  echo ${srrs}    
+  if [[ $sequencing_read_type == PE ]]; then
+    # PE
+    echo PE    
+    echo " -1 /home/chuffarf/projects/datashare/${gse}/raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1_fastxtrimf30.fastq.gz -2 /home/chuffarf/projects/datashare/${gse}/raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_2_fastxtrimf30.fastq.gz " > ${gsm}_trim30.info
+  else
+   #  # # SR
+   echo SR
+    echo " -U /home/chuffarf/projects/datashare/${gse}/raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_fastxtrimf30.fastq.gz " > ${gsm}_trim30.info
+  fi
+done
 cat  *_trim30.info
-
+## and set samples there:
 cd ~/projects/${project}/results/${gse}/
-cat config.R
+echo "samples = c("         >  config.R                                                                    
+for gsm in $gsms                                                        
+do                                                        
+  echo "  '${gsm}',     "   >> config.R                                                                
+done                                                        
+echo ")           "         >> config.R                                                         
+cat config.R                                                        
+
 
 
 
@@ -81,7 +75,8 @@ cd ~/projects/${project}/results/${gse}/
 snakemake -k -s 02_align_fastq_files.py --cores 16 -pn
 ## or on the dahu cluster:
 snakemake -k -s 02_align_fastq_files.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
-
+## QC is there:
+echo ${project}/results/${study}/multiqc_notrim.html
 
 #/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf 
 # cat /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed

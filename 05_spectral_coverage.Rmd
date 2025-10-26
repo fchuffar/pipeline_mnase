@@ -21,11 +21,20 @@ source("config.R")
 
 ```{r label="params"}
 exp_grp = data.frame(
-  bw = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw"),
+  bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw"),
   id = samples,
   stringsAsFactors=FALSE
 )
 rownames(exp_grp) = exp_grp$id
+head(exp_grp)
+dim(exp_grp)
+s = epimedtools::create_study()
+s$gse = "GSE193140"
+e = s$get_exp_grp()
+exp_grp$age = as.numeric(e[rownames(exp_grp),]$age)
+exp_grp$qage = cut(exp_grp$age, quantile(exp_grp$age, 0:10/10), include.lowest=TRUE)
+exp_grp$gender = e[rownames(exp_grp),]$gender
+
 
 prefix = "spectral"
 score_filenames = exp_grp$bw
@@ -111,16 +120,16 @@ Genome is sliced into features according to a size of window w, $w \in$ `r range
 
 
 ```{r label="functions"}
+options(scipen=999)
+win_sizes = c(100000, 50000, 10000, 5000, 1000)
 tasks = lapply(win_sizes, function(win_size) {
   list(
     win_size=win_size
   )
 })
 tasks
-
 compute_matrix_file = function(task) {
   # task = tasks[[1]]
-  # task = tasks[[20]]
   print(date())
   print(task)
   # parameters
@@ -142,11 +151,17 @@ compute_matrix_file = function(task) {
 
   # compute matrix
   matrix_file = paste0("tmp/matrix_", prefix, "_", win_size, ".txt.gz")
-  Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH")
-  matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filename, score_filename=score_filenames, out_filename=matrix_file, bin_size=format(win_size, scientific = FALSE) , region_body_length=format(win_size, scientific = FALSE), before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, number_of_processors=32)    
+  # Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH")
+  matrix_file = deeptoolsr::dt_compute_matrix_scale(
+    regions_filename=regions_filename, score_filename=score_filenames, out_filename=matrix_file, 
+    bin_size=format(win_size, scientific = FALSE), 
+    region_body_length=format(win_size, scientific = FALSE), 
+    before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, 
+    number_of_processors=192
+  )    
   print(matrix_file)
 }
-
+stop("EFN")
 ```
 
 
@@ -166,6 +181,7 @@ if (substr(Sys.info()["nodename"], 1, 4) == "luke" | substr(Sys.info()["nodename
       # foo = compute_matrix_file(task)
       # foo = compute_matrix_file(tasks[[1]])
       # task_out_filenames = bot::run_engine(tasks[1:2], compute_matrix_file, DEBUG=TRUE)
+      task_out_filenames = bot::run_engine(tasks[1:2], compute_matrix_file, DEBUG=TRUE)
       # task_out_filenames = bot::run_engine(tasks, compute_matrix_file, nb_proc=1)
       # # oarsub --project epimed -l /core=4,walltime=48:00:00 -I
       # # cd ~/projects/small_structs/results/
@@ -221,6 +237,123 @@ foo = sapply(matrix_files, function(matrix_file) {
 plot(ws, foo, xlab="window size", ylab="nb. of features")
 ```
 
+# PCA
+
+```{r pca}
+matrix_file = matrix_files[2]
+matrix_file = "tmp/matrix_spectral_5000.txt.gz"
+print(matrix_file)
+rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
+tmp_d = as.matrix(rpkm_wig_signal[,7:ncol(rpkm_wig_signal)])
+# tmp_d[300:310,]
+# tmp_d[600:610,]
+colnames(tmp_d) = rownames(exp_grp)
+
+palette(c(
+  "#543005", "#8c510a", "#bf812d", "#dfc27d", "#f6e8c3",
+  "#c7eae5", "#80cdc1", "#35978f", "#01665e", "#003c30"
+))
+
+  mat = t(as.matrix(tmp_d))
+  # idx_samples = rownames(mat)
+  mat = mat[idx_samples,]
+  dim(mat)
+  sds = apply(mat, 2, sd)
+  mat = mat[,sds!=0]
+  dim(mat)
+
+
+  pca = prcomp(mat, scale=TRUE)
+  v = pca$sdev * pca$sdev
+  p = v / sum(v) * 100
+  palette("default")
+  cols = as.numeric(as.factor(exp_grp[rownames(mat),]$gender))
+  # cols = as.numeric(as.factor(exp_grp[rownames(mat),]$qage)) ; palette(c(  "#543005", "#8c510a", "#bf812d", "#dfc27d", "#f6e8c3",  "#c7eae5", "#80cdc1", "#35978f", "#01665e", "#003c30")) ; plot(exp_grp$age, col=as.numeric(as.factor(exp_grp$qage)))
+  
+  layout(matrix(1:6,2), respect=TRUE)
+  # layout(matrix(1:2,1), respect=TRUE)
+  barplot(p, ylab="% of variance explained", xlab="components")
+  for (i in 1:4) {
+    j = i+1
+    plot(pca$x[,i], pca$x[,j], 
+    	xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), 
+    	ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), 
+    	col=cols,
+    	pch=16)  
+  }
+
+  print(paste0("  removing..."))
+  head(pca$x[,1:2])
+  mean = mean(pca$x[,1])
+  sd = sd(pca$x[,1])
+  pval = pnorm(abs(pca$x[,1]), mean, sd, lower.tail=FALSE)
+  padj = p.adjust(pval, method="BH")
+  sum(padj <= 0.2)
+  range(padj)  
+  idx_rm = names(padj)[!padj > 0.2]
+  i = 1
+  j = i+1
+  plot(pca$x[,i], pca$x[,j], 
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), 
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), 
+    col=cols,
+    pch=16)  
+  points(pca$x[idx_rm,i], pca$x[idx_rm,j], 
+    col=2,
+    cex=3, pch=16)  
+  idx_samples = names(padj)[padj > 0.2]
+
+
+
+
+plot(apply(mat, 1, sd), exp_grp[rownames(mat), ]$age)
+
+plot(density(mat))
+
+```
+
+
+samtools view ~/projects/datashare/GSE193140/GSM5774303_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam | \
+awk '($9 > 0 && $9 < 1000) {sum+=$9; n++} END {print "Mean insert size:", sum/n}'
+
+samtools view sample.dedup.bam | \
+awk '($9 > 0 && $9 < 1000){print $9}' | sort -n | uniq -c > insert_histogram.txt
+gnuplot -e "plot 'insert_histogram.txt' using 2:1 with lines"
+
+macs2 callpeak -t sample.dedup.bam \
+  -f BAMPE -g hs -n sample_macs2 \
+  --keep-dup all --nomodel \
+  --shift -75 --extsize 150 \
+  -q 0.01 --outdir macs2_output
+
+```{r}
+foo = sapply(list.files(pattern="*.insert.size.txt"), read.table)[4,]
+exp_grp$insert_size = NA
+exp_grp[substr(names(foo), 1, 10),]$insert_size = unlist(foo)
+plot(exp_grp$insert_size, exp_grp$age)
+plot(exp_grp[idx_samples,]$insert_size, exp_grp[idx_samples,]$age)
+
+```
+
+
+
+
+
+srp=`cat ~/projects/datashare/platforms/SRA_Accessions_SRP_GSE.tab | grep ${gse} | cut -f1 | grep SRP | uniq`
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${srp} | cut -f10 | cut -f1 -d_ | uniq`
+for gsm in $gsms
+do
+  echo ${gsm}  
+  samtools view ~/projects/datashare/GSE193140/${gsm}_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam | awk '($9 > 0 && $9 < 1000) {sum+=$9; n++} END {print "Mean insert size:", sum/n}' > ${gsm}.insert.size.txt &
+done
+ls   *.insert.size.txt
+cat  *.insert.size.txt
+
+
+
+
+
+
 
 
 
@@ -229,12 +362,12 @@ plot(ws, foo, xlab="window size", ylab="nb. of features")
 print(paste0("Slicing ChIPseq data... (matrix_files)"))
 if (!exists("counts")) {
   counts = lapply(matrix_files, function(matrix_file) {
+    # matrix_file = matrix_files[2]
     print(matrix_file)
-    # matrix_file = matrix_files[5]
     rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
     tmp_d = as.matrix(rpkm_wig_signal[,7:ncol(rpkm_wig_signal)])
-    tmp_d[300:310,]
-    tmp_d[600:610,]
+    # tmp_d[300:310,]
+    # tmp_d[600:610,]
     colnames(tmp_d) = rownames(exp_grp)
     apply(tmp_d, 2, sum)
     breaks = (0:1000) / 50
@@ -421,35 +554,35 @@ for (chr in unique(rpkm_wig_signal$chr)) {
 # # matrix_file = paste0("matrix_", prefix, "_feat_10000", ".txt.gz")
 # # Sys.setenv(PATH="/summer/epistorage/miniconda3/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
 # # score_filename_detail = c(
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_RPKM.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_None.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_RPKM.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_None.bw",
-# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_RPKM.bw",
-# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_None.bw",
-# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_RPKM.bw",
-# #   # "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_None.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_RPKM.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_local_trim30_srt_0_1000_None.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_RPKM.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_local_trim30_srt_0_1000_None.bw",
+# #   # "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_RPKM.bw",
+# #   # "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_local_trim30_srt_0_1000_None.bw",
+# #   # "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_RPKM.bw",
+# #   # "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_local_trim30_srt_0_1000_None.bw",
 # #
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_0_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_30_4.bw",
-# #   "/home/fchuffar/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_30_4.bw"
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_0_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/P_mns_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/R_mns_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_nuc_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/C_sms_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn1_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn2_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn3_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn4_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn5_trim30_srt_30_4.bw",
+# #   "/home/chuffarf/projects/datashare_epistorage/TGML_runs/bam_epimed/S_bn6_trim30_srt_30_4.bw"
 # # )
 # #
 # # matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filename, score_filename=score_filename_detail, out_filename=matrix_file, bin_size=10, region_body_length=format(10000, scientific = FALSE), before_region_start_length=0, after_region_start_length=0, FORCE_EXEC=TRUE, number_of_processors=32)

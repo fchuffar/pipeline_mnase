@@ -1,5 +1,5 @@
-gse="atacseq_cometh_lot4"
-project="cometh"
+gse="GSE193140"
+project="atacclock"
 species="Homo_sapiens"
 annotation="UCSC"
 version="hg38"

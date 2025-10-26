@@ -77,7 +77,7 @@ if (species=="Mus_musculus" & version=="mm10") {
 
 
 ```{r label="tss_feature"}
-regions_filenames = paste0("/home/fchuffar/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+regions_filenames = paste0("/home/chuffarf/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
 regions_filenames
 
 # feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
@@ -134,10 +134,10 @@ dir.create("tmp", showWarnings=FALSE)
 matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 
 # score_filenames
-score_filenames = paste0("/home/fchuffar/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+score_filenames = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
 brsl = arsl = 5000
 bin_size = 100
-Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/fchuffar/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
+Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/chuffarf/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")
 matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
   blacklist_filename = blacklist_filename,
   bin_size = bin_size,
@@ -154,7 +154,7 @@ matrix_file = deeptoolsr::dt_compute_matrix(regions_filename=regions_filenames, 
 source("common.R")
 ordered_wig_signal = fast_matrix_file(matrix_file, GRP=TRUE)
 hm_out_filename = paste0("tmp/hm_", prefix, ".fasted.png")
-hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=FALSE, color_map="YlOrRd", sort_regions="descend")
+hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=TRUE, color_map="YlOrRd", sort_regions="descend")
 ```
 
 ```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}

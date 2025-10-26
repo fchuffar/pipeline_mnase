@@ -7,9 +7,9 @@ def c(*args): return list(args)
 exec(open("config.R").read())
 
 foo=version 
-bam_srt = [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt.bam"             for sample in samples for trim in ["30"]]#, "60"]]
-bam_mmq = [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt_mmq{mmq}.bam"    for sample in samples for trim in ["30"] for mmq in ["0", "30"]]
-bw =      [f"/home/fchuffar/projects/datashare/{gse}/{sample}_end-to-end_trim30_bowtie2_{species}_{annotation}_{foo}_srt_{sr_or_pe}_30_4_RPKM.bw"     for sample in samples]
+bam_srt = [f"/home/chuffarf/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt.bam"             for sample in samples for trim in ["30"]]#, "60"]]
+bam_mmq = [f"/home/chuffarf/projects/datashare/{gse}/{sample}_end-to-end_trim{trim}_bowtie2_{species}_{annotation}_{foo}_srt_mmq{mmq}.bam"    for sample in samples for trim in ["30"] for mmq in ["0", "30"]]
+bw =      [f"/home/chuffarf/projects/datashare/{gse}/{sample}_end-to-end_trim30_bowtie2_{species}_{annotation}_{foo}_srt_{sr_or_pe}_30_4_RPKM.bw"     for sample in samples]
 
 localrules: target
 
@@ -44,7 +44,7 @@ echo workflow \"02_align_fastq_files.py\" completed at `date`.
 rule align_bowtie:
     input:
       fastq_info="{prefix}/{sample}_trim{trim}.info",
-      bowtie2idx = "/home/fchuffar/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome.1.bt2"
+      bowtie2idx = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome.1.bt2"
     output:
       log =    "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{annotation}_{version}.log",
       bam =    "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{annotation}_{version}.bam",
@@ -60,7 +60,7 @@ bowtie2 \
   --{wildcards.localendtoend} \
   --no-mixed \
   --no-discordant \
-  -x  /home/fchuffar/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/genome \
+  -x  /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/genome \
   `cat {input.fastq_info}` \
   2> {output.log} \
   | samtools view -bS - > {output.bam}
@@ -74,14 +74,14 @@ cat {output.log}
 
 rule index_bowtie:
     input:
-      genome = "/home/fchuffar/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/WholeGenomeFasta/genome.fa"
+      genome = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/WholeGenomeFasta/genome.fa"
     output:
-      bowtie2idx = "/home/fchuffar/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome1.bt2"
+      bowtie2idx = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome1.bt2"
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-mkdir -p /home/fchuffar/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
-cd /home/fchuffar/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
+mkdir -p /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
+cd /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
 ln -s ../WholeGenomeFasta/genome.fa 
 PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
 bowtie2-build -f genome.fa genome
