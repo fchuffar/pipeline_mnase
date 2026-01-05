@@ -1,3 +1,6 @@
+# 0. cp 00_preprocessing.sh to customize it
+cp 00_preprocessing.sh 00_custom_preprocessing.sh
+
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
 cd ~/projects/atacclock/results/GSE193140t2t
