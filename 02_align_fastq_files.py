@@ -60,6 +60,9 @@ bowtie2 \
   --{wildcards.localendtoend} \
   --no-mixed \
   --no-discordant \
+  --dovetail \
+  --very-sensitive \
+  -X 1000 \
   -x  /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/genome \
   `cat {input.fastq_info}` \
   2> {output.log} \

@@ -1,3 +1,39 @@
+merge_bed = function(tmp_bed) {
+  library('bedr');
+  region <- tmp_bed;
+  is.valid = is.valid.region(region, check.chr=FALSE);
+  is.sorted = is.sorted.region(region, check.chr=FALSE);
+  region.sort <- bedr.sort.region(region, check.chr=FALSE);
+  is.sorted.region(region.sort, check.chr=FALSE);
+  is.merged.region(region.sort, check.chr=FALSE);
+  region.merge <- bedr.merge.region(region.sort, check.chr=FALSE);
+  is.merged.region(region.merge, check.chr=FALSE);
+  sum(region[,3] - region[,2]) / 1000000000
+  sum(region.merge[,3] - region.merge[,2]) / 1000000000
+  region.merge[,5] = region.merge[,3] - region.merge[,2]
+  region.merge[,6] = "+"
+  return(region.merge)
+}
+
+hm_genome = function(m, col=colorRampPalette(c("blue", "white", "red"))(100), ...) {
+  image(t(m[nrow(m):1,]), xaxt="n", yaxt="n", xlab="Chromosome Position (Mb)", col=col, ...)
+  axis(2, at=seq(0, 1, length.out=nrow(m)), labels=rev(rownames(m)), las=2)
+  axis(1, at=seq(0, 1, length.out=round(ncol(m)/100)), labels=(1:round(ncol(m)/100)-1)*10, las=2)
+}
+
+hm_genome2 = function(pf, key, ...) {
+  pf$x = round((pf[,2]-1)/100000+1)
+  pf$y = factor(pf[,1], levels=unique(pf[,1]))
+  pf$z = pf[[key]]
+  m = matrix(NA, nrow=max(as.numeric(pf$y)), ncol=max(pf$x))
+  rownames(m) = levels(pf$y)
+  for (i in 1:nrow(pf)) {
+    m[as.numeric(pf[i,]$y),pf[i,]$x] = pf[i,]$z 
+  }
+  hm_genome(m, ...)
+}
+
+
 get_nb_reads_core = function(bam_file, args) {
   cmd = "samtools"
   args = paste0(args, bam_file)

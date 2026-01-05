@@ -1,6 +1,6 @@
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/atacclock/results/GSE193140
+cd ~/projects/atacclock/results/GSE193140t2t
 source config
 echo $gse
 echo $project
