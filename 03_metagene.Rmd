@@ -64,6 +64,8 @@ if (species=="Mus_musculus" & version=="mm10") {
   write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)      
 } else if (species=="Candida_albicans" & version=="SC5314.A22"){
   blacklist_filename=NULL
+} else if (species=="Candida_albicans" & version=="SC5314.A22.haplo"){
+  blacklist_filename=NULL
 } else if (species=="Saccharomyces_cerevisiae" & version=="sacCer3"){
   blacklist_filename=NULL
 } else {
@@ -77,7 +79,7 @@ if (species=="Mus_musculus" & version=="mm10") {
 
 
 ```{r label="tss_feature"}
-regions_filenames = paste0("/home/chuffarf/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+regions_filenames = paste0("datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
 regions_filenames
 
 # feat = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
@@ -134,7 +136,7 @@ dir.create("tmp", showWarnings=FALSE)
 matrix_file = paste0("tmp/matrix_", prefix, ".txt.gz")
 
 # score_filenames
-score_filenames = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+score_filenames = paste0("datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
 brsl = arsl = 5000
 bin_size = 100
 Sys.setenv(PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:/summer/epistorage/miniconda3/condabin:/home/chuffarf/perl5/bin:/summer/epistorage/opt/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games")

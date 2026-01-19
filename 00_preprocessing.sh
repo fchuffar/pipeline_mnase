@@ -1,5 +1,6 @@
 # 0. cp 00_preprocessing.sh to customize it
 cp 00_preprocessing.sh 00_custom_preprocessing.sh
+open 00_custom_preprocessing.sh
 
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
@@ -12,9 +13,10 @@ rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/res
 
 
 # 2. Put raw fastq file in ~/projects/datashare/${gse}/raw
+ln -s ~/projects/datashare
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
-# done previously using https://github.com/fchuffar/gse2study
+# done previously using https://github.com/chuffarf/gse2study
 
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
@@ -81,9 +83,11 @@ snakemake -k -s 02_align_fastq_files.py --jobs 50 --cluster "oarsub --project ep
 ## QC is there:
 echo ${project}/results/${study}/multiqc_notrim.html
 
-#/home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf 
-# cat /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed
-# cat /home/fchuffar/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/fchuffar/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.bed
+# bed form gft
+# gffread /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gff -T -o /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gtf
+# cat /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.bed
+# cat /home/chuffarf/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/chuffarf/projects/datashare/genomes/Candida_albicans/CGD/SC5314.A22/Annotation/Genes/genes.bed
+# cat /home/chuffarf/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/chuffarf/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.bed
 # 6. 03_metagene.Rmd and so on
 source ~/conda_config.sh 
 conda activate mnase_env
@@ -111,12 +115,12 @@ snakemake -s ~/projects/${project}/results/${gse}/wf.py --jobs 49 --cluster "oar
 
 ### DESIGN
 cd ~/projects/datashare/${gse}/
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/input_rep10_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/input_rep10_R2_fastxtrimf30.fastq.gz " > input_rep10_trim30.info 
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep11_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep11_R2_fastxtrimf30.fastq.gz " > cth2b_rep11_trim30.info 
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep12_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep12_R2_fastxtrimf30.fastq.gz " > cth2b_rep12_trim30.info 
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/input_rep20_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/input_rep20_R2_fastxtrimf30.fastq.gz " > input_rep20_trim30.info 
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep21_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep21_R2_fastxtrimf30.fastq.gz " > cth2b_rep21_trim30.info 
-echo " -1 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep22_R1_fastxtrimf30.fastq.gz  -2 /home/fchuffar/projects/datashare/mmspz/raw/cth2b_rep22_R2_fastxtrimf30.fastq.gz " > cth2b_rep22_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/input_rep10_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/input_rep10_R2_fastxtrimf30.fastq.gz " > input_rep10_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep11_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep11_R2_fastxtrimf30.fastq.gz " > cth2b_rep11_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep12_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep12_R2_fastxtrimf30.fastq.gz " > cth2b_rep12_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/input_rep20_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/input_rep20_R2_fastxtrimf30.fastq.gz " > input_rep20_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep21_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep21_R2_fastxtrimf30.fastq.gz " > cth2b_rep21_trim30.info 
+echo " -1 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep22_R1_fastxtrimf30.fastq.gz  -2 /home/chuffarf/projects/datashare/mmspz/raw/cth2b_rep22_R2_fastxtrimf30.fastq.gz " > cth2b_rep22_trim30.info 
 ls -lha
 cat *.info
 pwd
