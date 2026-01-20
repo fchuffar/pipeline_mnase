@@ -79,7 +79,7 @@ rule index_bowtie:
     input:
       genome = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/WholeGenomeFasta/genome.fa"
     output:
-      bowtie2idx = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome1.bt2"
+      bowtie2idx = "/home/chuffarf/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/Bowtie2Index/genome.1.bt2"
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """

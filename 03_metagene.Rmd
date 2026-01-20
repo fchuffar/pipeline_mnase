@@ -166,7 +166,7 @@ knitr::include_graphics(hm_out_filename)
 
 
 ```{r, eval=FALSE}
-raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE, na.strings="nan")
 foo = apply(raw_wig_signal[,-(1:6)], 1, max)
 rev(sort(foo))[1:6]
 head(raw_wig_signal[rev(rank(foo)),])
