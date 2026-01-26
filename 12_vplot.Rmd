@@ -25,7 +25,7 @@ source("common.R")
 library(GenomicRanges)
 library(VplotR)
 
-for (sample in samples) {
+for (sample in samples[4]) {
   bamfile = paste0("/home/chuffarf/projects/datashare/", gse, "/", sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")
   fragments = importPEBamFiles(
       bamfile, 
@@ -33,7 +33,7 @@ for (sample in samples) {
   )
   # fragments
 
-  genes_file = "~/projects/datashare/genomes/Saccharomyces_cerevisiae/UCSC/sacCer3/Annotation/Genes/genes.bed"
+  genes_file = paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
   genes = read.table(genes_file, header=FALSE)
   head(genes)
 
@@ -61,115 +61,6 @@ for (sample in samples) {
        labs(title = sample)
   plot(p)
 }
-```
-
-```{r eval=FALSE}
-if (!exists("mscanBam")) {
-  mscanBam = function(f) {
-    library("Rsamtools")
-    mscanBam = memoise::memoise(scanBam)
-    memoise::memoise(Rsamtools::scanBam(f))
-  }
-}
-
-if (! exists("mscanBam")) {
-  library("Rsamtools")
-  mscanBam = memoise::memoise(scanBam)
-}
-
-
-# -rw-r--r-- 1 chuffarf l-iab 767K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/cth2b_rep11_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-# -rw-r--r-- 1 chuffarf l-iab 955K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/cth2b_rep12_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-# -rw-r--r-- 1 chuffarf l-iab 189K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/cth2b_rep21_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-# -rw-r--r-- 1 chuffarf l-iab 160K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/cth2b_rep22_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-# -rw-r--r-- 1 chuffarf l-iab 484K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/input_rep10_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-# -rw-r--r-- 1 chuffarf l-iab 215K Dec  2 10:20 /home/chuffarf/projects/datashare/hsspz/input_rep20_end-to-end_trim30_bowtie2_Homo_sapiens_hg38_srt.bam.SAR.bam
-
-
-# score_filenames = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam.SAR.bam")
-score_filenames = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, ".bam")
-bam_file = score_filenames[4]
-mbam = mscanBam(bam_file)
-names(bam[[1]])
-# [1] "qname"  "flag"   "rname"  "strand" "pos"    "qwidth" "mapq"   "cigar"
-# [9] "mrnm"   "mpos"   "isize"  "seq"    "qual"
-foo = bam[[1]]
-dim(foo)
-
-length(foo$qname  )
-length(foo$flag   )
-length(foo$rname  )
-length(foo$strand )
-length(foo$pos    )
-length(foo$qwidth )
-length(foo$mapq   )
-length(foo$cigar)
-length(foo$mrnm   )
-length(foo$mpos   )
-length(foo$isize  )
-length(foo$seq    )
-length(foo$qual   )
-
-bar = data.frame(
-  qname  = foo$qname  ,
-  # flag   = foo$flag   ,
-  rname  = foo$rname  ,
-  strand = foo$strand ,
-  pos    = foo$pos    ,
-  # qwidth = foo$qwidth ,
-  # mapq   = foo$mapq   ,
-  # cigar  = foo$cigar  ,
-  # mrnm   = foo$mrnm   ,
-  # mpos   = foo$mpos   ,
-  # isize  = foo$isize  ,
-  seq    = foo$seq    ,
-  # qual   = foo$qual   
-  mapq   = foo$mapq   
-)
-
-head(bar)
-
-table(bar$mapq)
-
-dim(foo$qname  )
-dim(foo$flag   )
-dim(foo$rname  )
-dim(foo$strand )
-dim(foo$pos    )
-dim(foo$qwidth )
-dim(foo$mapq   )
-dim(foo$cigar)
-dim(foo$mrnm   )
-dim(foo$mpos   )
-dim(foo$isize  )
-dim(foo$seq    )
-dim(foo$qual   )
-
-```
-
-
-```{r eval=FALSE}
-layout(matrix(1:3, 1), respect=TRUE)
-locus = strsplit("chr10:41887332-41916263 chr10:41856986-41889331 chr17:21943262-21983441 chr17:21983555-21984549 chr2:89811301-89833976 chr5:49666174-49667431 chr4:49091249-49112662 chr4:49631298-49658068 chr4:49631298-49658068 chr16:34571580-34576219 chr5:49656289-49661871 chr5:49656289-49661871 chr4:49110670-49156598 chr5:49601092-49603131 chr17:21985159-21992022 chr2:89835277-89841184", " ")[[1]]
-
-
-locus="chr10:41859272-41860605"
-foo = sapply(locus, function(loci) {
-  print(loci)
-  loci_len = diff(as.numeric(strsplit(loci, ":|-")[[1]][2:3]))
-  nb_reads = sapply(samples, function(sample) {
-    bed_filename = paste0("/home/chuffarf/projects/datashare/", gse, "/", sample, "_end-to-end_trim30_bowtie2_", species, "_", version, "_srt.bam.", loci, ".bed")
-    # bed_filename = bed_filenames[1]
-    reads = read.table(bed_filename)
-    cen = (reads[,6]+reads[,2])/2 - min(reads[,2])
-    len = reads[,6]-reads[,2] 
-    # plot(cen, len, pch=".", col=adjustcolor(1, alpha.f=1), main=sample, ylim=c(0, 500))
-    smoothScatter(cen, len, main=paste0(loci, " ", sample), ylim=c(0, 500))
-    return(nrow(reads))
-  })
-  return(nb_reads/loci_len)
-})
-sort(apply(foo, 2, mean))
 ```
 
 
