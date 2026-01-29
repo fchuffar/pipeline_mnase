@@ -16,23 +16,35 @@ knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, 
 source("config")
 source("config.R")
 source("common.R")
+cores = 1# min(parallel::detectCores(), 32)
 ```
+
 ```{r}
 # score_filenames = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")
 # bam_file = score_filenames[4]
-#   bamfile <- "/home/chuffarf/projects/datashare/atacseq_govin_2023spoatacseq1/veg1_end-to-end_trim30_bowtie2_Saccharomyces_cerevisiae_UCSC_sacCer3_srt.bam"
+#   bam_file <- "/home/chuffarf/projects/datashare/atacseq_govin_2023spoatacseq1/veg1_end-to-end_trim30_bowtie2_Saccharomyces_cerevisiae_UCSC_sacCer3_srt.bam"
 
 library(GenomicRanges)
 library(VplotR)
 
-for (sample in samples[4]) {
-  bamfile = paste0("/home/chuffarf/projects/datashare/", gse, "/", sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")
-  fragments = importPEBamFiles(
-      bamfile, 
-      shift_ATAC_fragments = TRUE
-  )
-  # fragments
+# if (!exists("mimportPEBamFiles")) {mimportPEBamFiles = memoise::memoise(importPEBamFiles, cache=cachem::cache_mem(max_size = 10*1024 * 1024^2))}
+# if (!exists("mgetFragmentsDistribution")) {mgetFragmentsDistribution = memoise::memoise(getFragmentsDistribution, cache=cachem::cache_mem(max_size = 10*1024 * 1024^2))}
+# if (!exists("mplotVmat")) {mplotVmat = memoise::memoise(plotVmat, cache=cachem::cache_mem(max_size = 10*1024 * 1024^2))}
 
+
+if (!exists("mimportPEBamFiles"))         {mimportPEBamFiles           = importPEBamFiles         }
+if (!exists("mgetFragmentsDistribution")) {mgetFragmentsDistribution   = getFragmentsDistribution }
+if (!exists("mplotVmat"))                 {mplotVmat                   = plotVmat                 }
+
+for (sample in samples) {
+  cat("***********************")
+  cat(sample)
+  write("***********************", stderr())
+  write(sample, stderr())
+
+
+  bam_file = paste0("/home/chuffarf/projects/datashare/", gse, "/", sample, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt.bam")
+  # bam_file = "datashare/cutntag_sayou_curie/raw/2021988/analysis_results/N300C04/mapping/N300C04_SC5314_Assembly22_custom_filtered.bam"
   genes_file = paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
   genes = read.table(genes_file, header=FALSE)
   head(genes)
@@ -46,9 +58,22 @@ for (sample in samples[4]) {
       strand = genes$V6
     )
 
-  df <- getFragmentsDistribution(
+
+
+  fragments = mimportPEBamFiles(
+      bam_file, 
+      # where=genes,
+      # cores=cores,
+      shift_ATAC_fragments=TRUE
+  )
+  # fragments
+
+
+  df <- mgetFragmentsDistribution(
       fragments, 
-      genes
+      extend_granges = c(-1500, 1500),
+      genes, 
+      cores=cores
   )
   #> Warning in as.cls(x): NAs introduced by coercion
   #> Warning in as.cls(x): NAs introduced by coercion
@@ -57,7 +82,11 @@ for (sample in samples[4]) {
        labs(title = sample)
   plot(p)
   #> Warning: 
-  p <- plotVmat(x = fragments, granges = genes) +
+  p <- mplotVmat(x = fragments,  
+    xlims = c(-700, 700),
+    # cores=cores, 
+    granges = genes
+    ) +
        labs(title = sample)
   plot(p)
 }
