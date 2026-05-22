@@ -97,7 +97,7 @@ par(mar=c(5.1, 4.1, 4.1, 2.1))
 ```{r}
 raw_counts[,7:ncol(raw_counts)]
 
-for i in 1:length(bam_filess) {
+for (i in 1:length(bam_files)) {
   write.table(raw_counts[,c(1, 6+i)], paste0(bam_files[i], "_", tmp_prefix, ".txt"), sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
 }
 ```
