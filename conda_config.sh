@@ -8,6 +8,16 @@ mamba install -c anaconda -c bioconda -c conda-forge -c r r-base libopenblas bio
 # devtools::install_github("fchuffar/bot")
 
 
+conda create -n deeptools_env \
+  python=3.9 \
+  numpy=1.23.5 \
+  -c anaconda -c bioconda -c conda-forge -c r 
+conda create -n deeptools_env 
+conda activate deeptools_env
+mamba install  -c anaconda -c bioconda -c conda-forge -c r python=3.9 numpy=1.23.5 deeptools
+
+
+
 # # conda deactivate
 # # rm -Rf /summer/epistorage/miniconda3/*
 # # ~/Miniconda3-latest-Linux-x86_64.sh -u -p /summer/epistorage/miniconda3 -b
