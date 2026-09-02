@@ -16,7 +16,8 @@ rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/res
 ln -s ~/projects/datashare
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
-# done previously using https://github.com/chuffarf/gse2study
+# done previously using https://github.com/fchuffar/gse2study ... 
+# ... or edit and bash design.sh
 
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
