@@ -1,0 +1,339 @@
+---
+title: "Clustering of gene profiles"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+# Params
+
+```{r label="params"}
+prefix = "gene_profile_clust"
+```
+
+# Blacklist
+
+We excluded the regions of the genome corresponding to `GSAT_MM` and `SYNREP_MM` annotation in `RepeatMasker` database dowloaded from UCSC for `r version`.
+
+```{r label="blacklist"}
+# https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
+# downloading UCSC rmsk data as BED
+# BED formatted UCSC track content can be obtained from UCSC table broswer.
+# The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
+#
+# the assembly "Feb.2009 GRCh37/hg19"
+# the group "repeats and variations"
+# the track "RepeatMasker"
+# and finally the table "rmsk"
+# As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
+#
+# region: "genome"
+# ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
+#
+# output format: "BED - browser extensibke format"
+# output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
+# file type returned: "gzip compressed"
+options(scipen=999)
+
+if (!exists("rmsk_raw")) {
+  rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+}
+rmsk = rmsk_raw
+
+# blacklist = rmsk
+blacklist = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
+blacklist = rbind(blacklist, list("chr19", 61266781, 61266782, "chr19:61266781-61266782", 1404, "+"))
+blacklist = rbind(blacklist, list("chr11", 3126500, 3200500, "Sfi1", 300, "-"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("Sfi1", "chr11", 3126500, 3200500, "-"))
+print(head(blacklist))
+dim(blacklist)
+blacklist_filename = "blacklist_file.bed"
+write.table(blacklist, file=blacklist_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)    
+```
+
+
+
+# Features
+
+We filtered protein-coding genes for `r version` and we organise genes by quantile of absolute expression in si scrumble sample of GSE70314.
+
+
+
+```{r label="tss_feature"}
+feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
+feat = feat[!is.na(feat$tx_end),]
+feat = feat[nchar(feat$chrom_text) <=5,]
+dim(feat)
+table(feat$type, useNA="ifany")
+table(feat$chrom_text, useNA="ifany")
+
+feat = feat[feat$type%in%"protein-coding",]
+
+# tss
+table(feat$strand, useNA="ifany")
+feat$tss = NA
+feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
+feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
+feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
+sum(duplicated(feat$tss_key))
+feat = feat[!duplicated(feat$tss_key),]
+dim(feat)
+
+unique(feat[,1])
+
+feat[feat[,1]=="chrMT",1] = "chrM"
+unique(feat[,1])
+
+
+regions_filenames = regions_filename = paste0(prefix, ".bed")
+write.table(feat, file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+```
+
+
+
+# Heatmap
+
+```{r, label="computeMatrix tss_keys", eval=TRUE}
+matrix_file = paste0("matrix_", prefix, ".txt.gz")
+# score_filenames
+score_filenames = c(
+  # "/home/fchuffar/projects/datashare/GSE70312/GSM1723635_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+  # "/home/fchuffar/projects/datashare/GSE70312/GSM1723636_end-to-end_trim30_srt_PE_30_4_RPKM.bw",
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/Input_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep1_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__WT_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/SSRP1_KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  # "/home/fchuffar/projects/datashare_epistorage/chip_hira_ssrp1/HIRA__KO_rep2_end-to-end_trim30_srt_PE_30_4_RPKM.bw" ,
+  NULL
+)
+brsl = arsl = 2000
+rbl = arsl * 2
+bin_size = 10
+matrix_file = deeptoolsr::dt_compute_matrix_scale(regions_filename=regions_filenames, score_filename=score_filenames, out_filename=matrix_file,
+  blacklist_filename = blacklist_filename,
+  bin_size = bin_size,
+  before_region_start_length = brsl,
+  after_region_start_length = arsl,
+  region_body_length = rbl,
+  FORCE_EXEC=TRUE,
+  number_of_processors=32,
+  sort_regions="descend"
+)
+```
+
+
+```{r eval=TRUE, label="sort_heatmap"}
+source("common.R")
+ordered_wig_signal = fast_matrix_file(matrix_file, GRP=TRUE)
+hm_out_filename = paste0("tmp/hm_", prefix, ".fasted.png")
+hm_out_filename = deeptoolsr::dt_plot_heatmap(matrix_file=paste0(matrix_file, ".fast.txt.gz"), out_filename=hm_out_filename, FORCE_EXEC=TRUE, color_map="YlOrRd", sort_regions="descend", raw_args="--kmeans 4")
+```
+
+```{r, echo=FALSE, eval=TRUE, out.width="100%", results="markup"}
+knitr::include_graphics(hm_out_filename)
+```
+
+
+```{r hira_vs_fact, eval=TRUE}
+raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+
+head(raw_wig_signal[,1:10])
+dim(raw_wig_signal)
+wig_signal = raw_wig_signal[,-(1:6)]
+ncol(wig_signal)  / 8
+
+Input_WT_rep1 = apply(wig_signal[,0001:0800], 1, mean)
+Input_KO_rep1 = apply(wig_signal[,0801:1600], 1, mean)
+Input_WT_rep2 = apply(wig_signal[,1601:2400], 1, mean)
+Input_KO_rep2 = apply(wig_signal[,2401:3200], 1, mean)
+SSRP1_WT_rep1 = apply(wig_signal[,3201:4000], 1, mean)
+HIRA__WT_rep1 = apply(wig_signal[,4001:4800], 1, mean)
+SSRP1_KO_rep1 = apply(wig_signal[,4801:5600], 1, mean)
+HIRA__KO_rep1 = apply(wig_signal[,5601:6400], 1, mean)
+
+layout(matrix(1:2, 1), respect=TRUE)
+mWT = lm(SSRP1_WT_rep1~HIRA__WT_rep1) 
+mKO = lm(SSRP1_KO_rep1~HIRA__KO_rep1) 
+plot(HIRA__WT_rep1, SSRP1_WT_rep1, pch=".", col=2, xlim=c(0,60), ylim=c(0,60))
+abline(mWT, col=2)
+points(HIRA__KO_rep1, SSRP1_KO_rep1, pch=".", col=4)
+abline(mKO, col=4)
+legend("topleft", c("SSRP1_WT_rep1~HIRA__WT_rep1", "SSRP1_KO_rep1~HIRA__KO_rep1"), col=c(2,4), pch=16)
+
+plot(HIRA__KO_rep1, SSRP1_KO_rep1, pch=".", col=4, xlim=c(0,60), ylim=c(0,60))
+abline(mKO, col=4)
+points(HIRA__WT_rep1, SSRP1_WT_rep1, pch=".", col=2)
+abline(mWT, col=2)
+legend("topleft", c("SSRP1_WT_rep1~HIRA__WT_rep1", "SSRP1_KO_rep1~HIRA__KO_rep1"), col=c(2,4), pch=16)
+
+
+# df = data.frame(
+#   Input_WT_rep1,
+#   Input_KO_rep1,
+#   Input_WT_rep2,
+#   Input_KO_rep2,
+#   SSRP1_WT_rep1,
+#   HIRA__WT_rep1,
+#   SSRP1_KO_rep1,
+#   HIRA__KO_rep1
+# )
+# df = df[!apply(is.na(df), 1, any),]
+# dim(df)
+# epimedtools::et_pairs(df)
+  
+```
+
+
+```{r sig_vs_expr, eval=FALSE}
+matrix_file = "matrix_gene_profile.txt.gz"
+raw_wig_signal = read.table(gzfile(matrix_file), skip=1, stringsAsFactors=FALSE)
+head(raw_wig_signal[,1:10])
+dim(raw_wig_signal)
+
+sig = apply(raw_wig_signal[,-(1:6)], 1, mean, na.rm=TRUE)
+names(sig) = as.character(raw_wig_signal[,4])
+length(sig)
+
+genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+genes = genes[genes$type %in% "protein-coding",]
+dim(genes)
+d = read.table("~/projects/atad2/results/GSE70314/04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE, stringsAsFactors=FALSE)
+d$lnorm.GSM1723639 = log2(d$norm.GSM1723639+1)
+d$lnorm.GSM1723640 = log2(d$norm.GSM1723640+1)
+d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
+d = d[
+  !is.na(d$mean.scru) &
+  d$mean.scru>0 &
+  d$Id %in% rownames(genes),
+]
+head(d)
+dim(d)
+rownames(d) = d[,1]
+d = d[rownames(d)%in%rownames(genes),]
+dim(d)
+rownames(d) = as.character(genes[rownames(d),]$entrez)
+
+idx = intersect(rownames(d), names(sig))
+m = lm(sig[idx]~d[idx,]$mean.scru)
+summary(m)
+plot(d[idx,]$mean.scru, sig[idx], main=paste0("sig~expr R^2=", signif(summary(m)$r.squared, 3)), pch=".")
+abline(m, col=2)
+
+
+
+
+
+
+
+
+
+sig = apply(raw_wig_signal[,-(1:6)], 1, mean, na.rm=TRUE)
+names(sig) = as.character(raw_wig_signal[,4])
+length(sig)
+
+genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+genes = genes[genes$type %in% "protein-coding",]
+dim(genes)
+d = read.table("~/projects/atad2/results/GSE70314/04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE, stringsAsFactors=FALSE)
+d$lnorm.GSM1723639 = log2(d$norm.GSM1723639+1)
+d$lnorm.GSM1723640 = log2(d$norm.GSM1723640+1)
+d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
+d = d[
+  !is.na(d$mean.scru) &
+  d$mean.scru>0 &
+  d$Id %in% rownames(genes),
+]
+head(d)
+dim(d)
+rownames(d) = d[,1]
+d = d[rownames(d)%in%rownames(genes),]
+dim(d)
+rownames(d) = as.character(genes[rownames(d),]$entrez)
+
+idx = intersect(rownames(d), names(sig))
+m = lm(sig[idx]~d[idx,]$mean.scru)
+summary(m)
+plot(d[idx,]$mean.scru, sig[idx], main=paste0("sig~expr R^2=", signif(summary(m)$r.squared, 3)), pch=".")
+abline(m, col=2)
+```
+
+
+
+# Material and Methods
+
+
+
+## Sequencing
+
+**TO BE UPDATED** *Total RNA was purified by trizol extraction followed by Qiagen RNeasy mini kit protocol. 
+Removal of most rRNA was proceeded using NEBNext rRNA Depletion Kit Ribodepletion. 
+Quality was verified by Agilent Bioanalyzer 2100. 
+Libraries were prepared using NEBNext Ultra Directional RNA Library Prep kit for Illumina and stranded paired-end 2x150bp reads were produced by Illumina NextSeq500. 
+Base calling was performed using RTA version 2.*
+
+## Trimming
+
+Post processing of fastq files, Paired fastq files were processed by 5 prime trimming, keeping 30 bp-length fragments, using `fastx_trimmer`.
+
+**with options:** -l 30 -Q33, meaning 5 prime trimming keeping 30 bp-length fragments). 
+
+## Alignment
+
+The trimmed fastq files were aligned on the USCS mm10 genome using `bowtie2`
+
+**with options:** –end-to-end, –no-mixed, –no-discordant). 
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
