@@ -1,3 +1,20 @@
+tile_genome = function(win_size, genome) {
+  feat = apply(genome, 1, function(l) {
+    beg = seq(1, as.numeric(l[[3]]), by=win_size)
+    end = beg + win_size
+    ret = data.frame(chr=l[[1]], beg=beg, end=end, name1=l[[5]], name2=paste0(l[[4]], "_feat", 1:length(beg)), strand=l[[6]], stringsAsFactors=FALSE)
+    return(ret)
+  })
+  feat = do.call(rbind, feat)
+  feat[,4] = paste0("feat_", 1:nrow(feat))
+  rownames(feat) = feat[,4]
+  feat[,2] = format(feat[,2], scientific = FALSE)
+  feat[,3] = format(feat[,3], scientific = FALSE)
+  head(feat)
+  dim(feat)
+  feat
+}
+
 merge_bed = function(tmp_bed) {
   library('bedr');
   region <- tmp_bed;
