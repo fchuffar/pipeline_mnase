@@ -34,9 +34,13 @@ rule target:
       # "/home/chuffarf/projects/datashare/GSE55819/raw/SRR1647910_fastxtrimf30.fastq.gz",
 
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+set +u
+source ~/conda_config.sh 
+conda activate mnase_env
+set -u
+
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ . -n multiqc_trim_fastq_files \
-  ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip \
+  ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
   # ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
 
 echo workflow \"01_trim_fastq_files.py\" completed at `date`.
@@ -44,25 +48,29 @@ echo workflow \"01_trim_fastq_files.py\" completed at `date`.
 
 
 
-rule trim_fastxtoolkit:
-    input:
-      fastqgz="{path}/raw/{prefix}.fastq.gz", 
-      fastqc="{path}/raw/{prefix}_fastqc.zip",
-    output: 
-      fastqgz="{path}/raw/{prefix}_fastxtrimf{trim}.fastq.gz",
-      # fastqc="{prefix}_fastxtrimf{trim}_fastqc.zip",
-    threads: 1
-    shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
-echo computing $tmpfile ...
-gunzip -c  {input.fastqgz} | fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
-echo move $tmpfile to output.
-cp $tmpfile {output.fastqgz}
-rm $tmpfile
-fastqc {output.fastqgz}
-fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
-    """
+# rule trim_fastxtoolkit:
+#     input:
+#       fastqgz="{path}/raw/{prefix}.fastq.gz", 
+#       fastqc="{path}/raw/{prefix}_fastqc.zip",
+#     output: 
+#       fastqgz="{path}/raw/{prefix}_fastxtrimf{trim}.fastq.gz",
+#       # fastqc="{prefix}_fastxtrimf{trim}_fastqc.zip",
+#     threads: 1
+#     shell:"""
+# source ~/conda_config.sh 
+# set +u
+# conda activate mnase_env
+# set -u
+
+# tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
+# echo computing $tmpfile ...
+# gunzip -c  {input.fastqgz} | fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
+# echo move $tmpfile to output.
+# cp $tmpfile {output.fastqgz}
+# rm $tmpfile
+# fastqc {output.fastqgz}
+# fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
+#     """
 
 rule fastqc:
     input:  fastqgz="{path}/raw/{prefix}.fastq.gz"
@@ -70,9 +78,13 @@ rule fastqc:
             html="{path}/raw/{prefix}_fastqc.html"
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+set +u
+source ~/conda_config.sh 
+conda activate mnase_env
+set -u
+
 fastqc {input.fastqgz}
-fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
+# fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
 """
 
 
