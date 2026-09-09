@@ -1,10 +1,13 @@
-# 0. cp 00_preprocessing.sh to customize it
+# 00. cp 00_preprocessing.sh to customize it
 cp 00_preprocessing.sh 00_custom_preprocessing.sh
 open 00_custom_preprocessing.sh
 
+# 0. copy the correct config.XXX file
+cp config.t2t config
+
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/templeton/results/GSE156108SR
+cd ~/projects/templeton/results/GSE156108SRT2T
 source config
 echo $gse
 echo $project
@@ -13,14 +16,12 @@ conda activate mnase_env
 ## push to dahu
 rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 
-
 # 2. Put raw fastq file in ~/projects/datashare/${gse}/raw
 ln -s ~/projects/datashare
-mkdir -p ~/projects/datashare/${gse}/raw
-cd ~/projects/datashare/${gse}/raw
+mkdir -p datashare/${gse}/raw
+cd datashare/${gse}/raw
 # done previously using https://github.com/fchuffar/gse2study/blob/master/01_preprocessing.sh ... 
 # ... or edit and bash design.sh
-
 
 # 3. QC/Trim fastq files using 01_trim_fastq_files.py 
 source ~/conda_config.sh 
@@ -28,15 +29,13 @@ conda activate mnase_env
 cd ~/projects/${project}/results/${gse}/
 ls -lha ~/projects/datashare/${gse}/raw/*.fastq.gz
 ## set targets in 01_trim_fastq_files.py, then launch pipeline on a node:
-snakemake -k -s 01_trim_SR_fastq_files.py --cores 16 -pn
+snakemake -k -s 01_trim_fastq_files.py --cores 16 -pn
 ## or on the dahu cluster:
 snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
-
-
-# 4. Design. Link here samples and fastqz unsing .info file.
+# 4. Design. Link here samples and fastqz unsing .info file...
 ## SR or PE?
-ls -lha ~/projects/datashare/${gse}/raw
+ls -lha ~/projects/datashare/${gse}/raw/
 if [[ -f ${srr}_2.fastq || -f ${srr}_2.fastq.gz ]]; then
   sequencing_read_type=PE
 else
@@ -66,15 +65,15 @@ done
 cat  *_trim30.info
 ## and set samples there:
 cd ~/projects/${project}/results/${gse}/
-echo "samples = c("         >  config.R                                                                    
+echo "samples = c("         >  samples.R                                                                    
 for gsm in $gsms                                                        
 do                                                        
-  echo "  '${gsm}',     "   >> config.R                                                                
+  echo "  '${gsm}',     "   >> samples.R                                                                
 done                                                        
-echo ")           "         >> config.R                                                         
-cat config.R                                                        
-
-
+echo ")           "         >> samples.R                                                         
+cat samples.R                                                        
+# or previouly done in design.sh and then:
+# cp samples.template.R samples.R 
 
 
 ## 5. Align and wiggle

@@ -24,6 +24,7 @@ rule target:
     message: "-- Rule target completed. --"
     input:
       fastqc,
+      # fastq_trim30,
       # fastq_trim30_R1,
       # fastq_trim30_R2,
       # fastq_trim60_R1,
@@ -39,11 +40,10 @@ source ~/conda_config.sh
 conda activate mnase_env
 set -u
 
-multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ . -n multiqc_trim_fastq_files \
+multiqc --force -o . -n multiqc_trim_fastq_files \
   ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
   # ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
 
-echo workflow \"01_trim_fastq_files.py\" completed at `date`.
           """
 
 

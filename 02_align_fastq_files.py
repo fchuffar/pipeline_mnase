@@ -1,10 +1,10 @@
 import os 
 exec(open("config").read())
 
-# trick to load samples from config.R
+# trick to load samples from samples.R
 def c(*args): return list(args)
 
-exec(open("config.R").read())
+exec(open("samples.R").read())
 
 foo=version 
 bam_srt = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt.bam"             for sample in samples for trim in ["no"]]
