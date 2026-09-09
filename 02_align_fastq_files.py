@@ -167,10 +167,11 @@ rule mmq_filter_for_danpos:
       bai = "{prefix}_srt_mmq{mmq}.bam.bai",
     threads: 1
     shell:"""
-# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-export CONDA_BUILD=""
+set +u
 source ~/conda_config.sh 
 conda activate mnase_env
+set -u
+
 samtools view -bq {wildcards.mmq} {input.bam} > {output.bam}
 samtools index {output.bam}
     """
@@ -184,10 +185,11 @@ rule awk_filter_fragment_length:
       bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_fsmin{fsmin}_fsmax{fsmax}_srt.bam.bai",
     threads: 1
     shell:"""
-# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-export CONDA_BUILD=""
+set +u
 source ~/conda_config.sh 
 conda activate mnase_env
+set -u
+
 # https://www.biostars.org/p/65262/
 BAM={input.bam}
 fsmin={wildcards.fsmin}
@@ -200,27 +202,6 @@ samtools index {output.bam}
 
 
 # ruleorder: mmq_filter_for_danpos > align_bowtie
-
-
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 rule bigwig_coverage_advanced_SR:
     input: "{prefix}_srt.bam", 
@@ -249,10 +230,11 @@ rule bigwig_coverage_advanced_PE:
     output: "{prefix}_srt_PE_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-export CONDA_BUILD=""
+set +u
 source ~/conda_config.sh 
 conda activate mnase_env
+set -u
+
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -272,10 +254,11 @@ rule bigwig_coverage_centerReads_advanced_PE:
     output: "{prefix}_srtcr_PE_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-export CONDA_BUILD=""
+set +u
 source ~/conda_config.sh 
 conda activate mnase_env
+set -u
+
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
