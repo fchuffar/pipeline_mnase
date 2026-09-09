@@ -1,5 +1,5 @@
-gse="GSE193140t2t"
-project="atacclock"
+project="templeton"
+gse="chip_sa"
 species="Homo_sapiens"
 annotation="T2T"
 version="CHM13v2.0"

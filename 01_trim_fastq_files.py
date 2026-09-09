@@ -35,16 +35,12 @@ rule target:
 
     shell:"""
 set +u
-echo "#1 ##############"
 source ~/conda_config.sh 
-echo "#2 ##############"
 conda activate mnase_env
 set -u
 
-echo "#3 ##############"
-
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ . -n multiqc_trim_fastq_files \
-  ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip \
+  ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
   # ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
 
 echo workflow \"01_trim_fastq_files.py\" completed at `date`.

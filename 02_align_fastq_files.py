@@ -109,12 +109,8 @@ rule align_bowtie:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-echo "SHELL=$SHELL" >&2
-echo "BASH_VERSION=$BASH_VERSION" >&2
-# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
-source ~/conda_config.sh 
-type conda >&2 || true
 set +u
+source ~/conda_config.sh 
 conda activate mnase_env
 set -u
 
