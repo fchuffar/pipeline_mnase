@@ -15,6 +15,7 @@ output:
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 source("common.R")
 source("config")
+if (!exists("COUNTTILES")) {COUNTTILES = FALSE}
 prefix = "pca_tiles"
 ```
 
@@ -31,6 +32,10 @@ exp_grp = data.frame(
 rownames(exp_grp) = exp_grp$id
 head(exp_grp)
 dim(exp_grp)
+
+e = exp_grp
+
+
 # s = epimedtools::create_study()
 # s$gse = "GSE193140"
 # e = s$get_exp_grp()
@@ -42,7 +47,6 @@ dim(exp_grp)
 # prefix = "spectral"
 # score_filenames = exp_grp$bw
 # # score_filenames = score_filenames[sapply(score_filenames, file.exists)]
-
 ```
 
 
@@ -81,7 +85,9 @@ dim(feat)
 
 
 ## Counts
-```{r}
+
+
+```{r count_tiles, eval=COUNTTILES}
 # Counts
 feat_saf = feat[, c(4,1:3, 6)]
 # feat_saf = feat[1:100,c(4,1:3, 6)]
@@ -109,437 +115,115 @@ args = paste0(
 print(paste(cmd, args))
 system2(cmd, args)
 system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
-stop("EFN")
+# stop("EFN")
+```
+
+
+
+
+##  Raw counts
+
+```{r raw_counts_tiles}
+raw_counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+rownames(raw_counts) = raw_counts[,1]
+raw_counts = raw_counts[,-(1:6)]
+colnames(raw_counts) = sub(".*?(GSM[^_]*)_.*", "\\1", colnames(raw_counts))
+head(raw_counts[,1:3])
+tail(raw_counts[,1:3])
+dim( raw_counts)
+```
+
+## CP50M norm counts
+
+```{r}
+```
+
+## Deseq2 norm counts
+
+
+```{r norm_counts_tiles, eval=TRUE}
+if (!all(e$id %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
+countData = raw_counts[,e$id]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData), ]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. exp_grp")}
+
+dds <- DESeq2::DESeqDataSetFromMatrix(
+  countData = countData,
+  colData = colData,
+  design = ~ 1
+)
+
+# dds <- DESeq2::DESeq(dds)
+# res_age <- DESeq2::results(dds, name = "age")
+
+dds = DESeq2::estimateSizeFactors(dds)
+
+norm_counts_tiles = DESeq2::counts(dds, normalized=TRUE)
+head(norm_counts_tiles[,1:3])
+dim(norm_counts_tiles)
 ```
 
 
 
 # PCA
 
-```{r pca}
-matrix_file = matrix_files[2]
-matrix_file = "tmp/matrix_spectral_50000.txt.gz"
-print(matrix_file)
-rpkm_wig_signal = mread.tablegz(matrix_file, skip=1, stringsAsFactors=FALSE)
-tmp_d = as.matrix(rpkm_wig_signal[,7:ncol(rpkm_wig_signal)])
-# tmp_d[300:310,]
-# tmp_d[600:610,]
-colnames(tmp_d) = rownames(exp_grp)
 
+```{r pca_norm_counts_tiles}
+data = as.matrix(t(norm_counts_tiles))
+pca = prcomp(data, scale=FALSE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# # --- MCLUST sur les scores PCA ---
+# library(mclust)
+# mc = mclust::Mclust(pca$x[,2:6], G=5)
+# cl = mc$classification
+# col = cl
 
-  mat = t(as.matrix(tmp_d))
-  idx_samples = rownames(mat)
-  mat = mat[idx_samples,]
-  dim(mat)
-  sds = apply(mat, 2, sd)
-  mat = mat[,sds!=0]
-  dim(mat)
+# col = as.numeric(e[rownames(pca$x),]$gender)
+col = 1
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
 
-
-  pca = prcomp(mat, scale=TRUE)
-  v = pca$sdev * pca$sdev
-  p = v / sum(v) * 100
-  palette("default")
-  cols = as.numeric(as.factor(exp_grp[rownames(mat),]$gender))
-  # cols = as.numeric(as.factor(exp_grp[rownames(mat),]$qage)) ; palette(c(  "#543005", "#8c510a", "#bf812d", "#dfc27d", "#f6e8c3",  "#c7eae5", "#80cdc1", "#35978f", "#01665e", "#003c30")) ; plot(exp_grp$age, col=as.numeric(as.factor(exp_grp$qage)))
-  
-  layout(matrix(1:6,2), respect=TRUE)
-  # layout(matrix(1:2,1), respect=TRUE)
-  barplot(p, ylab="% of variance explained", xlab="components")
-  for (i in 1:4) {
-    j = i+1
-    plot(pca$x[,i], pca$x[,j], 
-    	xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), 
-    	ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), 
-    	col=cols,
-    	pch=16)  
-  }
-
-  print(paste0("  removing..."))
-  head(pca$x[,1:2])
-  mean = mean(pca$x[,1])
-  sd = sd(pca$x[,1])
-  pval = pnorm(abs(pca$x[,1]), mean, sd, lower.tail=FALSE)
-  padj = p.adjust(pval, method="BH")
-  sum(padj <= 0.2)
-  range(padj)  
-  idx_rm = names(padj)[!padj > 0.2]
-  i = 1
+for (i in 1:5) {
   j = i+1
-  plot(pca$x[,i], pca$x[,j], 
-    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), 
-    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), 
-    col=cols,
-    pch=16)  
-  points(pca$x[idx_rm,i], pca$x[idx_rm,j], 
-    col=2,
-    cex=3, pch=16)  
-  idx_samples = names(padj)[padj > 0.2]
-
-
-
-
-plot(apply(mat, 1, sd), exp_grp[rownames(mat), ]$age)
-
-plot(density(mat))
-
-```
-
-# Insert size
-
-```
-srp=`cat ~/projects/datashare/platforms/SRA_Accessions_SRP_GSE.tab | grep ${gse} | cut -f1 | grep SRP | uniq`
-gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${srp} | cut -f10 | cut -f1 -d_ | uniq`
-for gsm in $gsms
-do
-  echo ${gsm}  
-  samtools view ~/projects/datashare/GSE193140/${gsm}_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam | awk '($9 > 0 && $9 < 1000) {sum+=$9; n++} END {print "Mean insert size:", sum/n}' > ${gsm}.insert.size.txt &
-done
-ls   *.insert.size.txt
-cat  *.insert.size.txt
-```
-
-
-
-
-
-```{r inseret.size}
-foo = sapply(list.files(pattern="*.insert.size.txt"), read.table)[4,]
-exp_grp$insert_size = NA
-exp_grp[substr(names(foo), 1, 10),]$insert_size = unlist(foo)
-plot(exp_grp$insert_size, exp_grp$age)
-points(exp_grp[idx_samples,]$insert_size, exp_grp[idx_samples,]$age, col=2, pch=16, cex=3)
-plot(exp_grp[idx_samples,]$insert_size, pca$x[idx_samples,1], col=2, pch=16, cex=3)
-
-```
-
-# params
-
-```{r}
-qcok_samples = rownames(exp_grp)[exp_grp$insert_size < 200]
-qcok_samples
-prefix = "feat"
-mmq = 30 
-```
-
-# macs3
-
-
-```{r mergebammacs3, eval=FALSE}
-cmd = "samtools"
-args = paste0("merge /home/chuffarf/projects/datashare/GSE193140/merged_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam ", paste0("/home/chuffarf/projects/datashare/GSE193140/", qcok_samples, "_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam", collapse=" "))
-print(paste(cmd, args))
-system2(cmd, args)
-
-cmd = "samtools"
-args = paste0("sort /home/chuffarf/projects/datashare/GSE193140/merged_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30.bam -o /home/chuffarf/projects/datashare/GSE193140/merged_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30_srt.bam ")
-print(paste(cmd, args))
-system2(cmd, args)
-
-cmd = "samtools"
-args = paste0("index  /home/chuffarf/projects/datashare/GSE193140/merged_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30_srt.bam ")
-print(paste(cmd, args))
-system2(cmd, args)
-
-cmd = "macs3"
-args = paste0("callpeak -t /home/chuffarf/projects/datashare/GSE193140/merged_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt_mmq30_srt.bam -f BAMPE -g hs --keep-dup all --nomodel --shift -75 --extsize 150 -q 0.01 --outdir macs3_output_merged ")
-print(paste(cmd, args))
-system2(cmd, args)
-
-# #	Nom de la colonne	Description	Type / Exemple
-# 1	chrom	Nom du chromosome	chr1
-# 2	chromStart	Position de début du pic (0-based, inclusif)	3455000
-# 3	chromEnd	Position de fin du pic (1-based, exclusif)	3455500
-# 4	name	Nom du pic	peak_00001
-# 5	score	Score de 0 à 1000 (utile pour visualisation UCSC)	500
-# 6	strand	Brin (+, -, ou . si non applicable)	.
-# 7	signalValue	Enrichissement du signal au sommet du pic	12.45
-# 8	pValue	–log10(p-value) de la significativité du pic	7.30
-# 9	qValue	–log10(q-value, FDR ajustée)	5.21
-# 10	peak	Position du sommet du pic par rapport à chromStart (en bp). -1 si inconnu.	250
-feat = read.table("macs3_output_merged/NA_feat.narrowPeak")
-colnames(feat) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue", "peak")
-feat$len = feat$chromEnd - feat$chromStart
-
-plot(feat$qValue, feat$pValue, pch=".")
-
-qValueMax = 100
-feat[feat$qValue>=qValueMax,]$qValue = qValueMax
-
-signalValueMax = 3
-feat[feat$signalValue>=signalValueMax,]$signalValue = signalValueMax
-
-layout(matrix(1:6, 2), respect=TRUE)
-# plot(density(feat$len))
-plot(density(feat$qValue))
-# plot(density(feat$qValue))
-plot(feat$qValue, feat$len, pch=".")
-
-plot(density(feat$signalValue))
-plot(feat$signalValue, feat$len, pch=".")
-
-plot(feat$qValue, feat$signalValue, pch=".")
-plot(feat$qValue, feat$pValue, pch=".")
-
-# Counts
-feat_saf = feat[, c(4,1:3, 6)]
-# feat_saf = feat[1:100,c(4,1:3, 6)]
-colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
-# feat_saf$Start = feat$tss
-# head(feat_saf)
-# feat_saf$Start = feat$tss - ifelse(feat_saf$Strand=="+", 800, 1500) 
-# if (sum(feat_saf$Start<1)!=0) {
-#   feat_saf[feat_saf$Start<1,]$Start = 1
-# } 
-# feat_saf$End = feat$tss + ifelse(feat_saf$Strand=="-", 800, 1500)  
-# head(feat_saf)
-saf_filename = paste0(prefix, ".saf")
-write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
-cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
-cmd = "featureCounts"
-smps = qcok_samples
-# smps = qcok_samples[1:4]
-# smps = "GSM5774299"
-args = paste0(
-  "-p -a ", saf_filename, " -F SAF -s 0 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
-  paste0("/home/chuffarf/projects/datashare/GSE193140/", smps, "_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt.bam ", collapse=" "),
-
-  ""
-)
-print(paste(cmd, args))
-system2(cmd, args)
-system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
-```
-
-# RepeatMasker
-
-```{r}
-prefix = "rmsk"
-if (!exists("mreadtablegz")) {mreadtablegz = memoise::memoise(function(gz_file, ...){read.table(file=gzfile(gz_file), ...)})}  
-# https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
-# downloading UCSC rmsk data as BED
-# BED formatted UCSC track content can be obtained from UCSC table broswer.
-# The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
-#
-# the assembly "Feb.2009 GRCh37/hg19"
-# the group "repeats and variations"
-# the track "RepeatMasker"
-# and finally the table "rmsk"
-# As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
-#
-# region: "genome"
-# ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
-#
-# output format: "BED - browser extensible data"
-# output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
-# file type returned: "gzip compressed"
-
-rmsk = mreadtablegz("~/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/UCSC_rmsk.hg38.tsv.gz")
-head(rmsk)
-dim(rmsk)
-
-table(rmsk[,12])
-feat_oi = c(
-  "LINE", 
-  "SINE", 
-  "LTR", 
-  "DNA", 
-  # "RC", 
-  # "Retroposon", 
-  # "RNA", 
-  "tRNA", 
-  "rRNA", 
-  "Satellite", 
-  # "scRNA", 
-  "Simple_repeat", 
-  # "snRNA", 
-  # "srpRNA", 
-  "Low_complexity", 
-  "Unknown"
-)               
-rmsk_bed = rmsk[rmsk[,12]%in%feat_oi,]
-rmsk_bed = rmsk_bed[,c(6,7,8,12,12,10, 11)]
-rmsk_bed[,4] = paste0("rmsk_", 1:nrow(rmsk_bed))
-rownames(rmsk_bed) = rmsk_bed[,4]
-head(rmsk_bed)
-tail(rmsk_bed)
-dim(rmsk_bed)
-sort(table(rmsk_bed[5]))
-# write.table(rmsk_bed[,1:6], file="rmsk.hg38.bed"       , sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
-
-
-PRC2_bed = read.table("~/projects/dnamaging/vignettes/PRC2.bed") ; PRC2_bed[,5] = "PRC2" ; PRC2_bed[,7] = "PRC2"
-PROM_bed = read.table("~/projects/dnamaging/vignettes/PROM.bed") ; PROM_bed[,5] = "PROM" ; PROM_bed[,7] = "PROM"
-OTHR_bed = read.table("~/projects/dnamaging/vignettes/OTHR.bed") ; OTHR_bed[,5] = "OTHR" ; OTHR_bed[,7] = "OTHR"
-
-PRC2_bed[,2] = PRC2_bed[,2] - 5000 ; PRC2_bed[,3] = PRC2_bed[,3] + 5000 ; 
-PROM_bed[,2] = PROM_bed[,2] - 5000 ; PROM_bed[,3] = PROM_bed[,3] + 5000 ; 
-OTHR_bed[,2] = OTHR_bed[,2] - 5000 ; OTHR_bed[,3] = OTHR_bed[,3] + 5000 ; 
-
-
-colnames(PRC2_bed) = colnames(rmsk_bed)
-colnames(PROM_bed) = colnames(rmsk_bed)
-colnames(OTHR_bed) = colnames(rmsk_bed)
-
-
-
-rmsk_bed = rbind( 
- PRC2_bed,
- PROM_bed,
- OTHR_bed,
- rmsk_bed
-)
-rownames(rmsk_bed) = rmsk_bed[,4]
-
-feat_oi = c(feat_oi, "PRC2", "PROM", "OTHR")
-```
-
-```{r, eval=FALSE}
-stop("EFN")
-# Counts
-feat_saf = rmsk_bed[, c(4,1:3, 6)]
-colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
-# feat_saf = feat_saf[1:100,]
-saf_filename = paste0(prefix, ".saf")
-write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
-cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
-cmd = "featureCounts"
-smps = qcok_samples
-# smps = qcok_samples[1:4]
-# smps = "GSM5774299"
-args = paste0( #-p
-  "-p  -B --read2pos 5 -a ", saf_filename, " -F SAF -s 0 -Q ", mmq, " -T 16 -o ", prefix, "_count_", mmq, ".txt ", 
-  paste0("/home/chuffarf/projects/datashare/GSE193140/", smps, "_end-to-end_trim30_bowtie2_Homo_sapiens_UCSC_hg38_srt.bam ", collapse=" "),
-
-  ""
-)
-print(paste(cmd, args))
-system2(cmd, args)
-system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
-```
-
-
-# DESeq2
-
-
-
-```{r eval=TRUE}
-raw_counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
-
-head(raw_counts)
-dim(raw_counts)
-
-countData = raw_counts[,7:ncol(raw_counts)]
-rownames(countData) = raw_counts[,1]
-colnames(countData) = substr(colnames(countData), 46, 55)
-
-head(countData)
-dim( countData)
-
-
-# Vérification
-
-stopifnot(all(rownames(countData) == rownames(rmsk_bed)))
-
-# Agrégation des counts par classe
-library(Matrix) # utile si la matrice est grande
-counts_by_class <- rowsum(countData, group = rmsk_bed[,7])
-head(counts_by_class)
-dim(counts_by_class)
-
-countData = counts_by_class
-
-
-# head(countData)
-# tail(countData)
-# dim(countData)
-# colData = data.frame(id=colnames(countData))
-# dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ 1)
-# dds = DESeq2::estimateSizeFactors(dds)
-# dds$sizeFactor
-
-tmp_idx = intersect(qcok_samples, rownames(exp_grp)[as.numeric(exp_grp$qage) %in% c(1,4)])
-tmp_idx = qcok_samples
-
-counts = countData[,tmp_idx] # <- read.csv("counts_matrix.csv", row.names = 1)
-plot(density(log2(apply(counts, 1, max)+1)))
-colData = exp_grp[colnames(counts), ]
-
-# Vérifie que les noms de colonnes correspondent
-all(colnames(counts) == rownames(colData))
-
-dds <- DESeq2::DESeqDataSetFromMatrix(
-  countData = counts,
-  colData = colData,
-  design = ~ gender + age
-)
-
-dds <- DESeq2::DESeq(dds)
-
-res_age <- DESeq2::results(dds, name = "age")
-foo = rmsk_bed[,c(5,7)]
-foo = foo[!duplicated(paste0(foo[,1], "_", foo[,2])),]
-foo = foo[!duplicated(foo[,2]),]
-rownames(foo) = foo[,2]
-bar = res_age
-
-all(rownames(foo) %in% rownames(bar))
-all(rownames(bar) %in% rownames(foo))
-bar$class = foo[rownames(bar),1]
-
-bar$class = factor(bar$class, levels=feat_oi)
-
-beanplot::beanplot(bar$log2FoldChange ~ bar$class, what=c(0,1,0,0), border=1, col="grey", las=2)
-abline(h=0, lty=2)
-
-
-# # resultsNames(dds)  # pour voir les noms exacts des contrastes disponibles
-# # res_age <- results(dds, contrast = c("age", "old", "young"))
-
-# res_age <- res_age[order(res_age$padj), ]
-# sig_genes_age  <- subset(res_age, padj < 0.05)
-
-# # png("dds.png", width=1200, height=1200)
-
-# idxs = list()
-# for (f in feat_oi) {
-#  idxs[[f]] = unique(rmsk_bed[rmsk_bed[rmsk_bed[,5]%in%c(f),4],7])
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=col,
+    pch=16
+  )
+}
+
+# for (key in c("age", "gender")) {
+#  layout(matrix(1:6,2), respect=TRUE)
+#   plot(sapply(1:ncol(pca$x), function(i) {
+#     x =  e[rownames(pca$x),key]
+#     y = pca$x[,i]
+#     m = lm(y~x)
+#     summary(m)$r.squared*100
+#   }), main=key, xlab="PCs", ylab="R^2 (%)")
+#   for (i in 1:5) {
+#     x =  e[rownames(pca$x),key]
+#     y = pca$x[,i]
+#     m = lm(y~x)
+#     xlab=key
+#     ylab=paste0("PC", i, "(", signif(p[i], 3), "%)")
+#     main=paste0("R^2=", signif(summary(m)$r.squared, 3)*100, "%")
+#     if (is.numeric(x)) {
+#       plot(x, y, xlab=xlab, ylab=ylab, main=main, pch=16)      
+#       abline(m, col=2)
+#     } else {
+#       boxplot(y~x, xlab=xlab, ylab=ylab, main=main)      
+#     }
+#   }
 # }
-
-# res_age$log2FoldChange
-# den = density(res_age$log2FoldChange, na.rm=TRUE) 
-
-# plot(den, lty=2, col="grey")
-# dens = list()
-# col=1
-# for (f in feat_oi) {
-#   dens[[f]] = density(res_age[idxs[[f]],]$log2FoldChange, na.rm=TRUE, bw=den$bw)
-#   lines(dens[[f]]$x, dens[[f]]$y/nrow(res_age)*length(idxs[[f]]), col=col)
-#   col = col+1
-# }
-
-# legend("topright", feat_oi, col=1:length(feat_oi), pch=15)
-
-plot(res_age$log2FoldChange, -log10(res_age$pvalue),
-     pch = ".", main = "Volcano plot - age",
-     xlab = "log2 Fold Change", ylab = "-log10(p-value)")
-abline(h = -log10(0.05), col = "red", lty = 2)
-
-# points(res_age[idx_line,]$log2FoldChange, -log10(res_age[idx_line,]$pvalue), col=2)
-# points(res_age[idx_sine,]$log2FoldChange, -log10(res_age[idx_sine,]$pvalue), col=3)
-# points(res_age[idx_ltr ,]$log2FoldChange, -log10(res_age[idx_ltr ,]$pvalue), col=4)
-
-
-
-
-
-# dev.off()
-
-# vsd <- DESeq2::vst(dds, blind = FALSE)
-# DESeq2::plotPCA(vsd, intgroup = c("gender", "age"))
-
-
 ```
+
+
 
 
 
@@ -548,6 +232,7 @@ abline(h = -log10(0.05), col = "red", lty = 2)
 # Session Information
 
 ```{r results="verbatim"}
+COUNTTILES = FALSE
 sessionInfo()
 ```
 
