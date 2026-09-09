@@ -7,13 +7,15 @@ def c(*args): return list(args)
 exec(open("config.R").read())
 
 foo=version 
-bam_srt = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt.bam"             for sample in samples for trim in ["no", "30", "60"]]
+bam_srt = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt.bam"             for sample in samples for trim in ["no"]]
 # bam_mmq = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_mmq"+mmq+".bam"    for sample in samples for trim in ["30"] for mmq in ["0", "30"]]
-bw =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
-bw2 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin150_fsmax180_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
-bw3 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin200_fsmax250_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
-bw4 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin150_fsmax180_srtcr_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
-bw5 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin200_fsmax250_srtcr_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
+bw =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
+# bw2 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin150_fsmax180_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
+# bw3 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin200_fsmax250_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
+# bw4 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin150_fsmax180_srtcr_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
+# bw5 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin200_fsmax250_srtcr_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
+
+
 
 localrules: target
 
@@ -26,10 +28,10 @@ rule target:
       bam_srt,
       # bam_mmq,
       bw,
-      bw2,
-      bw3,
-      bw4,
-      bw5,
+      # bw2,
+      # bw3,
+      # bw4,
+      # bw5,
       # "/home/chuffarf/projects/datashare/cutntag_sayou_curie/RSC1-FLAG_ATHOOK_FLAG_Rep1_end-to-end_trim30_bowtie2_Candida_albicans_IAB_SC5314.A22.haplo_fsmin200_fsmax250_srt.bam", 
       # "/home/chuffarf/projects/datashare/cutntag_sayou_curie/RSC1-FLAG_ATHOOK_FLAG_Rep2_end-to-end_trim30_bowtie2_Candida_albicans_IAB_SC5314.A22.haplo_fsmin200_fsmax250_srt.bam", 
       # "/home/chuffarf/projects/datashare/cutntag_sayou_curie/RSC1-FLAG_BAH_FLAG_Rep1_end-to-end_trim30_bowtie2_Candida_albicans_IAB_SC5314.A22.haplo_fsmin200_fsmax250_srt.bam", 
@@ -73,10 +75,14 @@ rule target:
       # "/home/chuffarf/projects/datashare/cutntag_sayou_curie/UNTAG_WT_H3K4me3_Rep2_end-to-end_trim30_bowtie2_Candida_albicans_IAB_SC5314.A22.haplo_fsmin150_fsmax180_srt_PE_30_4_RPKM.bw", 
 
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+set +u
+source ~/conda_config.sh 
+conda activate mnase_env
+set -u
+
 multiqc --force -o . -n multiqc_notrim \
-  ~/projects/datashare/"""+gse+"""/*_end-to-end_trim30_bowtie2_"""+species+"""_"""+annotation+"""_"""+foo+""".log \
-  ~/projects/datashare/"""+gse+"""/*_end-to-end_trim30_bowtie2_"""+species+"""_"""+annotation+"""_"""+foo+""".bam \
+  ~/projects/datashare/"""+gse+"""/*_end-to-end_trim*_bowtie2_"""+species+"""_"""+annotation+"""_"""+foo+""".log \
+  ~/projects/datashare/"""+gse+"""/*_end-to-end_trim*_bowtie2_"""+species+"""_"""+annotation+"""_"""+foo+""".bam \
   ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip
 
 echo workflow \"02_align_fastq_files.py\" completed at `date`.
@@ -103,7 +109,15 @@ rule align_bowtie:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+echo "SHELL=$SHELL" >&2
+echo "BASH_VERSION=$BASH_VERSION" >&2
+# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+source ~/conda_config.sh 
+type conda >&2 || true
+set +u
+conda activate mnase_env
+set -u
+
 bowtie2 \
   -t \
   -p {threads} \
@@ -133,6 +147,11 @@ rule index_bowtie:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
+set +u
+source ~/conda_config.sh 
+conda activate mnase_env
+set -u
+
 mkdir -p /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
 cd /home/chuffarf/projects/datashare/genomes/{wildcards.species}/{wildcards.annotation}/{wildcards.version}/Sequence/Bowtie2Index/
 ln -sf ../WholeGenomeFasta/genome.fa 
@@ -152,7 +171,10 @@ rule mmq_filter_for_danpos:
       bai = "{prefix}_srt_mmq{mmq}.bam.bai",
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export CONDA_BUILD=""
+source ~/conda_config.sh 
+conda activate mnase_env
 samtools view -bq {wildcards.mmq} {input.bam} > {output.bam}
 samtools index {output.bam}
     """
@@ -166,7 +188,10 @@ rule awk_filter_fragment_length:
       bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_bowtie2_{species}_{version}_fsmin{fsmin}_fsmax{fsmax}_srt.bam.bai",
     threads: 1
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export CONDA_BUILD=""
+source ~/conda_config.sh 
+conda activate mnase_env
 # https://www.biostars.org/p/65262/
 BAM={input.bam}
 fsmin={wildcards.fsmin}
@@ -206,7 +231,11 @@ rule bigwig_coverage_advanced_SR:
     output: "{prefix}_srt_SR_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+set +u
+source ~/conda_config.sh 
+conda activate mnase_env
+set -u
+
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -224,7 +253,10 @@ rule bigwig_coverage_advanced_PE:
     output: "{prefix}_srt_PE_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export CONDA_BUILD=""
+source ~/conda_config.sh 
+conda activate mnase_env
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
@@ -244,7 +276,10 @@ rule bigwig_coverage_centerReads_advanced_PE:
     output: "{prefix}_srtcr_PE_{mmq}_{binsize}_{norm}.bw"
     threads: 32
     shell:"""
-PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+# PATH="/summer/epistorage/miniconda3/envs/mnase_env/bin:$PATH"
+export CONDA_BUILD=""
+source ~/conda_config.sh 
+conda activate mnase_env
 export TMPDIR=/dev/shm
 bamCoverage \
   -b {input} \
