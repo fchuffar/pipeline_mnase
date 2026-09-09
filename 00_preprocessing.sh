@@ -4,19 +4,21 @@ open 00_custom_preprocessing.sh
 
 # 1. Set parameters there and in *config* file. 
 ## The two main setable parameters are *project* (the global project) *gse* (the batch/run of fastq files)
-cd ~/projects/atacclock/results/GSE193140t2t
+cd ~/projects/templeton/results/GSE156108SR
 source config
 echo $gse
 echo $project
+source ~/conda_config.sh 
+conda activate mnase_env
 ## push to dahu
-rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
+rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 
 
 # 2. Put raw fastq file in ~/projects/datashare/${gse}/raw
 ln -s ~/projects/datashare
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
-# done previously using https://github.com/fchuffar/gse2study ... 
+# done previously using https://github.com/fchuffar/gse2study/blob/master/01_preprocessing.sh ... 
 # ... or edit and bash design.sh
 
 
@@ -26,7 +28,7 @@ conda activate mnase_env
 cd ~/projects/${project}/results/${gse}/
 ls -lha ~/projects/datashare/${gse}/raw/*.fastq.gz
 ## set targets in 01_trim_fastq_files.py, then launch pipeline on a node:
-snakemake -k -s 01_trim_fastq_files.py --cores 16 -pn
+snakemake -k -s 01_trim_SR_fastq_files.py --cores 16 -pn
 ## or on the dahu cluster:
 snakemake -k -s 01_trim_fastq_files.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
