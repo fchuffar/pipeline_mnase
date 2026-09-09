@@ -114,13 +114,13 @@ if (sr_or_pe=="PE") {
   opt_pe=" "  
 }
 args = paste0(
-  " ", opt_pe, " -a ", saf_filename, " -F SAF -s 0 -Q ", mmq, " -T 32 -o ", prefix, "_count_", mmq, ".txt ", 
+  " ", opt_pe, " -a ", saf_filename, " -F SAF -s 0 -Q ", mmq, " -T 32 -o ", prefix, "_count.txt ", 
   paste0(e$bam , " ", collapse=" "),
   ""
 )
 print(paste(cmd, args))
 system2(cmd, args)
-system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
+system2("cat", paste0(prefix, "_count_.txt.summary"))
 # stop("EFN")
 ```
 
@@ -130,7 +130,7 @@ system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
 ##  Raw counts
 
 ```{r raw_counts_tiles}
-raw_counts = read.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
 rownames(raw_counts) = raw_counts[,1]
 raw_counts = raw_counts[,-(1:6)]
 colnames(raw_counts) = sub(".*?(GSM[^_]*)_.*", "\\1", colnames(raw_counts))
