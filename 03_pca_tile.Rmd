@@ -1,5 +1,5 @@
 ---
-title: "PCA"
+title: "PCA on tiles"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
@@ -40,7 +40,7 @@ This section defines the experimental design and associates each sample with its
 - The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
 - The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
 
-```{r label="params"}
+```{r label="samples"}
 source("samples.R")
 e = data.frame(
   gsm = samples,
@@ -172,7 +172,6 @@ dim(norm_counts_tiles)
 ```
 
 
-
 # PCA
 
 
@@ -187,11 +186,17 @@ p = v / sum(v) * 100
 # cl = mc$classification
 # col = cl
 
-# col = as.numeric(e[rownames(pca$x),]$gender)
-col = 1
 layout(matrix(1:6,2), respect=TRUE)
 # layout(matrix(1:2,1), respect=TRUE)
 barplot(p, ylab="% of variance explained", xlab="components")
+
+if (file.exists("exp_grp.R")) {
+  source("exp_grp.R")
+  col = as.numeric(e[rownames(pca$x),factoi[1]])
+  legend("topright", col=1:length(levels(e[,factoi[1]])), levels(e[,factoi[1]]),pch=16)
+} else {
+  col = 1
+}
 
 for (i in 1:5) {
   j = i+1
@@ -204,8 +209,21 @@ for (i in 1:5) {
   )
 }
 
-```
+layout(1, respect=TRUE)
 
+i=1
+j = i+1
+plot(
+  pca$x[,i], pca$x[,j],
+  xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+  ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+  col=adjustcolor(col, alpha.f=0.5),
+  pch=16
+)
+
+text(pca$x[,i], pca$x[,j], rownames(pca$x))
+
+```
 
 
 
