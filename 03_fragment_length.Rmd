@@ -147,7 +147,8 @@ for (gsm in rownames(e)) {
 }
 head(data[,1:10])
 
-# image(data)
+layout(1, respect=TRUE)
+image(t(data[rownames(pca$x)[order(pca$x[,1])], ]))
 
 pca = prcomp(data, scale=FALSE)
 v = pca$sdev * pca$sdev
@@ -180,6 +181,12 @@ for (i in 1:5) {
     pch=16
   )
 }
+
+pca$x[rownames(pca$x)[order(pca$x[,1])],1]
+
+
+layout(1, respect=TRUE)
+image(t(data[rownames(pca$x)[order(pca$x[,1])], ]))
 
 
 ```
