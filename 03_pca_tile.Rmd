@@ -133,7 +133,7 @@ system2("cat", paste0(prefix, "_count_.txt.summary"))
 raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
 rownames(raw_counts) = raw_counts[,1]
 raw_counts = raw_counts[,-(1:6)]
-colnames(raw_counts) = sub(".*?(GSM[^_]*)_.*", "\\1", colnames(raw_counts))
+colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
 head(raw_counts[,1:3])
 tail(raw_counts[,1:3])
 dim( raw_counts)
