@@ -1,0 +1,1728 @@
+---
+title: "Merging bam files"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+
+
+```{r}
+prefix = "merge_bam"
+if (!exists("MERGEBAM")) {MERGEBAM = FALSE}
+```
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+# Pipeline Initialization
+
+This section initializes the environment required for the analysis:
+
+- `common.R` contains the utility functions used throughout the pipeline.
+- `config` contains the dataset-specific parameters used by the script, such as the project name, dataset name, and species.
+
+
+```{r}
+source("common.R")
+source("config")
+```
+
+# Samples
+
+This section defines the experimental design and associates each sample with its corresponding sequencing files:
+
+- `samples.R` contains the sample-specific information and defines the `samples` variable used throughout the pipeline.
+- The `e` data frame defines the **experimental grouping**, with one row per sample and columns pointing to the corresponding BigWig (`bw`) and BAM (`bam`) files and factors if needed.
+- The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
+- The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
+
+```{r label="samples"}
+source("samples.R")
+e = data.frame(
+  gsm = samples,
+  bam = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam"),
+  bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+)
+rownames(e) = e$gsm
+head(e)
+dim(e)
+stop("EFN")
+```
+
+# ATAC peaks
+
+
+
+```{r mergebammacs3, eval=FALSE}
+# locus = "chr5:155000000-165000000"
+# cmd = "samtools"
+# args = paste0("merge - ", paste0("  <(samtools view -bh /home/chuffarf/projects/datashare/", gse, "/", idx_samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam ", locus, " ) ", collapse=" "), " > /home/chuffarf/projects/datashare/", gse, "/merged", locus, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam")
+# print(paste(cmd, args))
+# writeLines(paste(cmd, args), "tmp_mergebam.sh")
+# system2("bash", "tmp_mergebam.sh")
+
+# merge
+cmd = "samtools"
+args = paste0("merge ", 
+    "-@ 32 ", 
+    "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, ".bam ", 
+    paste0("datashare/", gse, "/", e$gsm, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam", collapse=" "), 
+    NULL
+  )
+print(paste(cmd, args))
+system2(cmd, args)
+
+# sort
+cmd = "samtools"
+args = paste0("sort ", 
+    "-@ 32 ", 
+    "-m 2G ", 
+    "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam -o /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
+    NULL
+  )
+print(paste(cmd, args))
+system2(cmd, args)
+
+# index
+cmd = "samtools"
+args = paste0("index  -@ 32   /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ")
+print(paste(cmd, args))
+system2(cmd, args)
+
+# bigwig
+bin_size = 4
+mmq = 30
+cmd = "bamCoverage"
+norm = "RPKM"
+args = paste0(
+    "--numberOfProcessors 32 ", 
+    "--extendReads ", 
+    "--normalizeUsing ", norm, " ", 
+    "--binSize ", bin_size, " ", 
+    "--minMappingQuality ", mmq, " ", 
+    " -b datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
+    " -o datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_PE_", mmq, "_", bin_size, "_", norm, ".bw "
+  )
+print(paste(cmd, args))
+system2(cmd, args)
+
+# bigwig
+bin_size = 4
+mmq = 30
+cmd = "bamCoverage"
+norm = "RPKM"
+args = paste0(
+    "--numberOfProcessors 32 ", 
+    "--extendReads ", 
+    "--centerReads ", 
+    "--normalizeUsing ", norm, " ", 
+    "--binSize ", bin_size, " ", 
+    "--minMappingQuality ", mmq, " ", 
+    " -b datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
+    " -o datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srtcr_PE_", mmq, "_", bin_size, "_", norm, ".bw "
+  )
+print(paste(cmd, args))
+system2(cmd, args)
+
+
+for (tmp_thresh in c("1.00e-25", "1.00e-50", "1.00e-99")[3]) {
+  cmd = "macs3"
+  args = paste0("callpeak --call-summits -n mrg", tmp_thresh, " -t /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30_srt.bam -f BAMPE -g hs --keep-dup all -q ", tmp_thresh, " --outdir macs3_output_merged ")
+  print(paste(cmd, args))
+  system2(cmd, args)
+}
+
+```
+
+## Stats
+
+```{r peaks, fig.height=6}
+# #	Nom de la colonne	Description	Type / Exemple
+# 1	chrom	Nom du chromosome	chr1
+# 2	chromStart	Position de début du pic (0-based, inclusif)	3455000
+# 3	chromEnd	Position de fin du pic (1-based, exclusif)	3455500
+# 4	name	Nom du pic	peak_00001
+# 5	score	Score de 0 à 1000 (utile pour visualisation UCSC)	500
+# 6	strand	Brin (+, -, ou . si non applicable)	.
+# 7	signalValue	Enrichissement du signal au sommet du pic	12.45
+# 8	pValue	–log10(p-value) de la significativité du pic	7.30
+# 9	qValue	–log10(q-value, FDR ajustée)	5.21
+# 10	peak	Position du sommet du pic par rapport à chromStart (en bp). -1 si inconnu.	250
+# peak_prefix = "mrg1.00e-25_peaks"
+# peak_prefix = "mrg1.00e-50_peaks"
+peak_prefix = "mrg1.00e-99_peaks"
+peaks = read.table(paste0("macs3_output_merged/", peak_prefix, ".narrowPeak"))
+rownames(peaks) = peaks[,4]
+colnames(peaks) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue", "peak")
+peaks$len = peaks$chromEnd - peaks$chromStart
+peaks = peaks[nchar(peaks$chrom)<=5,]
+head(peaks)
+dim(peaks)
+
+# Filtering peaks
+head(peaks)
+dim(peaks)
+peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
+length(unique(peaks$key))
+qv_thresh = peaks[order(peaks$qValue, decreasing=TRUE),]$qValue[40000]
+peaks = peaks[peaks$qValue>=qv_thresh,]
+dim(peaks)
+length(unique(peaks$key))
+peaks = peaks[!duplicated(peaks$key),]
+dim(peaks)
+length(unique(peaks$key))
+
+# Stat peaks
+custom_hm(peaks$qValue , peaks$pValue     , xlab="qValue", ylab="pValue     ", LOGCOUNT=TRUE, main=peak_prefix)#, xlim=c(0, quantile(peaks$qValue, .99), ylim=c(0, quantile(peaks$pValue     , .99))))
+custom_hm(peaks$qValue , peaks$signalValue, xlab="qValue", ylab="signalValue", LOGCOUNT=TRUE, main=peak_prefix)#, xlim=c(0, quantile(peaks$qValue, .99), ylim=c(0, quantile(peaks$signalValue, .99))))
+custom_hm(peaks$len    , peaks$signalValue, xlab="len   ", ylab="signalValue", LOGCOUNT=TRUE, main=peak_prefix)#, xlim=c(0, quantile(peaks$len   , .99), ylim=c(0, quantile(peaks$signalValue, .99))))
+custom_hm(peaks$len    , peaks$qValue     , xlab="len   ", ylab="qValue     ", LOGCOUNT=TRUE, main=peak_prefix)#, xlim=c(0, quantile(peaks$len   , .99), ylim=c(0, quantile(peaks$qValue     , .99))))
+# stop("EFN")
+```
+
+```{r prefix2}
+prefix2 = paste0(prefix, "_", peak_prefix)
+```
+
+## TFBS
+
+
+```{r call_jaspar fun}
+library(TFBSTools)
+library(JASPAR2022)
+library(Biostrings)
+
+if (!exists("mreadDNAStringSet")) {mreadDNAStringSet=memoise::memoise(readDNAStringSet, cache = cachem::cache_mem(max_size = 10*1024 * 1024^2))}
+
+
+# 1. Récupérer le genome
+genome <- mreadDNAStringSet(paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Sequence/WholeGenomeFasta/genome.fa"))
+names(genome) <- sub(" .*", "", names(genome))  # clean des noms (important)
+
+# 2. Récupérer tous les PWM humains depuis JASPAR
+opts <- list(species=9606, all_versions=FALSE)  # humain
+jaspar_matrices <- TFBSTools::getMatrixSet(JASPAR2022::JASPAR2022, opts)
+
+# idx_peak="mrg1.00e-99_peak_3" 
+# foo = call_jaspar(idx_peak=idx_peak, genome=genome, jaspar_matrices=jaspar_matrices, peaks=peaks)
+# call_jaspar("mrg1.00e-99_peak_7690", genome=genome, jaspar_matrices=jaspar_matrices, peaks=peaks)
+call_jaspar = function(idx_peak, genome, jaspar_matrices, peaks) {
+  # idx_peak <- peak
+  # idx_peak = rownames(peaks)[1]
+  print(idx_peak)
+  # 3. la sequence
+  chr   <- peaks[idx_peak,1]
+  start <- peaks[idx_peak,2]
+  end   <- peaks[idx_peak,3]
+  seq <- as.character(subseq(genome[[chr]], start=start, end=end))
+
+  # 4. Scanner la séquence pour chaque motif
+  all_tfbs <- lapply(names(jaspar_matrices), function(tf_name) {
+    # tf_name = "MA1723.1" # names(jaspar_matrices)[1]
+    # tf_name = "MA0139.1"
+    # tf_name = "MA1929.1"
+    # tf_name = "MA1930.1"
+    pwm <- jaspar_matrices[[tf_name]]
+    tfbs <- TFBSTools::searchSeq(toPWM(pwm), seq, min.score=0, strand="*")  # seuil 85% pour réduire faux positifs
+    if(length(tfbs) > 0) {
+      # print(tf_name)
+      ret = data.frame(
+        TF = name(pwm),
+        start = start(tfbs),
+        end = end(tfbs),
+        strand = strand(tfbs),
+        # pv = pvalues(tfbs, type="sampling"),
+        score = score(tfbs)
+      )
+      ret = ret[order(-ret$score),]
+      ret = ret[1,]
+      return(ret)
+    } else {
+      NULL
+    }
+  })
+  tfbs_df <- do.call(rbind, all_tfbs)
+  return(tfbs_df)
+}
+# stop("EFN")
+```
+
+
+```{r peaks_jaspar, eval=JASPARPEAKS}
+cl_bs = parallel::makeCluster(nb_cores/2, type="FORK")
+tfbs = parallel::parApply(cl_bs, t(t(rownames(peaks))), 1, call_jaspar, genome=genome, jaspar_matrices=jaspar_matrices, peaks=peaks)
+parallel::stopCluster(cl_bs)
+# foo = call_jaspar(idx_peak="mrg1.00e-99_peak_3", genome=genome, jaspar_matrices=jaspar_matrices, peaks=peaks)
+# tfbs = epimedtools::monitored_apply(t(t(rownames(peaks)[1:10])), 1, call_jaspar, genome=genome, jaspar_matrices=jaspar_matrices, peaks=peaks)
+names(tfbs) = rownames(peaks)
+saveRDS(tfbs, paste0(prefix2, "_tfbs.rds"))
+```
+
+```{r tfbs_stats}
+tfbs = readRDS(paste0(prefix2, "_tfbs.rds"))
+tf_scores = sapply(tfbs, "[[", "score")
+rownames(tf_scores) = tfbs[[1]]$TF
+
+layout(matrix(1:4,2), respect=TRUE)
+den = density(tf_scores)
+plot(den)
+# apply(tf_scores, 1, function(tf_score) {
+# tf_scores = sapply(tfbs, "[[", "score")
+#   lines(density(tf_score, bw=den$bw))
+# })
+
+score_means = apply(tf_scores, 1, mean)
+den = density(score_means)
+plot(den)
+
+len = tfbs[[1]][,3] - tfbs[[1]][,2]
+den = density(len)
+plot(den)
+
+custom_hm(len, score_means, nbin=30, xlab="TFBS length", ylab="TFBS av. scores")
+```
+
+```{r tfbs_clusters}
+pca = prcomp(tf_scores, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+trecre = sort(names(cl)[cl==5])
+foo = pca$x[trecre,4]
+tre = names(foo)[foo>0] # TPA Response Element
+cre = names(foo)[foo<0] # cAMP Response Element
+
+col = trecre
+names(col) = col
+col[tre] = 1
+col[cre] = 2
+
+data = tf_scores[rownames(tf_scores)[rownames(tf_scores)%in%trecre],]
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+cl = as.numeric(col[rownames(pca$x)])
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+
+
+data = tf_scores[rownames(tf_scores)[!rownames(tf_scores)%in%trecre],]
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+homeobox = sort(names(cl)[cl==5]) # Homeobox
+
+data = tf_scores[rownames(tf_scores)[!rownames(tf_scores)%in%c(trecre, homeobox)],]
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+ets = sort(names(cl)[cl==5]) # Homeobox
+
+
+data = tf_scores[rownames(tf_scores)[!rownames(tf_scores)%in%c(trecre, homeobox, ets)],]
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+tfbsoi = sort(names(cl)[cl==1]) # Homeobox
+metabo = tfbsoi[pca$x[tfbsoi,3]>0 & pca$x[tfbsoi,4]<0]
+
+data = tf_scores[rownames(tf_scores)[!rownames(tf_scores)%in%c(trecre, homeobox, ets, metabo)],]
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,2:6], G=5)
+cl = mc$classification
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=cl,          # <- coloration par cluster
+    pch=16
+  )
+}
+
+```
+
+Filtering `tf_scores`
+
+
+```{r}
+deseq2_genes = read.table("../GSE193141/04_deseq2/tables/MvsF.complete.txt", header=TRUE)
+rownames(deseq2_genes) = deseq2_genes[,1]
+deseq2_genes = deseq2_genes[,grep("norm", colnames(deseq2_genes))]
+colnames(deseq2_genes) = substr(colnames(deseq2_genes), 6, 200)
+deseq2_genes = as.matrix(deseq2_genes)
+# remove not expressd genes
+deseq2_genes = deseq2_genes[!apply(deseq2_genes==0, 1, all),]
+
+foo = rownames(tf_scores)[!rownames(tf_scores) %in% deseq2_genes]
+split_dimer = unique(unlist(strsplit(foo, "::")))
+split_dimer[!split_dimer %in% deseq2_genes]
+ # [1] "EWSR1-FLI1" "TBXT"      
+plot(density(deseq2_genes["T",]))
+
+notnull_genes = rownames(deseq2_genes)
+
+simple_tfs = rownames(tf_scores)[rownames(tf_scores) %in% notnull_genes]
+max_tf = apply(deseq2_genes[simple_tfs, ], 1, max)
+plot(sort(max_tf), ylim=c(0,100))
+simple_tfs = names(max_tf)[max_tf>=20]
+
+dimer_tfs = foo[grep("::", foo)]
+split_dimer = unique(unlist(strsplit(dimer_tfs, "::")))
+split_dimer = split_dimer[split_dimer %in% notnull_genes]
+max_tf = apply(deseq2_genes[split_dimer, ], 1, max)
+plot(sort(max_tf), ylim=c(0,1000))
+blacklist_tfs = names(max_tf)[max_tf<20]
+dimer_tfs = dimer_tfs[-grep(paste0(blacklist_tfs, collapse="|"), foo)]
+
+tf_scores_filtered = tf_scores[rownames(tf_scores)%in%c(simple_tfs, dimer_tfs),]
+dim(tf_scores_filtered)
+tf_scores = tf_scores_filtered
+```
+
+
+
+## Peak counts
+
+```{r peaks_featureCounts, eval=COUNTPEAKS}
+# Counts
+feat_saf = peaks[, c(4,1:3, 6)]
+# feat_saf = peaks[1:100,c(4,1:3, 6)]
+colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+# feat_saf$Start = feat$tss
+# head(feat_saf)
+# feat_saf$Start = feat$tss - , 800, 1500) 
+# if (sum(feat_saf$Start<1)!=0) {
+#   feat_saf[feat_saf$Start<1,]$Start = 1
+# } 
+# feat_saf$End = feat$tss + ifelse(feat_saf$Strand=="-", 800, 1500)  
+# head(feat_saf)
+saf_filename = paste0(prefix2, ".saf")
+write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
+cmd = "featureCounts"
+args = paste0(
+  "-O ", # allow multiple overlap
+  "-p -a ", saf_filename, " -F SAF -s 0 -Q ", mmq, " -T 16 -o ", prefix2, "_count_", mmq, ".txt ", 
+  paste0("/home/chuffarf/projects/datashare/", gse, "/", e$gsm_atac, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", collapse=" "),
+  ""
+)
+print(paste(cmd, args))
+system2(cmd, args)
+system2("cat", paste0(prefix2, "_count_", mmq, ".txt.summary"))
+```
+
+```{r raw_counts_peaks}
+raw_counts = read.table(paste0(prefix2, "_count_", mmq, ".txt"), header=TRUE)
+rownames(raw_counts) = raw_counts[,1]
+raw_counts = raw_counts[,-(1:6)]
+colnames(raw_counts) = sub(".*?(GSM[^_]*)_.*", "\\1", colnames(raw_counts))
+head(raw_counts[,1:10])
+tail(raw_counts[,1:10])
+dim( raw_counts)
+```
+
+```{r norm_counts_peaks, eval=TRUE}
+if (!all(e$gsm_atac %in% colnames(raw_counts))) {stop("problem e$gsm_atac vs. colnames(raw_counts)")}
+countData = raw_counts[,e$gsm_atac]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData), c("age", "gender")]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. exp_grp")}
+
+dds <- DESeq2::DESeqDataSetFromMatrix(
+  countData = countData,
+  colData = colData,
+  design = ~ gender + age
+)
+
+# dds <- DESeq2::DESeq(dds)
+# res_age <- DESeq2::results(dds, name = "age")
+
+dds = DESeq2::estimateSizeFactors(dds)
+
+norm_counts_peaks = DESeq2::counts(dds, normalized=TRUE)
+head(norm_counts_peaks[,1:10])
+dim(norm_counts_peaks)
+```
+
+```{r pca_norm_counts_peaks}
+data = as.matrix(t(norm_counts_peaks))
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# # --- MCLUST sur les scores PCA ---
+# library(mclust)
+# mc = mclust::Mclust(pca$x[,2:6], G=5)
+# cl = mc$classification
+# col = cl
+
+col = as.numeric(e[rownames(pca$x),]$gender)
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=col,
+    pch=16
+  )
+}
+
+for (key in c("age", "gender")) {
+ layout(matrix(1:6,2), respect=TRUE)
+  plot(sapply(1:ncol(pca$x), function(i) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    summary(m)$r.squared*100
+  }), main=key, xlab="PCs", ylab="R^2 (%)")
+  for (i in 1:5) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    xlab=key
+    ylab=paste0("PC", i, "(", signif(p[i], 3), "%)")
+    main=paste0("R^2=", signif(summary(m)$r.squared, 3)*100, "%")
+    if (is.numeric(x)) {
+      plot(x, y, xlab=xlab, ylab=ylab, main=main, pch=16)      
+      abline(m, col=2)
+    } else {
+      boxplot(y~x, xlab=xlab, ylab=ylab, main=main)      
+    }
+  }
+}
+```
+
+
+
+
+# RNA
+
+```{r norm_counts_rna}
+# awk '$3 == "transcript"' /home/chuffarf/projects/datashare/genomes/Homo_sapiens/T2T/CHM13v2.0/Annotation/Genes/genes.gtf |  awk 'OFS="\t" {if ($3=="transcript") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' | awk '!seen[$4]++'  > /home/chuffarf/projects/datashare/genomes/Homo_sapiens/T2T/CHM13v2.0/Annotation/Genes/genes.bed
+# awk 'BEGIN{FS=OFS="\t"}
+# {
+#     if (match($9,/gene_name "[^"]+"/)) {
+#         gene=substr($9,RSTART+11,RLENGTH-12)
+#     } else if (match($9,/gene_id "[^"]+"/)) {
+#         gene=substr($9,RSTART+9,RLENGTH-10)
+#     } else next
+
+#     if (!(gene in min) || $4 < min[gene]) min[gene]=$4
+#     if (!(gene in max) || $5 > max[gene]) max[gene]=$5
+#     chr[gene]=$1
+#     strand[gene]=$7
+# }
+# END{
+#     for (g in min)
+#         print chr[g], min[g]-1, max[g], g, ".", strand[g]
+# }' /home/chuffarf/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.gtf | sort -k1,1 -k2,2n > /home/chuffarf/projects/datashare/genomes/Homo_sapiens/UCSC/hg38/Annotation/Genes/genes.bed
+
+genes_bed = paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+genes_bed
+genes = read.table(genes_bed)
+genes = genes[nchar(genes[,1])<=5,]
+rownames(genes) = genes[,4]
+head(genes)
+dim(genes)
+
+norm_counts_rna = read.table("../GSE193141/04_deseq2/tables/MvsF.complete.txt", header=TRUE)
+rownames(norm_counts_rna) = norm_counts_rna[,1]
+norm_counts_rna = norm_counts_rna[,grep("norm", colnames(norm_counts_rna))]
+colnames(norm_counts_rna) = substr(colnames(norm_counts_rna), 6, 200)
+norm_counts_rna = as.matrix(norm_counts_rna)
+
+if (!all(e$gsm_rna %in% colnames(norm_counts_rna))) {stop("problem e$gsm_rna vs. colnames(norm_counts_rna)")}
+norm_counts_rna = norm_counts_rna[,e$gsm_rna]
+colnames(norm_counts_rna) = rownames(e)
+
+# remove not expressd genes
+norm_counts_rna = norm_counts_rna[!apply(norm_counts_rna==0, 1, all),]
+# sum( rownames(norm_counts_rna) %in% rownames(genes))
+# sum(!rownames(norm_counts_rna) %in% rownames(genes))
+genes = genes[rownames(norm_counts_rna)[rownames(norm_counts_rna) %in% rownames(genes)],]
+norm_counts_rna = norm_counts_rna[rownames(genes),]
+
+head(norm_counts_rna[,1:10])
+dim(norm_counts_rna)
+```
+
+
+```{r pca_norm_counts_rna}
+data = as.matrix(t(norm_counts_rna))
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# # --- MCLUST sur les scores PCA ---
+# library(mclust)
+# mc = mclust::Mclust(pca$x[,2:6], G=5)
+# cl = mc$classification
+# col = cl
+
+col = as.numeric(e[rownames(pca$x),]$gender)
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=col,
+    pch=16
+  )
+}
+
+for (key in c("age", "gender")) {
+ layout(matrix(1:6,2), respect=TRUE)
+  plot(sapply(1:ncol(pca$x), function(i) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    summary(m)$r.squared*100
+  }), main=key, xlab="PCs", ylab="R^2 (%)")
+  for (i in 1:5) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    xlab=key
+    ylab=paste0("PC", i, "(", signif(p[i], 3), "%)")
+    main=paste0("R^2=", signif(summary(m)$r.squared, 3)*100, "%")
+    if (is.numeric(x)) {
+      plot(x, y, xlab=xlab, ylab=ylab, main=main, pch=16)      
+      abline(m, col=2)
+    } else {
+      boxplot(y~x, xlab=xlab, ylab=ylab, main=main)      
+    }
+  }
+}
+
+
+
+
+
+# mat = t(foo)
+# mat = mat[,apply(!is.na(mat), 2, all)]
+data = log2(as.matrix(t(norm_counts_rna))+1)
+data = as.matrix(t(norm_counts_rna))+1
+pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+palette("default")
+
+# Distance de Mahalanobis
+d2 <- mahalanobis(pca$x[,1:2], center=colMeans(pca$x[,1:2]), cov=cov(pca$x[,1:2]))
+# Seuil correspondant à 95% (5% à l'extérieur)
+threshold <- qchisq(0.99, df = 2)
+# Points extérieurs
+outliers <- d2 > threshold
+outliers = names(outliers)[outliers]
+
+# # gsms = gsms[!gsms%in%outliers]
+# e = e[!e$gsm_atac%in%outliers,]
+
+layout(matrix(1:2,1), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+i = 1
+j = i+1
+plot(pca$x[,i], pca$x[,j], 
+  xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"), 
+  ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"), 
+  col=(rownames(pca$x)%in%outliers)+1,
+  pch=16
+)  
+
+
+den = density(log2(norm_counts_rna+1))
+plot(den, ylim=c(0,.6), xlim=c(-1, 5))
+for (i in rownames(data)) {
+  den2 = density(log2(norm_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=adjustcolor(i%in%outliers+1, alpha.f=.3))
+}
+for (i in outliers) {
+  den2 = density(log2(norm_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=2)
+}
+
+raw_counts_rna = read.table("../GSE193141/04_deseq2/tables/MvsF.complete.txt", header=TRUE)
+rownames(raw_counts_rna) = raw_counts_rna[,1]
+cn = colnames(raw_counts_rna)[grep("norm", colnames(raw_counts_rna))]
+cn = substr(cn, 6, 100)
+raw_counts_rna = raw_counts_rna[,cn]
+if (!all(e$gsm_rna %in% colnames(raw_counts_rna))) {stop("problem e$gsm_rna vs. colnames(raw_counts_rna)")}
+raw_counts_rna = raw_counts_rna[,e$gsm_rna]
+colnames(raw_counts_rna) = rownames(e)
+raw_counts_rna = as.matrix(raw_counts_rna)
+
+den = density(log2(raw_counts_rna+1))
+plot(den, ylim=c(0,1), xlim=c(-1, 15))
+# plot(den)
+for (i in rownames(data)) {
+  den2 = density(log2(raw_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=adjustcolor(i%in%outliers+1, alpha.f=.3))
+}
+for (i in outliers) {
+  den2 = density(log2(raw_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=2)
+}
+
+den = density(log2(raw_counts_rna+1))
+plot(den, ylim=c(0,1), xlim=c(-1, 2))
+# plot(den)
+for (i in rownames(data)) {
+  den2 = density(log2(raw_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=adjustcolor(i%in%outliers+1, alpha.f=.3))
+}
+for (i in outliers) {
+  den2 = density(log2(raw_counts_rna[,i]+1), bw=den$bw)
+  lines(den2, col=2)
+}
+
+# update exp_grp and norm_counts_peaks
+e = e[!rownames(e)%in%outliers,]
+norm_counts_peaks = norm_counts_peaks[,rownames(e)]
+norm_counts_rna = norm_counts_rna[,rownames(e)]
+
+# remove not expressd genes
+norm_counts_rna = norm_counts_rna[!apply(norm_counts_rna==0, 1, all),]
+# sum( rownames(norm_counts_rna) %in% rownames(genes))
+# sum(!rownames(norm_counts_rna) %in% rownames(genes))
+genes = genes[rownames(norm_counts_rna)[rownames(norm_counts_rna) %in% rownames(genes)],]
+norm_counts_rna = norm_counts_rna[rownames(genes),]
+
+head(norm_counts_rna[,1:10])
+dim(norm_counts_rna)
+
+
+```
+
+
+# Joint
+
+
+```{r genes_peaks_joint}
+# stop("EFN")
+head(genes)
+dim(genes)
+
+library(GenomicRanges)
+
+# Peaks
+gr_peaks <- GRanges(
+  seqnames = peaks$chrom,
+  ranges = IRanges(start = peaks$chromStart + 1, end = peaks$chromEnd),
+  peak = peaks$name
+)
+
+# Genes → TSS
+# ajouter noms de colonnes
+colnames(genes) <- c("chr", "start", "end", "gene", "score", "strand")
+
+# définir le TSS selon le strand
+tss_pos <- ifelse(genes$strand == "+", genes$start, genes$end)
+
+gr_tss <- GRanges(
+  seqnames = genes$chr,
+  ranges = IRanges(start = tss_pos, end = tss_pos),
+  strand = genes$strand,
+  gene = genes$gene
+)
+
+max_dist = 500e6 # full chromosomes
+# max_dist <- .1e6
+
+# fenêtre autour des TSS
+gr_tss_window <- resize(gr_tss, width = 2 * max_dist + 1, fix = "center")
+
+hits <- findOverlaps(gr_peaks, gr_tss_window)
+
+peak_hits <- gr_peaks[queryHits(hits)]
+tss_hits  <- gr_tss[subjectHits(hits)]
+
+distances <- distance(peak_hits, tss_hits)
+
+joint <- data.frame(
+  peak = mcols(peak_hits)$peak,
+  gene    = mcols(tss_hits)$gene,
+  chr     = as.character(seqnames(peak_hits)),
+  peak_start = start(peak_hits),
+  peak_end   = end(peak_hits),
+  tss        = start(tss_hits),
+  strand     = as.character(strand(tss_hits)),
+  distance   = distances
+)
+
+head(joint)
+dim(joint)
+# stop("EFN")
+```
+
+# Mediation
+
+
+```{r med_func}
+med_func = function(j, norm_counts_peaks, norm_counts_rna, e, LF=NULL) {
+  if (!all(colnames(norm_counts_rna) == colnames(norm_counts_peaks))) {stop("probleme colnames(norm_counts_rna) vs. colnames(norm_counts_peaks)")}
+  if (!all(rownames(e) == colnames(norm_counts_peaks))) {stop("probleme rownames(e) vs. colnames(norm_counts_peaks)")}
+
+  # print(j)
+  # j = joint[1,]
+  idx_peak = j[[1]]
+  idx_gene = j[[2]]
+  # print(paste0(idx_peak, " ", idx_gene))
+  M = log2(norm_counts_peaks[idx_peak,]+1)
+  X = e$age
+  Y = log2(norm_counts_rna[idx_gene,]+1)
+  C = e$gender
+  at = mean(M)
+  rn = mean(Y)
+  m  = lm(Y ~ X + C)
+  m1 = lm(M ~ X + C)
+  m2 = lm(Y ~ M + X + C)
+  if (!is.null(LF)) {
+    if (!all(rownames(LF) == colnames(norm_counts_peaks))) {stop("probleme rownames(LF) vs. colnames(norm_counts_peaks)")}
+    # LF = pca$x[,1:2]
+    m  = lm(Y ~ X + C + LF)
+    m1 = lm(M ~ X + C + LF)
+    m2 = lm(Y ~ M + X + C + LF)
+  }
+  a = m1$coef[[2]]
+  b = m2$coef[[2]]
+  c = m$coef[[2]]
+  cp = m2$coef[[3]]
+  pv  = summary(m )$coefficients[2,4]
+  pv1 = summary(m1)$coefficients[2,4]
+  pv2 = summary(m2)$coefficients[2,4]
+  pv3 = summary(m2)$coefficients[3,4]
+  pmax2 = max(pv1, pv2)^2
+  ret = c(
+    # i     = i     ,
+    # j     = j     , 
+    RNA   = rn    ,
+    ATAC  = at    ,
+    ADE   = cp    ,
+    ACME  = a*b   ,
+    TE    = c     ,
+    a     = a     ,   
+    b     = b     ,   
+    c     = c     ,  
+    cp    = cp    ,   
+    pv    = pv    ,
+    pv1   = pv1   ,                    
+    pv2   = pv2   ,                    
+    pv3   = pv3   ,                    
+    pmax2 = pmax2       
+  )
+  return(ret)
+}
+```
+
+```{r mediation, eval=MEDRES}
+### LF with PCA
+# data = log2(as.matrix(t(norm_counts_rna))+1)
+data = log2(as.matrix(t(norm_counts_peaks))+1)
+pca_peaks = pca = prcomp(data, scale=TRUE)
+LF = pca_peaks$x[,1:2]
+
+### LF with lfmm
+data = log2(as.matrix(t(norm_counts_peaks))+1)
+X = c(age=e[rownames(data), "age"])
+Y = data
+lfmm_fit = lfmm::lfmm_ridge(Y=Y, X=X, K=3,  lambda=1e-5)
+U = lfmm_fit$U # latent factors
+V = lfmm_fit$V # loadings
+B = lfmm_fit$B # 
+rownames(U) = rownames(data)
+rownames(V) = colnames(data)
+LF = U[,c(1,1)]
+
+# LF = NULL
+
+# medres = epimedtools::monitored_apply(joint[,1:2], 1, med_func, norm_counts_peaks=norm_counts_peaks, norm_counts_rna=norm_counts_rna, e=e, LF=LF)
+cl_bs = parallel::makeCluster(nb_cores, type="FORK")
+medres = parallel::parApply(cl_bs, joint[,1:2], 1, med_func, norm_counts_peaks=norm_counts_peaks, norm_counts_rna=norm_counts_rna, e=e, LF=LF)
+parallel::stopCluster(cl_bs)
+
+medres = t(medres)
+medres = cbind(joint, medres)
+medres$pmax2adj = p.adjust(medres$pmax2, method="BH")
+saveRDS(medres, paste0(prefix2, "_medres.rds"))
+# medres = do.call(rbind, medres)
+```
+
+
+
+
+```{r medres}
+# stop("EFN")
+res = readRDS(paste0(prefix2, "_medres.rds"))
+res = res[res$peak %in% rownames(peaks) & res$gene %in% rownames(genes),]
+res = res[res$RNA != 0,]
+
+joint$key = paste0(joint[,"peak"], "-", joint[,"gene"])
+sum(duplicated(joint$key))
+
+res$key = paste0(res[,"peak"], "-", res[,"gene"])
+sum(duplicated(res$key))
+
+all(joint$key %in% res$key)
+all(res$key %in% joint$key)
+
+# j = joint[!joint$key %in% res$key,][1,1:2]
+
+# layout(1, respect=TRUE)
+# idx = !is.na(res$pmax2) & res$pmax2adj < 0.05
+# # plot(-log10(res$pmax2adj), col=(rownames(res) %in% idx)+1)
+# plot(res$ACME, -log10(res$pmax2adj), col=idx+1, pch=".")
+# idx2 = !is.na(res$pmax2) & -log10(res$pmax2adj)>10
+# text(res[idx2,]$ACME, -log10(res[idx2,]$pmax2adj), res[idx2,]$gene)
+
+# custom_hm(res$ACME, -log10(res$pmax2adj), LOGCOUNT=TRUE)
+
+```
+
+```{r, echo=TRUE, results="verbatim"} 
+dim(joint)
+dim(res)
+# stop("EFN")
+```
+
+
+# Local genes / peaks interactions
+
+```{r ebf1_bis}
+stop("EFN")
+gene = "EBF1"
+peak = "mrg1.00e-99_peak_61474"
+peaks[peak,]
+subres = plot_hmmed(gene=gene, res)
+fitMed = plot_mediationpkg(gene=gene, peak=peak)
+enrich = plot_enrich(peaks=peak, tf_scores=tf_scores, res=res, main=peak)
+
+gene = "EXD2"
+peak = "mrg1.00e-99_peak_22472a"
+peaks[peak,]
+subres = plot_hmmed(gene=gene, res, delta=5e5)
+fitMed = plot_mediationpkg(gene=gene, peak=peak)
+enrich = plot_enrich(peaks=peak, tf_scores=tf_scores, res=res, main=peak)
+
+gene = "OBSCN"
+peak = "mrg1.00e-99_peak_7072"
+peaks[peak,]
+subres = plot_hmmed(gene=gene, res, delta=5e5)
+fitMed = plot_mediationpkg(gene=gene, peak=peak)
+enrich = plot_enrich(peaks=peak, tf_scores=tf_scores, res=res, main=peak)
+
+# subres = plot_hmmed("TRABD2A", res)
+# subres = plot_hmmed("GREM2", res)
+# subres = plot_hmmed("CHP1", res)
+# subres = plot_hmmed("GAL3ST4", res)
+# subres = plot_hmmed("NOG", res)
+# subres = plot_hmmed("DNAH6", res)
+# subres = plot_hmmed("EBF1", res, delta=20e6)
+# subres = plot_hmmed("JUN", res)
+# subres = subres[!is.na(subres$pmax2)&subres$gene=="JUN", ]
+# subres[order(subres$ACME), 1:6]
+```
+
+
+# UP/DOWN Grouping
+
+```{r eval=TRUE}
+res = res[res$distance<.5e6,]
+res = res[res$distance<5000,]
+length(unique(res$gene))
+length(unique(res$peak))
+dim(res)
+subres = plot_hmmed(gene="EBF1", res)
+
+idx = p.adjust(res$pv, method="BH") < 0.05
+subres = res[idx,]
+idx = subres$pmax2adj < 0.05
+subres = subres[idx,]
+
+genes_up = unique(subres[subres$c>=0,]$gene)
+genes_dn = unique(subres[subres$c< 0,]$gene)
+peaks_up = unique(subres[subres$a>=0,]$peak)
+peaks_dn = unique(subres[subres$a< 0,]$peak)
+
+layout(matrix(1:6,2), respect=TRUE)
+
+plot(res[!duplicated(res$gene),]$c, -log10(res[!duplicated(res$gene),]$pv), pch=".")
+points(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), col=2)
+# text(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), subres[!duplicated(subres$gene),]$gene)
+
+plot(res[!duplicated(res$peak),]$a, -log10(res[!duplicated(res$peak),]$pv1), pch=".")
+points(subres[!duplicated(subres$peak),]$a, -log10(subres[!duplicated(subres$peak),]$pv1), col=2)
+# text(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), subres[!duplicated(subres$gene),]$gene)
+
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="genes_up"); points(subres[subres$gene%in%genes_up,]$ACME, -log10(subres[subres$gene%in%genes_up,]$pmax2adj), col=2)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="genes_dn"); points(subres[subres$gene%in%genes_dn,]$ACME, -log10(subres[subres$gene%in%genes_dn,]$pmax2adj), col=3)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="peaks_up"); points(subres[subres$peak%in%peaks_up,]$ACME, -log10(subres[subres$peak%in%peaks_up,]$pmax2adj), col=4)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="peaks_dn"); points(subres[subres$peak%in%peaks_dn,]$ACME, -log10(subres[subres$peak%in%peaks_dn,]$pmax2adj), col=5)
+
+layout(matrix(1:2,1), respect=TRUE)
+enrich = plot_enrich(peaks=peaks_up, tf_scores=tf_scores, res=res, main="up")
+enrich = plot_enrich(peaks=peaks_up, tf_scores=tf_scores, res=res, main="DOWN")
+
+```
+
+
+# Candidates
+
+```{r}
+idx = p.adjust(res$pv, method="BH") < 0.05
+subres = res[idx,]
+idx = subres$pmax2adj < 0.05
+subres = subres[idx,]
+
+
+rownames(subres) = subres$key
+foo = subres[order(subres$pmax2adj), c("ACME", "pmax2adj"),]
+idx = rownames(foo)[1:20]
+layout(1, respect=TRUE)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="genes_oi"); 
+points(subres[idx,]$ACME, -log10(subres[idx,]$pmax2adj), col=2)
+text(subres[idx,]$ACME, -log10(subres[idx,]$pmax2adj), subres[idx,]$gene)
+for (i in idx) {
+  gene = subres[i,]$gene
+  peak = subres[i,]$peak
+  hmmed = plot_hmmed(gene=gene, res, delta=.5e6)
+  fitMed = plot_mediationpkg(gene=gene, peak=peak)
+  enrich = plot_enrich(peaks=peak, tf_scores=tf_scores, res=res, main=peak)
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ATAC~age
+
+```{r enrich_atac}
+
+idx = !duplicated(res$peak)
+subres = res[idx,]
+plot(subres$a, -log10(subres$pv1), xlab="a", ylab="pva")
+
+bg_peaks = unique(res$peak)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+
+idx_peaks_oi = subres[subres$pv1 < 0.05&subres$a < 0,]$peak
+enrich = plot_enrich(peaks=idx_peaks_oi, tf_scores=tf_scores, res=res, main="DOWN")
+
+idx_peaks_oi = subres[subres$pv1 < 0.05&subres$a > 0,]$peak
+enrich = plot_enrich(peaks=idx_peaks_oi, tf_scores=tf_scores, res=res, main="UP")
+
+```
+
+```{r pca4LF, eval=FALSE}
+data = log2(as.matrix(t(norm_counts_rna))+1)
+pca_rna = prcomp(data, scale=TRUE)
+data = log2(as.matrix(t(norm_counts_peaks))+1)
+pca_peaks = pca = prcomp(data, scale=TRUE)
+v = pca$sdev * pca$sdev
+p = v / sum(v) * 100
+# # --- MCLUST sur les scores PCA ---
+# library(mclust)
+# mc = mclust::Mclust(pca$x[,2:6], G=5)
+# cl = mc$classification
+# col = cl
+
+col = as.numeric(e[rownames(pca$x),]$gender)
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=col,
+    pch=16
+  )
+}
+
+for (key in c("gender", "age")) {
+ layout(matrix(1:6,2), respect=TRUE)
+  plot(sapply(1:ncol(pca$x), function(i) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    summary(m)$r.squared*100
+  }), main=key, xlab="PCs", ylab="R^2 (%)")
+  for (i in 1:5) {
+    x =  e[rownames(pca$x),key]
+    y = pca$x[,i]
+    m = lm(y~x)
+    xlab=key
+    ylab=paste0("PC", i, "(", signif(p[i], 3), "%)")
+    main=paste0("R^2=", signif(summary(m)$r.squared, 3)*100, "%")
+    if (is.numeric(x)) {
+      plot(x, y, xlab=xlab, ylab=ylab, main=main, pch=16)      
+      abline(m, col=2)
+    } else {
+      boxplot(y~x, xlab=xlab, ylab=ylab, main=main)      
+    }
+  }
+}
+
+
+res = readRDS(paste0(prefix2, "_medres.rds"))
+dim(res)
+res = res[res$peak %in% rownames(peaks) & res$gene %in% rownames(genes),]
+dim(res)
+res = res[res$RNA != 0,]
+dim(res)
+
+idx = res$peak %in% res[res$gene=="EBF1",]$peak
+subres = res[idx,]
+
+
+dev.new(width=9, height=9)
+subres = plot_hmmed("EBF1", res, delta=20e6)
+
+for (i in 1:3) {
+  LF = cbind(pca_rna$x[,1], pca_peaks$x[,c(1:2)])
+  LF = pca_peaks$x[,c(1:2)]
+  # medreslf = epimedtools::monitored_apply(subres[,1:2], 1, med_func, norm_counts_peaks=norm_counts_peaks, norm_counts_rna=norm_counts_rna, e=e, LF=LF)
+  cl_bs = parallel::makeCluster(10, type="FORK")
+  medres2 =      parallel::parApply(cl_bs, subres[,1:2], 1, med_func, norm_counts_peaks=norm_counts_peaks, norm_counts_rna=norm_counts_rna, e=e, LF=LF)
+  parallel::stopCluster(cl_bs)
+
+  medres2 = t(medres2)
+  medres2 = cbind(subres[,1:9], medres2)
+  medres2$pmax2adj = p.adjust(medres2$pmax2, method="BH")
+  # medres = do.call(rbind, medres)
+
+  # subres = plot_hmmed("EBF1", res)
+  # dev.new()
+  dev.new(width=9, height=9)
+  plot_hmmed("SHANK1", medres2, delta=5e6)
+}
+
+plot_hmmed("SHANK1", res, delta=5e6)
+```
+
+```{r lfmm, eval=FALSE}
+data = log2(as.matrix(t(norm_counts_peaks))+1)
+# data = apply(data, 2, function(x) {
+#   (x - mean(x)) / sd(x)
+# })
+# X = c(gender=as.numeric(e[rownames(data),"gender"]))
+X = c(age=e[rownames(data), "age"])
+# X = rep(1, nrow(data))
+# X = cbind(gender=as.numeric(e[rownames(data),"gender"]),age=e[rownames(data),"age"])
+Y = data
+lfmm_fit = lfmm::lfmm_ridge(Y=Y, X=X, K=3,  lambda=1e-5)
+# dev.new()
+# lfmm_fit = lfmm::lfmm_ridge(Y=Y, X=X, K=2,  lambda=100000)
+# lfmm_fit = lfmm::lfmm_lasso(Y=Y, X=X, K=17, lambda=0.5)
+# Y = XB + UV + E
+
+U = lfmm_fit$U # latent factors
+V = lfmm_fit$V # loadings
+B = lfmm_fit$B # 
+
+a = res[!duplicated(res$peak),]$a
+names(a) = res[!duplicated(res$peak),]$peak
+a = a[rownames(B)]
+plot(a, B, pch=".")
+abline(a=0, b=1, col=2)
+
+
+
+rownames(U) = rownames(data)
+rownames(V) = colnames(data)
+
+layout(matrix(1:18,3), respect=TRUE)
+plot(apply(abs(V), 2, sum) )
+
+plot(sapply(1:ncol(U), function(i) {
+  key="age"
+  x =  e[rownames(U),key]
+  y = U[,i]
+  m = lm(y~x)
+  summary(m)$r.squared*100
+}), main=key, xlab="Us", ylab="R^2 (%)")
+for (i in 1:16) {
+  # plot(density(abs(V[,i]), bw=.0003), xlim=c(0,0.015))
+  # idx_peaks_oi = names(rev(sort(abs(V[,i]))))[1:4000]
+  idx_peaks_oi = rownames(V)[abs(V[,i])>0.01]
+  length(idx_peaks_oi)
+  tf_signal = apply(tf_scores[, idx_peaks_oi], 1, median)
+  enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+  plot_enrich(enrich)
+
+  # plot(density(U[,i]))
+}
+
+# for (key in c("gender", "age")) {
+for (key in c("age")) {
+ layout(matrix(1:18,3), respect=TRUE)
+  plot(sapply(1:ncol(U), function(i) {
+    x =  e[rownames(U),key]
+    y = U[,i]
+    m = lm(y~x)
+    summary(m)$r.squared*100
+  }), main=key, xlab="Us", ylab="R^2 (%)")
+  for (i in 1:17) {
+    x =  e[rownames(U),key]
+    y = U[,i]
+    m = lm(y~x)
+    xlab=key
+    ylab=paste0("U", i)
+    main=paste0("R^2=", signif(summary(m)$r.squared, 3)*100, "%")
+    if (is.numeric(x)) {
+      plot(x, y, xlab=xlab, ylab=ylab, main=main, pch=16)      
+      abline(m, col=2)
+    } else {
+      boxplot(y~x, xlab=xlab, ylab=ylab, main=main)      
+    }
+  }
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# UP/DOWN Grouping
+
+```{r eval=FALSE}
+res = res[res$distance<.5e6,]
+res = res[res$distance<5000,]
+length(unique(res$gene))
+length(unique(res$peak))
+dim(res)
+
+
+idx = p.adjust(res$pv, method="BH") < 0.05
+subres = res[idx,]
+length(unique(subres$gene))
+sum(subres$pmax2adj < 0.05)
+idx = subres$pmax2adj < 0.05
+subres = subres[idx,]
+idx_peaks_oi = unique(subres$peak)
+bg_peaks = unique(res$peak)
+length(idx_peaks_oi)
+
+genes_up = unique(subres[subres$c>=0,]$gene)
+genes_dn = unique(subres[subres$c< 0,]$gene)
+peaks_up = unique(subres[subres$a>=0,]$peak)
+peaks_dn = unique(subres[subres$a< 0,]$peak)
+
+layout(matrix(1:6,2), respect=TRUE)
+
+plot(res[!duplicated(res$gene),]$c, -log10(res[!duplicated(res$gene),]$pv), pch=".")
+points(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), col=2)
+# text(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), subres[!duplicated(subres$gene),]$gene)
+
+plot(res[!duplicated(res$peak),]$a, -log10(res[!duplicated(res$peak),]$pv1), pch=".")
+points(subres[!duplicated(subres$peak),]$a, -log10(subres[!duplicated(subres$peak),]$pv1), col=2)
+# text(subres[!duplicated(subres$gene),]$c, -log10(subres[!duplicated(subres$gene),]$pv), subres[!duplicated(subres$gene),]$gene)
+
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="genes_up"); points(subres[subres$gene%in%genes_up,]$ACME, -log10(subres[subres$gene%in%genes_up,]$pmax2adj), col=2)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="genes_dn"); points(subres[subres$gene%in%genes_dn,]$ACME, -log10(subres[subres$gene%in%genes_dn,]$pmax2adj), col=3)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="peaks_up"); points(subres[subres$peak%in%peaks_up,]$ACME, -log10(subres[subres$peak%in%peaks_up,]$pmax2adj), col=4)
+plot(subres$ACME, -log10(subres$pmax2adj), pch=".", main="peaks_dn"); points(subres[subres$peak%in%peaks_dn,]$ACME, -log10(subres[subres$peak%in%peaks_dn,]$pmax2adj), col=5)
+
+plot(res$a, res$c, pch=".")
+points(subres$a, subres$c, col=2)
+
+idx_1 = subres$a >=0 & subres$c >=0
+idx_2 = subres$a >=0 & subres$c < 0
+idx_3 = subres$a < 0 & subres$c >=0
+idx_4 = subres$a < 0 & subres$c < 0
+
+bw = 10000
+layout(matrix(1:6,2), respect=TRUE)
+plot(density(res$distance            , bw=bw))
+plot(density(subres$distance         , bw=bw))
+plot(density(subres[idx_1, ]$distance, bw=bw))
+plot(density(subres[idx_2, ]$distance, bw=bw))
+plot(density(subres[idx_3, ]$distance, bw=bw))
+plot(density(subres[idx_4, ]$distance, bw=bw))
+
+
+idx_peaks_oi1 = unique(subres[idx_1, ]$peak)
+idx_peaks_oi2 = unique(subres[idx_2, ]$peak)
+idx_peaks_oi3 = unique(subres[idx_3, ]$peak)
+idx_peaks_oi4 = unique(subres[idx_4, ]$peak)
+
+length(idx_peaks_oi1);
+length(idx_peaks_oi2);
+length(idx_peaks_oi3);
+length(idx_peaks_oi4);
+
+tf_signal = apply(tf_scores[, idx_peaks_oi1], 1, median)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+head(enrich, 30)
+tail(enrich, 30)
+
+tf_signal = apply(tf_scores[, idx_peaks_oi2], 1, median)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+head(enrich, 30)
+tail(enrich, 30)
+
+tf_signal = apply(tf_scores[, idx_peaks_oi3], 1, median)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+head(enrich, 30)
+tail(enrich, 30)
+
+tf_signal = apply(tf_scores[, idx_peaks_oi4], 1, median)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+head(enrich, 30)
+tail(enrich, 30)
+
+
+
+plot(res[!duplicated(res$gene),]$cp, -log10(res[!duplicated(res$gene),]$pv3), pch=".")
+points(subres[!duplicated(subres$gene),]$cp, -log10(subres[!duplicated(subres$gene),]$pv3), col=2)
+
+
+
+plot(density(subres$distance))
+plot(subres$c, subres$ACME)
+plot(subres$cp, subres$ACME)
+plot(subres$cp, subres$a)
+plot(subres$b, subres$a)
+
+
+tf_signal = apply(tf_scores[, idx_peaks_oi], 1, median)
+tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+head(enrich, 30)
+tail(enrich, 30)
+
+# layout(1, respect=TRUE)
+# plot(enrich, main="TF enrichment in peaks of interest")
+# # abline(v=c(30, length(enrich)-30))
+# i = c(1:30, (length(enrich) - 30):length(enrich))
+# points(i, enrich[i], col=2, pch=16)
+# text(i, enrich[i], names(enrich)[i], pos=4)
+
+
+# library(ggplot2)
+# library(ggrepel)
+
+# df <- data.frame(
+#   tf = names(enrich),
+#   enrich = as.numeric(enrich),
+#   rank = seq_along(enrich)
+# )
+
+# df$highlight <- df$rank %in% c(1:30, (nrow(df)-29):nrow(df))
+
+
+
+# ggplot(df, aes(x = rank, y = enrich)) +
+#   geom_line() +
+#   geom_point(data = df[df$highlight, ], color = "red") +
+#   geom_text_repel(
+#     data = df[df$highlight, ],
+#     aes(label = tf),
+#     size = 5,
+#     col="red",
+#      segment.colour="black",
+#     max.overlaps = Inf
+#   ) +
+#   labs(
+#     title = "TF binding motif enrichement in peaks of interest",
+#     x = "Rank",
+#     y = "Enrichment"
+#   ) +
+#   theme_minimal()
+
+
+
+
+# for (i in 1:30) {
+#   # dev.new()
+#   idx_tf = names(enrich)[i]
+#   layout(matrix(1:6,2), respect=TRUE)
+#   plot(enrich, main="TF enrichment in mediator peaks")
+#   abline(v=c(30, length(enrich)-30))
+#   points(i, enrich[i], col=2, pch=16)
+#   text(i, enrich[i], idx_tf, pos=4)
+  
+#   den =density(tf_scores[idx_tf,bg_peaks])
+#   plot(den, col="grey", main=paste0(idx_tf, " TF binding score distr   ibution"))
+#   den2 = density(tf_scores[idx_tf, med_peaks], bw=den$bw)
+#   # lines(den2$x, den2$y*length(med_peaks) / ncol(tf_scores), col=2)
+#   lines(den2$x, den2$y, col=2)
+#   legend("topleft", lty=1, col=c("red", "grey"), c("mediator peaks", "background") )
+#   q = quantile(tf_scores[idx_tf,med_peaks], .90)
+#   abline(v=q)
+  
+#   tf_peaks = colnames(tf_scores)[tf_scores[idx_tf,]>q]
+   
+#   idx_res = res$peak%in%tf_peaks & res$gene%in%med_genes
+#   den = density(res[idx_res,]$a)
+#   plot (den,    main=paste0("'a' distr. in ", idx_tf, " peaks"))
+#   lines(density(          res$a, bw=den$bw), col="grey")
+#   den = density(res[idx_res,]$b)
+#   plot (den,    main=paste0("'b' distr. in ", idx_tf, " peaks"))
+#   lines(density(          res$b, bw=den$bw), col="grey")
+#   den = density(res[idx_res,]$ACME)
+#   plot (den,    main=paste0("'ACME' distr. in ", idx_tf, " peaks"))
+#   lines(density(          res$ACME, bw=den$bw), col="grey")
+#   den = density(res[idx_res,]$c)
+#   plot (den,    main=paste0("'c' distr. in ", idx_tf, " peaks"))
+#   lines(density(          res$c, bw=den$bw), col="grey")
+# }
+
+
+
+
+# pmax2adj_tresh = 0.05
+# layout(1, respect=TRUE)
+# sel = res$pmax2adj < pmax2adj_tresh
+# sel = res$pmax2adj < pmax2adj_tresh & res$pv < 0.01
+# # sel = res$pv1 < 0.01
+# # plot(-log10(res$pmax2adj), col=(rownames(res) %in% idx)+1)
+# plot(res$ACME, -log10(res$pmax2adj), col=sel+1, pch=".")
+# custom_hm(res$ACME, -log10(res$pmax2adj), LOGCOUNT=TRUE)
+
+# med_peaks = unique(res$peak[sel])
+# med_genes = unique(res$gene[sel])
+# bg_peaks = unique(res$peak)
+# bg_genes = unique(res$gene)
+
+# length(med_peaks)
+# length(med_genes)
+
+# tf_signal = apply(tf_scores[, med_peaks], 1, median)
+# tf_bg = apply(tf_scores[, bg_peaks], 1, median)
+
+# enrich = sort(tf_signal - tf_bg, decreasing=TRUE)
+
+# head(enrich, 30)
+# tail(enrich, 30)
+```
+
+
+##  Enrichement
+```{r, eval=FALSE}
+# experimentalcustom from there
+# stop("EFN")
+
+plot(density(tf_scores))
+
+custom_hm(res$ACME, -log10(res$pmax2adj), LOGCOUNT=TRUE)
+
+
+
+srtres = res[order(res$ACME),]
+layout(matrix(1:2,2))
+plot(srtres$ACME)
+tf = "FOSL2"
+# tf_scores[tf,]
+foo = cumsum(tf_scores[tf, srtres$peak] * srtres$ACME)
+plot(foo, pch=".")
+abline(a=0, b=rev(foo)[1] / nrow(srtres), col=2)
+
+layout(matrix(1:6,2), respect=TRUE)
+tf = "FOSL2"
+plot(density(tf_scores[tf,]))
+q = quantile(tf_scores[tf,], .95)
+abline(v=q)
+
+pks = colnames(tf_scores)[tf_scores[tf,]>q]
+
+srtres$peak
+plot(density(which(res[order(res$ACME),]$peak%in%pks)))
+plot(density(which(res[order(res$RNA),]$peak%in%pks)))
+plot(density(which(res[order(res$a),]$peak%in%pks)))
+plot(density(which(res[order(res$b),]$peak%in%pks)))
+
+plot(srtres$ACME)
+abline(v=which(srtres$peak%in%pks), col=adjustcolor(2, alpha.f=.001))
+wt = wilcox.test(which(srtres$peak%in%pks), which(!srtres$peak%in%pks))
+wt$p.value
+
+pvs = epimedtools::monitored_apply(t(t(rownames(m))), 1, function(tf) {
+  q = quantile(m[tf,][m[tf,]>-10], .95)
+  pks = colnames(m)[!is.na(m[tf,]) & m[tf,]>=q]
+  wt = wilcox.test(which(foo$peak%in%pks), which(!foo$peak%in%pks))
+  wt$p.value
+})
+names(pvs) = rownames(m)
+pvs = sort(unlist(pvs))
+
+
+plot(sort(-log10(unlist(pvs))))
+
+layout(matrix(1:32,4), respect=TRUE)
+for (i in 1:16) {
+  print(i)
+  tf = names(pvs)[i]
+  q = quantile(m[tf,][m[tf,]>-10], .95)
+  pks = colnames(m)[m[tf,]>=q]
+  wt = wilcox.test(which(foo$peak%in%pks), which(!foo$peak%in%pks))  
+  plot(foo$ACME, main=paste0(tf, " MW pv=", signif(wt$p.value, 3)), xlab="ranked peak:gene")
+  abline(v=which(foo$peak%in%pks), col=adjustcolor(2, alpha.f=.01))
+  den = density(which(foo$peak%in%pks)) 
+  plot(den, col=2, xlim=c(0, nrow(foo)))
+  lines(density(which(!foo$peak%in%pks)), col="grey", bw=den$bw)
+  # if (tf %in% rownames(norm_counts_rna)) {
+  #   md = lm(log2(norm_counts_rna[tf,]+1)~e[colnames(norm_counts_rna),]$age)
+  #   plot(e[colnames(norm_counts_rna),]$age, log2(norm_counts_rna[tf,]+1), main=tf, xlab="age", ylab="log2(norm_counts_rna+1)")
+  #   abline(md)
+  # } else {
+  #   plot.new()
+  # }
+}
+
+
+# custom_hm(res$ACME, -log10(res$pmax2adj), LOGCOUNT=TRUE)
+# peaks = peaks[rownames(peaks)%in%res$peak,]
+# res = res[res$peak%in%rownames(peaks),]
+# custom_hm(res$ACME, -log10(res$pmax2adj), LOGCOUNT=TRUE)
+# custom_hm(res$ACME, peaks[res$peak, ]$len, LOGCOUNT=TRUE)
+
+```
+
+# Biblio
+
+*The activity of early-life gene regulatory elements is hijacked in aging through pervasive AP-1-linked chromatin opening.*
+Patrick R, Naval-Sanchez M, Deshpande N, Huang Y, Zhang J, Chen X, Yang Y, Tiwari K, Esmaeili M, Tran M, Mohamed AR, Wang B, Xia D, Ma J, Bayliss J, Wong K, Hun ML, Sun X, Cao B, Cottle DL, Catterall T, Barzilai-Tutsch H, Troskie RL, Chen Z, Wise AF, Saini S, Soe YM, Kumari S, Sweet MJ, Thomas HE, Smyth IM, Fletcher AL, Knoblich K, Watt MJ, Alhomrani M, Alsanie W, Quinn KM, Merson TD, Chidgey AP, Ricardo SD, Yu D, Jardé T, Cheetham SW, Marcelle C, Nilsson SK, Nguyen Q, White MD, Nefzger CM. 
+**Cell Metab**. 2024 Aug 6;36(8):1858-1881.e23. doi: 10.1016/j.cmet.2024.06.006. Epub 2024 Jul 2. PMID: 38959897.
+
+https://www.cell.com/cell-metabolism/fulltext/S1550-4131(24)00231-6
+
+
+
+```{r plot_medres, eval=FALSE}
+
+idx_ugenes = !duplicated(res$gene)
+idx_upeaks = !duplicated(res$peak)
+
+layout(matrix(1:3, 1), respect=TRUE)
+plot(res[idx_ugenes,]$c, -log10(res[idx_ugenes,]$pv)  , col=adjustcolor(1, alpha.f=.2), xlab="Total Effect")
+plot(res$cp, -log10(res$pv3), col=adjustcolor(1, alpha.f=.2), xlab="ADE", pch=".")
+plot(res$c, res$cp, xlab="total Effect", ylab="ADE", pch=".", col=adjustcolor(1, alpha.f=.2))
+abline(a=0, b=1, col=2)
+abline(v=0, h=0, col="grey", lty=2)
+
+
+layout(matrix(1:2, 1), respect=TRUE)
+plot(res[idx_upeaks,]$a, -log10(res[idx_upeaks,]$pv1), xlab="a", ylab="-log10(pv_a)", col=adjustcolor(1, alpha.f=.2))
+plot(res$b, -log10(res$pv2), xlab="b", ylab="-log10(pv_b)", col=adjustcolor(1, alpha.f=.2), pch=".")
+
+
+layout(1, respect=TRUE)
+idx = !is.na(res$pmax2) & res$pmax2adj < 0.05
+# plot(-log10(res$pmax2adj), col=(rownames(res) %in% idx)+1)
+plot(res$a*res$b, -log10(res$pmax2adj), col=idx+1, pch=".")
+idx2 = res$gene == "EBF1"
+points(res[idx2,]$a*res[idx2,]$b, -log10(res[idx2,]$pmax2adj), col=4, pch=1)
+idx3 = idx & idx2
+text(res[idx3,]$a*res[idx3,]$b, -log10(res[idx3,]$pmax2adj), res[idx3,]$peak)
+
+# custom_hm(res$a*res$b, -log10(res$pmax2adj), col=idx+1, pch=".")
+
+layout(matrix(1:2, 1), respect=TRUE)
+plot(res$a * res$b , res$c, pch=".", xlab="ACME", ylab="Total Effect")
+abline(a=0, b=1, col="grey", lty=2)
+points(res[idx2,]$a * res[idx2,]$b , res[idx2,]$c, col=4)
+
+plot(res$a * res$b , res$cp, pch=".", xlab="ACME", ylab="ADE")
+abline(a=0, b=1, col="grey", lty=2)
+abline(v=0, h=0, col="grey", lty=2)
+points(res[idx2,]$a * res[idx2,]$b , res[idx2,]$cp, col=4)
+
+
+# layout(1, respect=TRUE)
+
+
+# pf$pvmax2adj = 0
+# pf[idx, ]$pvmax2adj = 1
+# hm_genome2(pf, "pvmax2adj", main="pvmax2adj")
+```
+
+```{r pairs, eval=FALSE}
+genes = c("EBF1", "GABRB2", "NIPAL4", "HMMR")
+pairs(t(log2(norm_counts_rna[genes,])))
+genes = c("SGCD", "CCNJL")
+pairs(t(log2(norm_counts_rna[genes,])))
+```
+
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+JASPARPEAKS = COUNTPEAKS = MEDRES = FALSE
+sessionInfo()
+```
+
+
+
