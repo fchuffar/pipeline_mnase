@@ -73,46 +73,63 @@ stop("EFN")
 cmd = "samtools"
 args = paste0("merge ", 
     "-@ 32 ", 
-    "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, ".bam ", 
+    # "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, ".bam ", 
+    "/localscratch/chuffarf.20912831.0/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, ".bam ", 
     paste0("datashare/", gse, "/", e$gsm, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam", collapse=" "), 
     NULL
   )
 print(paste(cmd, args))
 system2(cmd, args)
+print("done.")
+
+# rsync -auvP /localscratch/chuffarf.20912831.0/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0.bam datashare/chip_sa_t2t/.
+# rm /localscratch/chuffarf.20912831.0/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0.bam 
+
+bam=datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0.bam
+samtools view -h -f 2 -q 30 ${bam} |
+awk 'BEGIN{OFS="\t"} /^@/ || ($9 != 0 && $9 > -500 && $9 < 500)' |
+samtools view -b -o datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr.bam
+
+
+samtools sort -@ 32 -m 2G -T /localscratch/chuffarf.20912032.0/sort_tmp    \
+  datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr.bam \
+  -o /localscratch/chuffarf.20912032.0/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr_srt.bam
+
+rsync -auvP /localscratch/chuffarf.20912032.0/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr_srt.bam datashare/chip_sa_t2t/.
+
+samtools index -@ 32 datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr_srt.bam
+
+bamCoverage --numberOfProcessors 32 --extendReads --centerReads --normalizeUsing RPKM --binSize 4 --minMappingQuality 30  -b datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr_srt.bam  -o datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_fltr_srt_PE_30_4_RPKM.bw 
+
 
 # sort
 cmd = "samtools"
 args = paste0("sort ", 
     "-@ 32 ", 
     "-m 2G ", 
-    "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30.bam -o /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
+    "-T /localscratch/chuffarf.20912831.0/sort_tmp ", 
+    "   datashare/chip_sa_t2t/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr.bam ", 
+    "-o /localscratch/chuffarf.20912831.0/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam ", 
+#    "-o ~/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
     NULL
   )
 print(paste(cmd, args))
 system2(cmd, args)
+print("done.")
+
+# rsync -auvP /home/chuffarf/merged_end-to-end_trimno_bowtie2_Homo_sapiens_T2T_CHM13v2.0_
+srt.bam  datashare/chip_sa_t2t/.
+
 
 # index
 cmd = "samtools"
-args = paste0("index  -@ 32   /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ")
-print(paste(cmd, args))
-system2(cmd, args)
-
-# bigwig
-bin_size = 4
-mmq = 30
-cmd = "bamCoverage"
-norm = "RPKM"
-args = paste0(
-    "--numberOfProcessors 32 ", 
-    "--extendReads ", 
-    "--normalizeUsing ", norm, " ", 
-    "--binSize ", bin_size, " ", 
-    "--minMappingQuality ", mmq, " ", 
-    " -b datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
-    " -o datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_PE_", mmq, "_", bin_size, "_", norm, ".bw "
+args = paste0("index ", 
+    "-@ 32 ", 
+    "datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam "
   )
 print(paste(cmd, args))
 system2(cmd, args)
+print("done.")
 
 # bigwig
 bin_size = 4
@@ -126,16 +143,16 @@ args = paste0(
     "--normalizeUsing ", norm, " ", 
     "--binSize ", bin_size, " ", 
     "--minMappingQuality ", mmq, " ", 
-    " -b datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam ", 
-    " -o datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srtcr_PE_", mmq, "_", bin_size, "_", norm, ".bw "
+    " -b datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam ", 
+    " -o datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt_PE_", mmq, "_", bin_size, "_", norm, ".bw "
   )
 print(paste(cmd, args))
 system2(cmd, args)
 
 
-for (tmp_thresh in c("1.00e-25", "1.00e-50", "1.00e-99")[3]) {
+for (tmp_thresh in c("1.00e-25", "1.00e-50", "1.00e-99")) {
   cmd = "macs3"
-  args = paste0("callpeak --call-summits -n mrg", tmp_thresh, " -t /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30_srt.bam -f BAMPE -g hs --keep-dup all -q ", tmp_thresh, " --outdir macs3_output_merged ")
+  args = paste0("callpeak --call-summits -n mrg", tmp_thresh, " -t /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam -f BAMPE -g hs --keep-dup all -q ", tmp_thresh, " --outdir macs3_output_merged ")
   print(paste(cmd, args))
   system2(cmd, args)
 }
