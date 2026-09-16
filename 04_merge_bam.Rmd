@@ -204,6 +204,15 @@ args = paste0(
 print(paste(cmd, args))
 system2(cmd, args)
 
+
+# for (tmp_thresh in c("1.00e-25", "1.00e-50", "1.00e-99")) {
+#   cmd = "macs3"
+#   args = paste0("callpeak --call-summits -n mrg", tmp_thresh, " -t /home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam -f BAMPE -g hs --keep-dup all -q ", tmp_thresh, " --outdir macs3_output_merged ")
+#   print(paste(cmd, args))
+#   system2(cmd, args)
+# }
+
+
 ```
 
 

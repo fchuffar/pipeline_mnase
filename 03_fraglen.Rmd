@@ -12,7 +12,7 @@ output:
 
 
 ```{r}
-prefix = "fragment_length"
+prefix = "fraglen"
 max_frag_len = 500
 options =   paste0(
     "--numberOfProcessors 32 ", 
@@ -57,6 +57,10 @@ e = data.frame(
   bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
 )
 rownames(e) = e$gsm
+
+if (file.exists("exp_grp.R")) {
+  source("exp_grp.R")
+}
 head(e)
 dim(e)
 ```
@@ -105,7 +109,7 @@ for (gsm in rownames(e)) {
 ## One histogram per sample
 
 ```{r hists}
-layout(1, respect=TRUE)
+layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
 for (gsm in rownames(e)) {
   print(gsm)
   plot(0, 0, col=0, ylab="", xlab="", ylim=ylim, xlim=c(0,max_frag_len), main=gsm)  
@@ -153,24 +157,37 @@ image(t(data))
 pca = prcomp(data, scale=FALSE)
 v = pca$sdev * pca$sdev
 p = v / sum(v) * 100
-# # --- MCLUST sur les scores PCA ---
-# library(mclust)
-# mc = mclust::Mclust(pca$x[,2:6], G=5)
-# cl = mc$classification
-# col = cl
 
-layout(matrix(1:6,2), respect=TRUE)
-# layout(matrix(1:2,1), respect=TRUE)
-barplot(p, ylab="% of variance explained", xlab="components")
-
-if (file.exists("exp_grp.R")) {
-  source("exp_grp.R")
+if (exists("factoi")) {
   col = as.numeric(e[rownames(pca$x),factoi[1]])
   legend("topright", col=1:length(levels(e[,factoi[1]])), levels(e[,factoi[1]]),pch=16)
 } else {
   col = 1
 }
 
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=col,
+    pch=16
+  )
+}
+
+
+
+e$fraglenclust = as.factor(paste0("c", as.numeric(pca$x[rownames(e),1]<5000)+1))
+col = as.numeric(e[rownames(pca$x),"fraglenclust"])
+
+
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
 for (i in 1:5) {
   j = i+1
   plot(

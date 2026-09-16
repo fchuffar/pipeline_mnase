@@ -130,6 +130,11 @@ system2("cat", paste0(prefix, "_count_.txt.summary"))
 ##  Raw counts
 
 ```{r raw_counts_tiles}
+raw_counts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE, row.names=1)
+colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
+layout(1, respect=TRUE)
+barplot(prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
+
 raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
 rownames(raw_counts) = raw_counts[,1]
 raw_counts = raw_counts[,-(1:6)]
