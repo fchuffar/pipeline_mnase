@@ -1,0 +1,240 @@
+---
+title: "Vplot on a given locus"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+source("common.R")
+```
+
+# peaks
+
+# vplot
+
+```{r}
+locus="chr7:91627998-91636590"
+
+vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), ylims = c(0,300)) {
+    # locus = "chrY:56734583-56735142"
+    # locus = "chr21:8234226-8234724"
+    # locus = "chr14:69191284-69192079"
+    # locus = "chr19:44448198-44448639"
+    # locus = "chr16:16232407-16232609"
+    # xlims = c(-100, 100)
+    # locus = "chr17:46361742-46362137" # V V ZNF816
+    # xlims = c(-300, 300)
+    # locus = "chr17:43251505-43252029" # V master
+    # xlims = c(-300, 300)
+    # locus = "chr9:64369040-64369435"
+    # xlims = c(-300, 300)
+    # locus = "chrY:56734583-56735142"
+    # xlims = c(-300, 300)
+
+    chr  = strsplit(locus, "-|:")[[1]][1]
+    delta = 0
+    start = floor((as.numeric(strsplit(locus, "-|:")[[1]][2]) + as.numeric(strsplit(locus, "-|:")[[1]][3])) / 2) - delta
+    end   = start + 1 + 2*delta
+    locus = paste0(chr, ":", start, "-", end)
+    chr  = strsplit(locus, "-|:")[[1]][1]
+    start = as.numeric(strsplit(locus, "-|:")[[1]][2]) - 5000
+    end   = as.numeric(strsplit(locus, "-|:")[[1]][3]) + 5000
+    locus_ext = paste0(chr, ":", start, "-", end)
+
+    full_bam_file = paste0("/home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30_srt.bam")
+    bam_file = "locus.bam"
+
+    cmd = "samtools"
+    args = paste0("view -b ", full_bam_file, " ", locus_ext, " > ", bam_file)
+    print(paste(cmd, args))
+    system2(cmd, args)
+    system2("samtools", paste0("index ", bam_file ))
+
+
+    library(GenomicRanges)
+    library(VplotR)
+
+    fragments = importPEBamFiles(
+        bam_file, 
+        # where=genes,
+        cores=1,
+        shift_ATAC_fragments=TRUE
+    )
+
+    genes = GRanges(
+    seqnames = strsplit(locus, "-|:")[[1]][1],
+    ranges = IRanges(start = as.numeric(strsplit(locus, "-|:")[[1]][2]),
+                    end =   as.numeric(strsplit(locus, "-|:")[[1]][2]),
+                    names = locus),
+    strand = "+"
+    )
+
+    granges = genes
+    bam_granges = fragments
+    Vmat = computeVmat(
+      m_granges, bam_granges, # redas
+      granges = granges,      # taget, features, genes, tss...
+      xlims = xlims, 
+      ylims = ylims, 
+      cores=1
+    )
+    Vmat = log2(Vmat+1)
+
+    if (any(is.infinite(Vmat) | is.na(Vmat))) 
+        Vmat[is.infinite(Vmat) | is.na(Vmat)] = 0
+    class(Vmat) = c("Vmat", class(Vmat))
+
+
+    # ggplot
+    crp = colorRampPalette(c("black", "green"))(100)
+    p = plotVmat(
+        Vmat,
+        color=crp
+        ) + labs(title=locus)
+    print(p)
+    
+    # image 
+    layout(matrix(c(
+        1,1,1,1,
+        1,1,1,1,
+        2,2,2,2,
+        3,3,3,3
+    ), 4, byrow=TRUE), respect=TRUE)
+    par(mar=c(0, 4.1, 4.1, 2.1))
+    image(as.matrix(Vmat), xaxt="n", yaxt="n", col=crp)
+    axis(2, at=0:1, labels=ylims)
+
+
+    par(mar=c(0, 4.1, 0, 2.1))
+    cuts = lapply(colnames(Vmat), function(i) {
+    lapply(rownames(Vmat), function(j, i) {
+            rep(c(as.numeric(j)-as.numeric(i), as.numeric(j)+as.numeric(i)), Vmat[j,i])
+        }, i)
+    })
+    cuts = unlist(cuts)
+    tab = table(cuts)
+    plot(as.numeric(names(tab)), tab, xlim=xlims, xaxs = "i", type="l", yaxt="n", ylab="How many cuts?", xaxt="n")
+    axis(4)
+    axis(3, mgp = c(-1, -1, 0))
+
+    par(mar=c(5.1, 4.1, 0, 2.1))
+    library(TFBSTools)
+    library(JASPAR2022)
+    library(Biostrings)
+
+    if (!exists("mreadDNAStringSet")) {mreadDNAStringSet = memoise::memoise(readDNAStringSet, cache = cachem::cache_mem(max_size = 10*1024 * 1024^2))}
+    if (!exists("mTFBSTools_getMatrixSet")) {mTFBSTools_getMatrixSet = memoise::memoise(TFBSTools::getMatrixSet)}
+
+    # 1. Récupérer le genome
+    genome = mreadDNAStringSet(paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Sequence/WholeGenomeFasta/genome.fa"))
+    names(genome) = sub(" .*", "", names(genome))  # clean des noms (important)
+    # 2. Récupérer tous les PWM humains depuis JASPAR
+    opts = list(species=9606, all_versions=FALSE)  # humain
+    jaspar_matrices = mTFBSTools_getMatrixSet(JASPAR2022::JASPAR2022, opts)
+    # 3, Locus
+    chr  = strsplit(locus, "-|:")[[1]][1]
+    start = as.numeric(strsplit(locus, "-|:")[[1]][2]) + xlims[1]
+    end   = as.numeric(strsplit(locus, "-|:")[[1]][3]) + xlims[2]
+    seq = as.character(subseq(genome[[chr]], start=start, end=end))
+    # 4. Scanner la séquence pour chaque motif
+    all_tfbs = lapply(names(jaspar_matrices), function(tf_name) {
+    # tf_name = "MA1930.1"
+    pwm = jaspar_matrices[[tf_name]]
+    tfbs = TFBSTools::searchSeq(toPWM(pwm), seq, min.score=0, strand="*")  # seuil 85% pour réduire faux positifs
+    ret = data.frame(
+        TF = name(pwm),
+        start = start(tfbs),
+        end = end(tfbs),
+        strand = strand(tfbs),
+        score = score(tfbs)
+    )
+    ret
+    })
+    tfbs_df = do.call(rbind, all_tfbs)
+
+    plot(0,0, xlim=range(c(tfbs_df$start, tfbs_df$end)), ylim=c(0, max(tfbs_df$score)), col=0, xaxs = "i",
+    xlab=locus, xaxt="n", ylab="TFBS score")
+    axis(1, at=c(1, xlims[2]-xlims[1]+1), labels=xlims)
+    segments(x0=tfbs_df$start, y0=tfbs_df$score, x1=tfbs_df$end, y1=tfbs_df$score)
+    tfbs_df
+
+    par(mar=c(5.1, 4.1, 4.1, 2.1))
+
+    return(Vmat)
+}
+```
+
+# Vplot
+
+```{r}
+peaks_oi = tail(peaks[order(peaks$signalValue),c("signalValue", "len", "key")], 20)$key
+
+idx = p.adjust(res$pv, method="BH") < 0.05
+subres = res[idx,]
+idx = subres$pmax2adj < 0.05
+subres = subres[idx,]
+peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
+head(peaks_oi)
+peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
+peaks_oi
+peaks_oi = peaks_oi$key
+
+
+idx = !duplicated(res$peak)
+subres = res[idx,]
+idx = subres$pv1 < 0.00001
+subres = subres[idx,]
+peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
+peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
+peaks_oi
+peaks_oi = peaks_oi$key
+
+
+for (locus in peaks_oi) {
+  Vmat = vplot_locus(locus=locus)
+}
+```
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

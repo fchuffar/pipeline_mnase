@@ -1,0 +1,220 @@
+---
+title: "DA on features"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+# Pipeline Initialization
+
+```{r}
+source("common.R")
+source("config")
+feat_k = "tss"
+prefix = paste0("da_", feat_k)
+```
+
+# Samples
+
+This section defines the experimental design and associates each sample with its corresponding sequencing files:
+
+- `samples.R` contains the sample-specific information and defines the `samples` variable used throughout the pipeline.
+- The `e` data frame defines the **experimental grouping**, with one row per sample and columns pointing to the corresponding BigWig (`bw`) and BAM (`bam`) files and factors if needed.
+- The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
+- The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
+
+```{r label="samples"}
+source("samples.R")
+e = data.frame(
+  gsm = samples,
+  bam = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam"),
+  bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+)
+rownames(e) = e$gsm
+
+if (file.exists("exp_grp.R")) {
+  source("exp_grp.R")
+}
+
+head(e)
+dim(e)
+```
+
+
+
+# DA
+
+##  Raw counts
+
+merge bam
+
+macs3
+
+feat
+
+raw_count
+
+```{r raw_counts_feat}
+raw_counts_summary = read.table(paste0(feat_k, "_count.txt.summary"), header=TRUE, row.names=1)
+colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
+layout(matrix(1:2, 1), respect=TRUE)
+# barplot(table(as.matrix(raw_counts_summary), margin=2), las=2)
+barplot(prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
+
+raw_counts = read.table(paste0(feat_k, "_count.txt"), header=TRUE)
+rownames(raw_counts) = raw_counts[,1]
+pf = raw_counts[,1:6]
+raw_counts = as.matrix(raw_counts[,-(1:6)])
+colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
+head(raw_counts[,1:3])
+tail(raw_counts[,1:3])
+dim( raw_counts)
+```
+
+
+## Distribution
+
+```{r density, results="verbatim"}
+layout(matrix(1:2, 1), respect=TRUE)
+plot(density(log2(raw_counts)+1))
+# raw_counts = raw_counts[!apply(raw_counts<2048, 1, all),]
+# raw_counts = raw_counts[!apply(raw_counts<256, 1, all),]
+raw_counts = raw_counts[!apply(raw_counts<32, 1, all),]
+plot(density(log2(raw_counts)+1))
+dim(raw_counts)
+```
+
+## Deseq2 norm counts
+
+
+```{r norm_counts_feats, eval=FALSE}
+if (!all(e$gsm %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
+countData = raw_counts[,e$gsm]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData), c("sprayed_status", "age", "DDEugg44", "self_spray")]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
+
+
+k = "sprayed_status"
+dds <- DESeq2::DESeqDataSetFromMatrix(
+  countData = countData,
+  colData = colData,
+  # design = ~ age
+  design = formula(paste("~", k))
+  # design = ~ DDEugg44
+)
+dds <- DESeq2::DESeq(dds)
+res <- DESeq2::results(dds)
+
+```
+
+
+# Volcano plots
+
+
+```{r volcano, results="verbatim"}
+
+if (!all(e$gsm %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
+countData = raw_counts[,e$gsm]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData),]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
+
+layout(matrix(1:2,1), respect=TRUE)
+
+for (k in factoi) {
+  # k = "sprayed_status"
+  print(k)
+  frmula = formula(paste("~", k))
+  dds <- DESeq2::DESeqDataSetFromMatrix(
+    countData = countData,
+    colData = colData,
+    design = frmula
+  )
+  dds <- DESeq2::DESeq(dds)
+  res <- DESeq2::results(dds)
+
+  res = res[!is.na(res$pvalue),]
+  res = res[!is.na(res$padj),]
+  plot(res$log2FoldChange, -log10(res$pvalue), xlab="l2fc", ylab="-log10(pval)", main=frmula)
+  plot(res$log2FoldChange, -log10(res$padj)  , xlab="l2fc", ylab="-log10(padj)", main=frmula)
+
+  res = res[order(res$log2FoldChange), ]
+  idx = rownames(res)[res$padj< 0.05]
+
+  print(cbind(pf[idx,2:4], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+
+}
+
+for (k in factoi) {
+  # k = "log2DDEugg44"
+  # k = "ordDDEugg44"
+  # k = "BMI"
+  frmula = formula(paste0("~ ", k, " + age"))
+  dds <- DESeq2::DESeqDataSetFromMatrix(
+    countData = countData,
+    colData = colData,
+    design = frmula
+  )
+  dds <- DESeq2::DESeq(dds)
+  res <- DESeq2::results(dds, name=k)
+
+
+  res = res[!is.na(res$pvalue),]
+  res = res[!is.na(res$padj),]
+  layout(matrix(1:2,1), respect=TRUE)
+  plot(res$log2FoldChange, -log10(res$pvalue), xlab="l2fc", ylab="-log10(pval)", main=frmula)
+  plot(res$log2FoldChange, -log10(res$padj)  , xlab="l2fc", ylab="-log10(padj)", main=frmula)
+
+  res = res[order(res$log2FoldChange), ]
+  idx = rownames(res)[res$padj< 0.05]
+  print(cbind(pf[idx,2:4], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+}
+```
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,237 @@
+---
+title: "DA on tiles"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+# Pipeline Initialization
+
+```{r}
+source("common.R")
+source("config")
+prefix = "da_tiles"
+```
+
+# Samples
+
+This section defines the experimental design and associates each sample with its corresponding sequencing files:
+
+- `samples.R` contains the sample-specific information and defines the `samples` variable used throughout the pipeline.
+- The `e` data frame defines the **experimental grouping**, with one row per sample and columns pointing to the corresponding BigWig (`bw`) and BAM (`bam`) files and factors if needed.
+- The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
+- The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
+
+```{r label="samples"}
+source("samples.R")
+e = data.frame(
+  gsm = samples,
+  bam = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam"),
+  bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
+)
+rownames(e) = e$gsm
+
+if (file.exists("exp_grp.R")) {
+  source("exp_grp.R")
+}
+
+head(e)
+dim(e)
+```
+
+
+
+# DA
+
+##  Raw counts
+
+merge bam
+
+macs3
+
+peaks
+
+```{r raw_counts_tiles}
+raw_counts_summary = read.table(paste0("tiles_count.txt.summary"), header=TRUE, row.names=1)
+colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
+layout(matrix(1:2, 1), respect=TRUE)
+# barplot(table(as.matrix(raw_counts_summary), margin=2), las=2)
+barplot(prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
+
+raw_counts = read.table(paste0("tiles_count.txt"), header=TRUE)
+rownames(raw_counts) = raw_counts[,1]
+pf = raw_counts[,1:6]
+raw_counts = as.matrix(raw_counts[,-(1:6)])
+colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
+head(raw_counts[,1:3])
+tail(raw_counts[,1:3])
+dim( raw_counts)
+```
+
+
+## Distribution
+
+```{r density, results="verbatim"}
+layout(matrix(1:2, 1), respect=TRUE)
+plot(density(log2(raw_counts)+1))
+# raw_counts = raw_counts[!apply(raw_counts<2048, 1, all),]
+raw_counts = raw_counts[!apply(raw_counts<256, 1, all),]
+plot(density(log2(raw_counts)+1))
+dim(raw_counts)
+```
+
+## Deseq2 norm counts
+
+
+```{r norm_counts_tiles, eval=FALSE}
+if (!all(e$gsm %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
+countData = raw_counts[,e$gsm]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData), c("sprayed_status", "age", "DDEugg44", "self_spray")]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
+
+
+for (k in factoi[1]) {
+  k = "sprayed_status"
+  dds <- DESeq2::DESeqDataSetFromMatrix(
+    countData = countData,
+    colData = colData,
+    # design = ~ age
+    design = formula(paste("~", k))
+    # design = ~ DDEugg44
+  )
+  dds <- DESeq2::DESeq(dds)
+}
+
+# plot(density(dds$DDEugg44))
+# boxplot(dds$DDEugg44~dds$sprayed_status)
+
+
+# barplot(table(dds$age))
+# barplot(table(dds$age), las=2)
+# barplot(table(dds$age, dds$sprayed_status), las=2)
+# barplot(table(dds$sprayed_status, dds$age), las=2)
+
+
+# boxplot(dds$sprayed_status~dds$DDEugg44)
+
+# table(dds$sprayed_status)
+
+# boxplot(dds$sprayed_status)
+# boxplot(dds$sprayed_status)
+# plot(dds$DDEugg44, dds$age)
+# plot(dds$age, dds$DDEugg44)
+# plot(density(dds$age))
+
+# plot(dds$sprayed_status, dds$DDEugg44)
+# plot(density(dds$DDEugg44))
+
+
+# library(ggplot2)
+
+# ggplot(e, aes(x = age, y = DDEugg44, colour = sprayed_status)) +
+#   geom_point(size = 2, alpha = 0.7) +
+#   geom_smooth(method = "lm", se = FALSE) +
+#   theme_bw() +
+#   labs(
+#     x = "Age",
+#     y = "DDEugg44",
+#     colour = "Sprayed status"
+#   )
+
+
+# dds <- DESeq2::DESeq(dds)
+res <- DESeq2::results(dds)
+
+# dds = DESeq2::estimateSizeFactors(dds)
+# norm_counts_tiles = DESeq2::counts(dds, normalized=TRUE)
+# head(norm_counts_tiles[,1:3])
+# dim(norm_counts_tiles)
+```
+
+
+# Volcano plots
+
+
+```{r volcano, results="verbatim"}
+
+if (!all(e$gsm %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
+countData = raw_counts[,e$gsm]
+colnames(countData) = rownames(e)
+colData = e[colnames(countData), c("sprayed_status", "Smoking", "age", "DDEugg44", "self_spray")]
+# Vérifie que les noms de colonnes correspondent
+if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
+
+layout(matrix(1:2,1), respect=TRUE)
+
+for (k in factoi[1:2]) {
+  # k = "sprayed_status"
+  print(k)
+  dds <- DESeq2::DESeqDataSetFromMatrix(
+    countData = countData,
+    colData = colData,
+    # design = ~ age
+    design = formula(paste("~", k))
+    # design = ~ DDEugg44
+  )
+  dds <- DESeq2::DESeq(dds)
+  res <- DESeq2::results(dds)
+
+  res = res[!is.na(res$pvalue),]
+  res = res[!is.na(res$padj),]
+  plot(res$log2FoldChange, -log10(res$pvalue))
+  plot(res$log2FoldChange, -log10(res$padj))
+
+  res = res[order(res$log2FoldChange), ]
+  idx = rownames(res)[res$padj< 0.05]
+
+  print(cbind(pf[idx,2:4], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+
+}
+```
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
