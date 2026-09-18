@@ -1,0 +1,39 @@
+```{r}
+tile_size = as.numeric(sub("^[A-Za-z]+", "", prefix))
+if (is.na(tile_size)) tile_size = 5000
+```
+
+## Tiles (`R tile_size`bp)
+
+This section defines the genomic coordinates used throughout the analysis.
+
+```{r genome}
+# to create .chrom.sizes file for Mus_musculus/UCSC/mm10 do 
+# cat ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.dict | grep SN | cut -f2,3 | cut -d: -f2,3 | sed -e "s/LN://" > ~/projects/datashare/genomes/Mus_musculus/UCSC/mm10/mm10.chrom.sizes
+chr_sizes = read.table(paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/", version, ".chrom.sizes"), stringsAsFactors=FALSE)
+head(chr_sizes)
+dim(chr_sizes)
+# Filtering...
+# chr_sizes = chr_sizes[chr_sizes[,1] != "chrM",]
+# chr_sizes = chr_sizes[c(11:19, 1:10, 20:21),]
+chr_sizes = chr_sizes[1:24,]
+genome = data.frame(chr=chr_sizes[,1], beg=1, end=chr_sizes[,2], name1=chr_sizes[,1], name2=chr_sizes[,1], stringsAsFactorsnd="+", stringsAsFactors=FALSE)
+
+rownames(genome) = NULL
+print(genome)
+dim(genome)
+```
+
+```{r, results="verbatim", echo=TRUE}
+genome
+```
+
+This section defines the genomic features used for the downstream analysis.
+
+```{r results="verbatim"}
+feat = tile_genome(5000, genome)
+head(feat)
+dim(feat)
+```
+
+

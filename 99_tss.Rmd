@@ -1,0 +1,24 @@
+```{r}
+pm_size = as.numeric(sub("^[A-Za-z]+", "", prefix))
+if (is.na(pm_size)) pm_size = 1500
+```
+
+
+## TSS +/- `r pm_size`bp
+
+
+This section defines the genomic coordinates used throughout the analysis.
+
+```{r tss}
+
+feat = read.table(paste0("datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed"), stringsAsFactors=FALSE)
+feat$tss = ifelse(feat[,6]=="+", feat[,2], feat[,3])
+feat[,2] = feat$tss  - pm_size
+feat[feat[,2]<1,2] = 1
+feat[,3] = feat[,2] + pm_size + pm_size
+feat = feat[,1:6]
+
+head(feat)
+dim(feat)
+```
+

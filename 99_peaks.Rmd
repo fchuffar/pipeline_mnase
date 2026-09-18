@@ -1,0 +1,59 @@
+```{r}
+log10macspv = as.numeric(sub("^[A-Za-z]+", "", prefix))
+if (is.na(log10macspv)) log10macspv = 10
+```
+
+
+
+# Peaks with `macs3` (`thres=1e-`r log10macspv ``)
+
+This section defines the genomic coordinates used throughout the analysis.
+
+
+```{r peaks, fig.height=6}
+# #	Nom de la colonne	Description	Type / Exemple
+# 1	chrom	Nom du chromosome	chr1
+# 2	chromStart	Position de début du pic (0-based, inclusif)	3455000
+# 3	chromEnd	Position de fin du pic (1-based, exclusif)	3455500
+# 4	name	Nom du pic	peak_00001
+# 5	score	Score de 0 à 1000 (utile pour visualisation UCSC)	500
+# 6	strand	Brin (+, -, ou . si non applicable)	.
+# 7	signalValue	Enrichissement du signal au sommet du pic	12.45
+# 8	pValue	–log10(p-value) de la significativité du pic	7.30
+# 9	qValue	–log10(q-value, FDR ajustée)	5.21
+# 10	peak	Position du sommet du pic par rapport à chromStart (en bp). -1 si inconnu.	250
+peaks = read.table(paste0("macs3_output_merged/mrg1.00e-", log10macspv, "_peaks.narrowPeak"))
+rownames(peaks) = peaks[,4]
+colnames(peaks) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue", "peak")
+peaks$len = peaks$chromEnd - peaks$chromStart
+peaks = peaks[nchar(peaks$chrom)<=5,]
+head(peaks)
+dim(peaks)
+
+# Filtering peaks
+head(peaks)
+dim(peaks)
+peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
+length(unique(peaks$key))
+# qv_thresh = peaks[order(peaks$qValue, decreasing=TRUE),]$qValue[40000]
+# peaks = peaks[peaks$qValue>=qv_thresh,]
+dim(peaks)
+length(unique(peaks$key))
+peaks = peaks[!duplicated(peaks$key),]
+dim(peaks)
+length(unique(peaks$key))
+
+# Stat peaks
+custom_hm(peaks$qValue , peaks$pValue     , xlab="qValue", ylab="pValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(peaks$qValue, .99), ylim=c(0, quantile(peaks$pValue     , .99))))
+custom_hm(peaks$qValue , peaks$signalValue, xlab="qValue", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(peaks$qValue, .99), ylim=c(0, quantile(peaks$signalValue, .99))))
+custom_hm(peaks$len    , peaks$signalValue, xlab="len   ", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(peaks$len   , .99), ylim=c(0, quantile(peaks$signalValue, .99))))
+custom_hm(peaks$len    , peaks$qValue     , xlab="len   ", ylab="qValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(peaks$len   , .99), ylim=c(0, quantile(peaks$qValue     , .99))))
+# stop("EFN")
+
+feat = peaks
+head(feat)
+dim(feat)
+```
+
+
+
