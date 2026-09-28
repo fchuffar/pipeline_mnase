@@ -10,7 +10,6 @@ if (is.na(pm_size)) pm_size = 1500
 This section defines the genomic coordinates used throughout the analysis.
 
 ```{r tss}
-
 feat = read.table(paste0("datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed"), stringsAsFactors=FALSE)
 feat$tss = ifelse(feat[,6]=="+", feat[,2], feat[,3])
 feat[,2] = feat$tss  - pm_size

@@ -11,6 +11,9 @@ output:
 ---
 
 
+```{r header, child="header.Rmd"}
+```
+
 ```{r}
 prefix = "fraglen"
 max_frag_len = 500
@@ -23,47 +26,11 @@ options =   paste0(
 if (!exists("COMPUTEFRAGESIZE")) {COMPUTEFRAGESIZE = FALSE}
 ```
 
-```{r, echo=FALSE, eval=TRUE}
-knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+
+
+```{r samples, child="samples.Rmd"}
 ```
 
-# Pipeline Initialization
-
-This section initializes the environment required for the analysis:
-
-- `common.R` contains the utility functions used throughout the pipeline.
-- `config` contains the dataset-specific parameters used by the script, such as the project name, dataset name, and species.
-
-
-```{r}
-source("common.R")
-source("config")
-```
-
-# Samples
-
-This section defines the experimental design and associates each sample with its corresponding sequencing files:
-
-- `samples.R` contains the sample-specific information and defines the `samples` variable used throughout the pipeline.
-- The `e` data frame defines the **experimental grouping**, with one row per sample and columns pointing to the corresponding BigWig (`bw`) and BAM (`bam`) files and factors if needed.
-- The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
-- The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
-
-```{r label="samples"}
-source("samples.R")
-e = data.frame(
-  gsm = samples,
-  bam = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt.bam"),
-  bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
-)
-rownames(e) = e$gsm
-
-if (file.exists("exp_grp.R")) {
-  source("exp_grp.R")
-}
-head(e)
-dim(e)
-```
 
 
 # Fragment Size Distribution
