@@ -28,7 +28,7 @@ rule target:
     input:
       bam_srt,
       # bam_mmq,
-      bw,
+      # bw,
       bwcr,
       # bw2,
       # bw3,

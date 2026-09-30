@@ -106,15 +106,20 @@ tail(raw_counts[,1:3])
 dim( raw_counts)
 ```
 
-## Fingerprint
+## Fingerprint (`raw_counts`)
 
 ```{r fingerprint}
 data = as.matrix(t(raw_counts))
-col = as.numeric(e[,factoi[1]])
-names(col) = rownames(e)
 
 layout(1, respect=TRUE)
 plot(0,0, col=0, xlim=c(1, ncol(data)), ylim=0:1, xlab="Ranked genomic features", ylab="Cumulative fraction of signal")
+if (exists("factoi")) {
+  col = as.numeric(e[,factoi[1]])
+  legend("topright", col=1:length(levels(e[,factoi[1]])), levels(e[,factoi[1]]), pch=16)
+} else {
+  col = rep(1, nrow(e))
+}
+names(col)=rownames(e)
 sapply(rownames(data), function(k){
   l = data[k,]
   tot = sum(sort(l))
@@ -188,7 +193,7 @@ for (k in names(norm_counts)) {
 
   layout(matrix(1:6,2), respect=TRUE)
   # layout(matrix(1:2,1), respect=TRUE)
-  barplot(p, ylab="% of variance explained", xlab="components")
+  barplot(p, ylab="% of variance explained", xlab="components", main=k)
 
   if (exists("factoi")) {
     col = as.numeric(e[rownames(pca$x),factoi[1]])
@@ -217,6 +222,7 @@ for (k in names(norm_counts)) {
     xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
     ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
     col=adjustcolor(col, alpha.f=0.5),
+    main=k,
     pch=16
   )
 

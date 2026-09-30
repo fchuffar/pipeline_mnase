@@ -132,6 +132,8 @@ if (exists("factoi")) {
   col = 1
 }
 
+
+
 layout(matrix(1:6,2), respect=TRUE)
 # layout(matrix(1:2,1), respect=TRUE)
 barplot(p, ylab="% of variance explained", xlab="components")
@@ -148,7 +150,7 @@ for (i in 1:5) {
 
 
 
-e$fraglenclust = as.factor(paste0("c", as.numeric(pca$x[rownames(e),1]<5000)+1))
+e$fraglenclust = as.factor(paste0("c", as.numeric(pca$x[rownames(e),1]< -5000)+1))
 col = as.numeric(e[rownames(pca$x),"fraglenclust"])
 
 
