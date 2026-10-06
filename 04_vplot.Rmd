@@ -22,7 +22,7 @@ source("common.R")
 # vplot
 
 ```{r}
-locus="chr7:91627998-91636590"
+locus="chr19:35000000-35100000"
 
 vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), ylims = c(0,300)) {
     # locus = "chrY:56734583-56735142"
@@ -50,7 +50,7 @@ vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), y
     end   = as.numeric(strsplit(locus, "-|:")[[1]][3]) + 5000
     locus_ext = paste0(chr, ":", start, "-", end)
 
-    full_bam_file = paste0("/home/chuffarf/projects/datashare/", gse, "/merged_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_mmq30_srt.bam")
+    full_bam_file = paste0("/home/chuffarf/projects/datashare/", gse, "/mergedall_end-to-end_trimno_bowtie2_", species, "_", annotation, "_", version, "_fltr_srt.bam")
     bam_file = "locus.bam"
 
     cmd = "samtools"
@@ -81,7 +81,7 @@ vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), y
     granges = genes
     bam_granges = fragments
     Vmat = computeVmat(
-      m_granges, bam_granges, # redas
+      bam_granges=bam_granges, # redas
       granges = granges,      # taget, features, genes, tss...
       xlims = xlims, 
       ylims = ylims, 
@@ -176,32 +176,33 @@ vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), y
 # Vplot
 
 ```{r}
-peaks_oi = tail(peaks[order(peaks$signalValue),c("signalValue", "len", "key")], 20)$key
+vplot_locus(locus=locus)
+# peaks_oi = tail(peaks[order(peaks$signalValue),c("signalValue", "len", "key")], 20)$key
 
-idx = p.adjust(res$pv, method="BH") < 0.05
-subres = res[idx,]
-idx = subres$pmax2adj < 0.05
-subres = subres[idx,]
-peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
-head(peaks_oi)
-peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
-peaks_oi
-peaks_oi = peaks_oi$key
-
-
-idx = !duplicated(res$peak)
-subres = res[idx,]
-idx = subres$pv1 < 0.00001
-subres = subres[idx,]
-peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
-peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
-peaks_oi
-peaks_oi = peaks_oi$key
+# idx = p.adjust(res$pv, method="BH") < 0.05
+# subres = res[idx,]
+# idx = subres$pmax2adj < 0.05
+# subres = subres[idx,]
+# peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
+# head(peaks_oi)
+# peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
+# peaks_oi
+# peaks_oi = peaks_oi$key
 
 
-for (locus in peaks_oi) {
-  Vmat = vplot_locus(locus=locus)
-}
+# idx = !duplicated(res$peak)
+# subres = res[idx,]
+# idx = subres$pv1 < 0.00001
+# subres = subres[idx,]
+# peaks_oi = peaks[unique(subres$peak),c("signalValue", "len", "key")]
+# peaks_oi = peaks_oi[order(peaks_oi$signalValue),]
+# peaks_oi
+# peaks_oi = peaks_oi$key
+
+
+# for (locus in peaks_oi) {
+#   Vmat = vplot_locus(locus=locus)
+# }
 ```
 
 
