@@ -29,9 +29,11 @@ peaks = peaks[nchar(peaks$chrom)<=5,]
 head(peaks)
 dim(peaks)
 
+# define key for identify multipeaks groups
 peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
 length(unique(peaks$key))
 
+# split multipeaks
 peaks$chromStart2 = peaks$chromStart
 peaks$chromEnd2 = peaks$chromEnd
 
@@ -61,28 +63,36 @@ peaks$chromStart = peaks$chromStart2
 peaks$chromEnd = peaks$chromEnd2
 
 peaks$len = peaks$chromEnd - peaks$chromStart
-peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
-length(unique(peaks$key))
 
-dim(peaks)
-length(unique(peaks$key))
-peaks = peaks[!duplicated(peaks$key),]
-dim(peaks)
-length(unique(peaks$key))
+
+
+# # 
+# peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
+# length(unique(peaks$key))
+
+
+# # debup according to key
+# dim(peaks)
+# length(unique(peaks$key))
+# # peaks = peaks[!duplicated(peaks$key),]
+# dim(peaks)
+# length(unique(peaks$key))
 ```
 ```{r peaks_hm, fig.height=6}
 # Filtering peaks
 head(peaks)
 dim(peaks)
 peaks$key = paste0(peaks[[1]], ":", peaks[[2]], "-", peaks[[3]])
-length(unique(peaks$key))
-# qv_thresh = peaks[order(peaks$qValue, decreasing=TRUE),]$qValue[40000]
-# peaks = peaks[peaks$qValue>=qv_thresh,]
-dim(peaks)
-length(unique(peaks$key))
-peaks = peaks[!duplicated(peaks$key),]
-dim(peaks)
-length(unique(peaks$key))
+if (sum(duplicated(peaks$key))>0) {stop("Duplicated peaks.")}
+# length(unique(peaks$key))
+# # qv_thresh = peaks[order(peaks$qValue, decreasing=TRUE),]$qValue[40000]
+# # peaks = peaks[peaks$qValue>=qv_thresh,]
+# dim(peaks)
+# length(unique(peaks$key))
+# peaks = peaks[!duplicated(peaks$key),]
+# dim(peaks)
+# length(unique(peaks$key))
+
 
 # Stat peaks
 custom_hm(peaks$qValue , peaks$pValue     , xlab="qValue", ylab="pValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(peaks$qValue, .99), ylim=c(0, quantile(peaks$pValue     , .99))))

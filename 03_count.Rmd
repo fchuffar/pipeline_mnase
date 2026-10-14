@@ -54,7 +54,9 @@ colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
 feat_saf$Start = as.numeric(feat_saf$Start)
 feat_saf$End   = as.numeric(feat_saf$End  )
 saf_filename = paste0(prefix, ".saf")
+options(scipen=999)
 write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+options(scipen=0)
 
 cmd = "featureCounts"
 mmq = 30
