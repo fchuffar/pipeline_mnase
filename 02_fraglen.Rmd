@@ -125,50 +125,74 @@ pca = prcomp(data, scale=FALSE)
 v = pca$sdev * pca$sdev
 p = v / sum(v) * 100
 
+
+layout(matrix(1:6,2), respect=TRUE)
+# layout(matrix(1:2,1), respect=TRUE)
+barplot(p, ylab="% of variance explained", xlab="components")
+for (i in 1:5) {
+  j = i+1
+  plot(
+    pca$x[,i], pca$x[,j],
+    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+    col=1,
+    pch=16
+  )
+}
+
+
+
+rm(cols)
 if (exists("factoi")) {
-  col = as.numeric(e[rownames(pca$x),factoi[1]])
-  legend("topright", col=1:length(levels(e[,factoi[1]])), levels(e[,factoi[1]]),pch=16)
-} else {
-  col = 1
+  fois = factoi[sapply(factoi, function(fa) {class(e[[fa]])})=="factor"]
+  if (length(fois)>0) {
+    for (foi in fois) {
+      layout(matrix(1:6,2), respect=TRUE)
+      # layout(matrix(1:2,1), respect=TRUE)
+      barplot(p, ylab="% of variance explained", xlab="components")
+      cols = as.numeric(e[rownames(pca$x),foi])
+      legend("topright", col=1:length(levels(e[,foi])), levels(e[,foi]), pch=16, title=foi, bty="n")
+      for (i in 1:5) {
+        j = i+1
+        plot(
+          pca$x[,i], pca$x[,j],
+          xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+          ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+          col=cols,
+          pch=16
+        )
+      }
+    }
+  }
 }
 
 
 
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,1:2], G=2)
+cl = mc$classification
+cols = cl
+
+
+
+e$fraglenclust = as.factor(paste0("c", cl[rownames(e)]))
+foi = "fraglenclust"
 layout(matrix(1:6,2), respect=TRUE)
 # layout(matrix(1:2,1), respect=TRUE)
 barplot(p, ylab="% of variance explained", xlab="components")
+cols = as.numeric(e[rownames(pca$x),foi])
+legend("topright", col=1:length(levels(e[,foi])), levels(e[,foi]), pch=16, title=foi, bty="n")
 for (i in 1:5) {
   j = i+1
   plot(
     pca$x[,i], pca$x[,j],
     xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
     ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
-    col=col,
+    col=cols,
     pch=16
   )
 }
-
-
-
-e$fraglenclust = as.factor(paste0("c", as.numeric(pca$x[rownames(e),1]< -5000)+1))
-col = as.numeric(e[rownames(pca$x),"fraglenclust"])
-
-
-layout(matrix(1:6,2), respect=TRUE)
-# layout(matrix(1:2,1), respect=TRUE)
-barplot(p, ylab="% of variance explained", xlab="components")
-for (i in 1:5) {
-  j = i+1
-  plot(
-    pca$x[,i], pca$x[,j],
-    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
-    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
-    col=col,
-    pch=16
-  )
-}
-
-pca$x[rownames(pca$x)[order(pca$x[,1])],1]
 
 
 layout(1, respect=TRUE)
