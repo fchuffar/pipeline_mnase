@@ -22,7 +22,7 @@ source("common.R")
 # vplot
 
 ```{r}
-locus="chr19:35000000-35100000"
+locus="chr19:35039708-35042868"
 
 vplot_locus = function(locus="chr1:226515000-226525000", xlims = c(-300, 300), ylims = c(0,300)) {
     # locus = "chrY:56734583-56735142"
