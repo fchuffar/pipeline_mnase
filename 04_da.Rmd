@@ -91,31 +91,68 @@ colData = e[colnames(countData),]
 # Vérifie que les noms de colonnes correspondent
 if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
 
-layout(matrix(1:2,1), respect=TRUE)
 
 for (k in factoi) {
   # k = "sprayed_status"
   print(k)
-  frmula = formula(paste("~", k))
+  model_formula = paste0("~", k)
+  frmula = formula(model_formula)
+
   dds <- DESeq2::DESeqDataSetFromMatrix(
-    countData = countData,
-    colData = colData,
+    countData = countData[,rownames(colData[!is.na(colData[,k]),])],
+    colData = colData[!is.na(colData[,k]),],
     design = frmula
   )
   dds <- DESeq2::DESeq(dds)
   res <- DESeq2::results(dds)
 
-  res = res[!is.na(res$pvalue),]
-  res = res[!is.na(res$padj),]
+  head(res[is.na(res$pvalue),])
+  sum(!is.na(res$pvalue))
+  sum(is.na(res$pvalue))
+  sum(!is.na(res$padj))
+  # res = res[!is.na(res$pvalue),]
+  # res = res[!is.na(res$padj),]
+
+  layout(matrix(1:2,1), respect=TRUE)
   plot(res$log2FoldChange, -log10(res$pvalue), xlab="l2fc", ylab="-log10(pval)", main=frmula)
   plot(res$log2FoldChange, -log10(res$padj)  , xlab="l2fc", ylab="-log10(padj)", main=frmula)
 
-  res = res[order(res$log2FoldChange), ]
-  idx = rownames(res)[res$padj< 0.05]
-
+  # res = res[order(res$log2FoldChange), ]
+  idx = rownames(res)[!is.na(res$padj)&res$padj< 0.05]
   print(cbind(pf[idx,2:4], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
 
-  WriteXLS::WriteXLS
+  model_func_name = "deseq2"  
+  prefix3 = paste0(gse, "_", model_func_name, "_", model_formula)
+
+  tmp_df = cbind(pf[rownames(res),], res)
+  head(tmp_df)
+  # WriteXLS::WriteXLS(tmp_df, paste0("results_", prefix3, "_", prefix2, "_", prefix, ".xlsx"))
+
+  # gsea_input = cbind(rownames(tmp_df), tmp_df$log2FoldChange)
+  # head(gsea_input)
+  # dim(gsea_input)
+  # gsea_input_filename = paste0("results_", prefix3, "_", prefix2, "_", prefix, ".rnk")
+  # write.table(gsea_input, gsea_input_filename, sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
+
+  bed = tmp_df[,-1]
+  head(bed)
+  bed[,3] = bed[,2]+1
+  bed[,4] = rownames(bed)
+  bed[,5] = bed$pvalue
+  bed[,6] = "+"
+  bed[,7] = bed$log2FoldChange
+  bed[,8] = -log10(bed[,5])  
+  bed = bed[,1:8]
+  colnames(bed) = c("#chrom", "start", "end", "probes", "pval", "strand", "l2fc", "lpv")
+  head(bed)
+  dim(bed)
+
+  # write ewas res for combp
+  bed[,1] = as.character(bed[,1])
+  bed = bed[order(bed[,1], bed[,2]),]
+  bed_ewas_filename = paste0("ewas4combp_", prefix3, ".bed")
+  write.table(bed, file=bed_ewas_filename , sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+  # bed_on_disk = read.table(bed_ewas_filename, sep="\t", header=TRUE)
 
 
 

@@ -93,7 +93,7 @@ for (gsm in rownames(e)) {
 
 
 
-```{r}
+```{r pca}
 hs = lapply(rownames(e), function(gsm) {
   h = mread.table(paste0(prefix, "/", gsm, ".txt"), header=TRUE)
   h[,1]
@@ -125,7 +125,6 @@ pca = prcomp(data, scale=FALSE)
 v = pca$sdev * pca$sdev
 p = v / sum(v) * 100
 
-
 layout(matrix(1:6,2), respect=TRUE)
 # layout(matrix(1:2,1), respect=TRUE)
 barplot(p, ylab="% of variance explained", xlab="components")
@@ -139,10 +138,29 @@ for (i in 1:5) {
     pch=16
   )
 }
+layout(1, respect=TRUE)
+i=1 ; j = i+1
+plot(
+  pca$x[,1], pca$x[,j],
+  xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
+  ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
+  col=adjustcolor(1, alpha.f=0.5),
+  pch=16
+)
+text(pca$x[,i], pca$x[,j], rownames(pca$x))
+layout(1, respect=TRUE)
+image(t(data[rownames(pca$x)[order(pca$x[,1])], ]))
 
 
+# --- MCLUST sur les scores PCA ---
+library(mclust)
+mc = mclust::Mclust(pca$x[,1:2], G=2)
+cl = mc$classification
+e$fraglenclust = as.factor(paste0("c", cl[rownames(e)]))
+saveRDS(e$fraglenclust, "e_fraglenclust.rds")
+if (!exists("factoi")) {factoi = c()}
+factoi = unique(c("fraglenclust", factoi))
 
-rm(cols)
 if (exists("factoi")) {
   fois = factoi[sapply(factoi, function(fa) {class(e[[fa]])})=="factor"]
   if (length(fois)>0) {
@@ -167,36 +185,6 @@ if (exists("factoi")) {
 }
 
 
-
-# --- MCLUST sur les scores PCA ---
-library(mclust)
-mc = mclust::Mclust(pca$x[,1:2], G=2)
-cl = mc$classification
-cols = cl
-
-
-
-e$fraglenclust = as.factor(paste0("c", cl[rownames(e)]))
-foi = "fraglenclust"
-layout(matrix(1:6,2), respect=TRUE)
-# layout(matrix(1:2,1), respect=TRUE)
-barplot(p, ylab="% of variance explained", xlab="components")
-cols = as.numeric(e[rownames(pca$x),foi])
-legend("topright", col=1:length(levels(e[,foi])), levels(e[,foi]), pch=16, title=foi, bty="n")
-for (i in 1:5) {
-  j = i+1
-  plot(
-    pca$x[,i], pca$x[,j],
-    xlab=paste0("PC", i, "(", signif(p[i], 3), "%)"),
-    ylab=paste0("PC", j, "(", signif(p[j], 3), "%)"),
-    col=cols,
-    pch=16
-  )
-}
-
-
-layout(1, respect=TRUE)
-image(t(data[rownames(pca$x)[order(pca$x[,1])], ]))
 
 
 ```
