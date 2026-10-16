@@ -24,6 +24,11 @@ prefix2 = "combp"
 ```
 prefix="peaks5"   ; rmarkdown::render("03_count.Rmd", output_file=paste0("03_count_", prefix, ".html"))
 rmarkdown::render("04_da.Rmd", output_file=paste0("04_da_", prefix, ".html"))
+
+for (pheno_key in c("BMI", "hiloDDE", "smoking", "age")) {
+  prefix="peaks5"
+  rmarkdown::render("04_combp.Rmd", output_file=paste0("04_combp_", prefix, "_", pheno_key, ".html"))
+}
 ```
 
 
@@ -38,11 +43,10 @@ rmarkdown::render("04_da.Rmd", output_file=paste0("04_da_", prefix, ".html"))
 ```{r inputs}
 if (!exists("gse"))             gse = "chip_sa"  ;
 if (!exists("model_func_name")) model_func_name = "deseq2"         ;
-# if (!exists("model_formula"))   model_formula = paste0("~hiloDDE")  ;
 if (!exists("pval_thresh"))     pval_thresh = "0.05"                     ;
+if (!exists("pheno_key"))     pheno_key = "hiloDDE"                     ;
 
-
-model_formula = paste0("~hiloDDE")  ;
+model_formula = paste0("~", pheno_key)  ;
 # # study_filename = paste0("./datashare/", gse, "/study_preproc_", gse, ".rds")
 bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", model_func_name, "_", model_formula), ".bed")
 # # rds_ewas_filename = paste0("ewas_", prefix, ".rds")
@@ -92,13 +96,13 @@ Identification of differentially methylated regions (DER) using comb-p
 # Run comb-p, run!!
 Sys.setenv(PYTHONPATH="/summer/epistorage/opt/combined-pvalues/")
 cmd = "/summer/epistorage/opt/combined-pvalues/cpv/comb-p"
-arg = paste0("pipeline -c 5 --seed ", pval_thresh, " --dist 1000 -p dmr_", prefix," --region-filter-p 0.05 --region-filter-n 2 ", bed_ewas_filename)
+arg = paste0("pipeline -c 5 --seed ", pval_thresh, " --dist 1000 -p dmr_", prefix,"_", pheno_key, " --region-filter-p 0.05 --region-filter-n 1 ", bed_ewas_filename)
 print(paste(cmd, arg))
 system2(cmd, arg)
 ```
 
 ```{r echo=FALSE, out.width="100%", results="asis"}
-manhattan_file = paste0("dmr_", prefix, ".manhattan.png")
+manhattan_file = paste0("dmr_", prefix, "_", pheno_key, ".manhattan.png")
 if (file.exists(manhattan_file)) {
   cat(paste0("![](", manhattan_file, ")"), "\n")
 }
@@ -108,8 +112,8 @@ if (file.exists(manhattan_file)) {
 ```{r combp_outputs}
 # recuparation du fichier dmrbycombp1000_SGCE.fdr.bed après comb-p
 ewas = read.table(bed_ewas_filename, header=TRUE)
-combp_res_probes = read.table(gzfile(paste0("dmr_", prefix, ".fdr.bed.gz")), comment="@", header=TRUE)
-combp_res_region_filename = paste0("dmr_", prefix, ".regions-t.bed")
+combp_res_probes = read.table(gzfile(paste0("dmr_", prefix, "_", pheno_key, ".fdr.bed.gz")), comment="@", header=TRUE)
+combp_res_region_filename = paste0("dmr_", prefix, "_", pheno_key, ".regions-t.bed")
 if (file.exists(combp_res_region_filename)) {  
   combp_res_region = read.table(combp_res_region_filename, comment="@", header=TRUE)
   # head(combp_res_region[order(-combp_res_region$n_probes, combp_res_region$z_sidak_p),])
@@ -122,7 +126,7 @@ if (file.exists(combp_res_region_filename)) {
 results = combp_res_region
 results[,2] = results[,2] - 0
 results[,3] = results[,3] + 0
-tmp_results_filename = paste0("tmp_", prefix, ".bed")
+tmp_results_filename = paste0("tmp_", prefix, "_", pheno_key, ".bed")
 ```
 
 
@@ -257,20 +261,14 @@ for (idx in rownames(results)) {
   results[idx, "probes"] = paste(idx_probes, collapse=";")
 }
 
-
-# results$url = sapply(results[,4], function(i){
-#   output_pdf_filename = paste0("global_results/", prefix, "_", i, ".pdf")
-#   paste0("http://epimed.univ-grenoble-alpes.fr/downloads/florent/expedition_5300/results/meth/", output_pdf_filename)
-# })
-
-results_filename = paste0("global_results_", prefix, ".xlsx")
+results_filename = paste0("global_results_", prefix, "_", pheno_key, ".xlsx")
 print(results_filename)
 WriteXLS::WriteXLS(results, results_filename, FreezeCol=6, FreezeRow=1, BoldHeaderRow=TRUE, AdjWidth=TRUE)
 ```
 
 # Volcano plot wity DERs
 
-```{r}
+```{r volcano}
 idx_probes = unlist(strsplit(results[,]$probes, ";"))
 xlim = range(ewas_orig[idx_probes,1])
 ylim = range(ewas_orig[idx_probes,2])
@@ -310,7 +308,7 @@ There are `r nrow(results)` regions of interest with `pval_thresh`=$`r pval_thre
 ```
 
 
-```{r, eval=nrow(results)>0}
+```{r figs4res, eval=nrow(results)>0}
 library(Biostrings)
 library(Rsamtools)
 
@@ -331,10 +329,8 @@ get_CpG_positions <- function(fasta, chr, start, end) {
   )
 }
 
-
-
 if (nrow(results) > 0) {
-  for (i in rownames(results)[1:20]) {
+  for (i in rownames(results)[1:min(nrow(results),20)]) {
     print(i)
     roi = results[i,]
     if (nrow(results)>1 & !is.matrix(dmr_indexed_probes)) {
@@ -346,26 +342,26 @@ if (nrow(results) > 0) {
       roi,
       combp_res_probes=combp_res_probes,
       ewas=ewas,
-      pheno_key="hiloDDE", # rownames(attr(stats::terms(as.formula(model_formula)), "factor"))[2],
+      pheno_key=pheno_key, # rownames(attr(stats::terms(as.formula(model_formula)), "factor"))[2],
       idx_probes=idx_probes,
       study_filename=study_filename
     )
     e = s$exp_grp
-    idx_lo  = rownames(e)[e$hiloDDE%in%"lo"]
-    idx_hi  = rownames(e)[e$hiloDDE%in%"hi"]
+    idx_ctrl  = rownames(e)[e[[pheno_key]]%in%levels(e[[pheno_key]])[1]]
+    idx_case  = rownames(e)[e[[pheno_key]]%in%levels(e[[pheno_key]])[2]]
 
     layout(c(1,1,2,2,3,4))
     par(mar=c(0, 5.1, 4.1, 2.1))
     plot (s$platform[idx_probes,2], s$platform[idx_probes,]$lpv                          , ylab="-log10(raw_pv)", xaxt="n", typ="b", pch=16, main=i)
     abline(h=-log10(as.numeric(pval_thresh)), col=1, lty=2)
     abline(v=(floor(min(s$platform[idx_probes,2])/100):ceiling(max(s$platform[idx_probes,2]/100))*100), col=adjustcolor("grey", alpha.f=.3))
-    legend("topright", col=1:3, levels(as.factor(e$hiloDDE)), pch=16)
+    legend("topright", col=1:3, levels(as.factor(e[[pheno_key]])), pch=16)
     par(mar=c(0, 5.1, 0, 2.1))
-    matplot(s$platform[idx_probes,2], s$data[idx_probes,], type="l", col=adjustcolor(as.numeric(as.factor(e$hiloDDE)), alpha.f=.3), lty=1, ylab="norm counts", xaxt="n")
+    matplot(s$platform[idx_probes,2], s$data[idx_probes,], type="l", col=adjustcolor(as.numeric(as.factor(e[[pheno_key]])), alpha.f=.3), lty=1, ylab="norm counts", xaxt="n")
     abline(v=(floor(min(s$platform[idx_probes,2])/100):ceiling(max(s$platform[idx_probes,2]/100))*100), col=adjustcolor("grey", alpha.f=.3))
     # lines(s$platform[idx_probes,2], apply(s$data[idx_probes,idx_HD ], 1, mean), col=1, type="b", lwd=3, pch=16)
-    lines(s$platform[idx_probes,2], apply(s$data[idx_probes,idx_lo  ], 1, mean), col=1, type="b", lwd=3, pch=16)
-    lines(s$platform[idx_probes,2], apply(s$data[idx_probes,idx_hi  ], 1, mean), col=2, type="b", lwd=3, pch=16)
+    lines(s$platform[idx_probes,2], apply(s$data[idx_probes,idx_ctrl  ], 1, mean), col=1, type="b", lwd=3, pch=16)
+    lines(s$platform[idx_probes,2], apply(s$data[idx_probes,idx_case  ], 1, mean), col=2, type="b", lwd=3, pch=16)
     # plot(s$platform[idx_probes,2], s$platform[idx_probes,]$diff, ylim=range(0, s$platform[idx_probes,]$diff), ylab="Diff. meth.", xaxt="n")
     # abline(v=(floor(min(s$platform[idx_probes,2])/100):ceiling(max(s$platform[idx_probes,2]/100))*100), col=adjustcolor("grey", alpha.f=.3), ylab="meth. diff.")
     par(mar=c(5.1, 5.1, 0, 2.1))
@@ -381,14 +377,6 @@ if (nrow(results) > 0) {
 
   }
 }
-
-
-
-
-
-
-
-
 ```
 
 

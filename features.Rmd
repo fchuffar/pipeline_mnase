@@ -1,0 +1,19 @@
+# Features
+
+This section defines the genomic coordinates used throughout the analysis.
+
+```{r features, child=paste0("99_", sub("[0-9]+$", "", prefix), ".Rmd")}
+```
+
+```{r feat_hm, fig.height=6}
+# Stat feat
+custom_hm(feat$qValue , feat$pValue     , xlab="qValue", ylab="pValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$qValue, .99), ylim=c(0, quantile(feat$pValue     , .99))))
+custom_hm(feat$qValue , feat$signalValue, xlab="qValue", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$qValue, .99), ylim=c(0, quantile(feat$signalValue, .99))))
+custom_hm(feat$len    , feat$signalValue, xlab="len   ", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$len   , .99), ylim=c(0, quantile(feat$signalValue, .99))))
+custom_hm(feat$len    , feat$qValue     , xlab="len   ", ylab="qValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$len   , .99), ylim=c(0, quantile(feat$qValue     , .99))))
+```
+
+```{r echo=TRUE, results="verbatim"}
+head(feat)
+dim(feat)
+```

@@ -110,7 +110,7 @@ for (k in factoi) {
   sum(!is.na(res$pvalue))
   sum(is.na(res$pvalue))
   sum(!is.na(res$padj))
-  # res = res[!is.na(res$pvalue),]
+  res = res[!is.na(res$pvalue),]
   # res = res[!is.na(res$padj),]
 
   layout(matrix(1:2,1), respect=TRUE)
