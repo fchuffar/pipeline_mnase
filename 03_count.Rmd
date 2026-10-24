@@ -103,33 +103,18 @@ dim( raw_counts)
 
 ```{r fingerprint}
 data = as.matrix(t(raw_counts))
+# Compute cumulative signal fractions for each row
+cs = t(apply(data, 1, function(x) cumsum(sort(x)) / sum(x)))
 
-layout(1, respect=TRUE)
-plot(0,0, col=0, xlim=c(1, ncol(data)), ylim=0:1, xlab="Ranked genomic features", ylab="Cumulative fraction of signal")
-foo = sapply(rownames(data), function(k){
-  l = data[k,]
-  tot = sum(sort(l))
-  cs = cumsum(sort(l))
-  lines(cs/tot, type="l", col=adjustcolor(1, alpha.f=0.7))
-}) 
-
-if (exists("factoi")) {
-  fois = factoi[sapply(factoi, function(fa) {class(e[[fa]])})=="factor"]
-  if (length(fois)>0) {
-    for (foi in fois) {
-      layout(1, respect=TRUE)
-      plot(0,0, col=0, xlim=c(1, ncol(data)), ylim=0:1, xlab="Ranked genomic features", ylab="Cumulative fraction of signal")
-      col = as.numeric(e[,foi])
-      legend("topleft", col=1:length(levels(e[,foi])), levels(e[,foi]), pch=16, title=foi)
-      names(col)=rownames(e)
-      foo = sapply(rownames(data), function(k){
-        l = data[k,]
-        tot = sum(sort(l))
-        cs = cumsum(sort(l))
-        lines(cs/tot, type="l", col=adjustcolor(col[k], alpha.f=0.7))
-      }) 
-    }
-  }
+fois = factoi[sapply(factoi, function(fa) {class(e[[fa]])})=="factor"]
+for (foi in c("null", fois)) {
+  layout(1, respect=TRUE)
+  col = as.numeric(e[,foi])
+  names(col)=rownames(e)
+  matplot(t(cs), type="l", lty=1, col=adjustcolor(col, alpha.f=0.7),
+    xlab="Ranked genomic features",
+    ylab="Cumulative fraction of signal")
+  legend("topleft", col=1:length(levels(e[,foi])), levels(e[,foi]), pch=16, title=foi)
 }
 ```
 

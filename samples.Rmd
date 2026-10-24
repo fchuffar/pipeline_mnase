@@ -7,7 +7,7 @@ This section defines the experimental design and associates each sample with its
 - The `gsm` column stores the GEO sample like identifiers, which are also used as row names to uniquely identify each sample.
 - The file paths are constructed dynamically from the dataset (`gse`), sample name (`samples`), species, annotation, genome version, and sequencing configuration.
 
-```{r label="samples"}
+```{r sample_R}
 source("samples.R")
 e = data.frame(
   gsm = samples,
@@ -15,11 +15,17 @@ e = data.frame(
   bw = paste0("/home/chuffarf/projects/datashare/", gse, "/", samples, "_end-to-end_trim30_bowtie2_", species, "_", annotation, "_", version, "_srt_", sr_or_pe, "_30_4_RPKM.bw")
 )
 rownames(e) = e$gsm
+e$null = factor(1)
+factoi = c()
+```
 
+```{r exp_grp}
 if (file.exists("exp_grp.R")) {
   source("exp_grp.R")
 }
+```
 
+```{r echo=TRUE, results="verbatim"}
 head(e)
 dim(e)
 ```

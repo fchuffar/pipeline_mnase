@@ -22,7 +22,7 @@ This section defines the genomic coordinates used throughout the analysis.
 # 8	pValue	–log10(p-value) de la significativité du pic	7.30
 # 9	qValue	–log10(q-value, FDR ajustée)	5.21
 # 10	peak	Position du sommet du pic par rapport à chromStart (en bp). -1 si inconnu.	250
-feat = read.table(paste0("macs3_output_merged/mrg1.00e-", log10macspv, "_feat.narrowPeak"))
+feat = read.table(paste0("macs3_output_merged/mrg1.00e-", log10macspv, "_peaks.narrowPeak"))
 rownames(feat) = feat[,4]
 colnames(feat) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue", "peak")
 feat = feat[nchar(feat$chrom)<=5,]
@@ -34,6 +34,17 @@ feat$key = paste0(feat[[1]], ":", feat[[2]], "-", feat[[3]])
 length(unique(feat$key))
 feat = feat[!duplicated(feat$key),]
 length(unique(feat$key))
+
+# peaks len
+feat$len = feat$chromEnd - feat$chromStart
+```
+
+```{r peaks_hm, fig.height=6}
+# Stat feat
+custom_hm(feat$qValue , feat$pValue     , xlab="qValue", ylab="pValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$qValue, .99), ylim=c(0, quantile(feat$pValue     , .99))))
+custom_hm(feat$qValue , feat$signalValue, xlab="qValue", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$qValue, .99), ylim=c(0, quantile(feat$signalValue, .99))))
+custom_hm(feat$len    , feat$signalValue, xlab="len   ", ylab="signalValue", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$len   , .99), ylim=c(0, quantile(feat$signalValue, .99))))
+custom_hm(feat$len    , feat$qValue     , xlab="len   ", ylab="qValue     ", LOGCOUNT=TRUE, main=prefix)#, xlim=c(0, quantile(feat$len   , .99), ylim=c(0, quantile(feat$qValue     , .99))))
 ```
 
 
