@@ -70,7 +70,8 @@ if (COUNT) {system2(cmd, args)}
 
 ##  Raw counts
 
-```{r raw_counts, fig.height=3}
+
+```{r raw_counts, fig.height=3, results="verbatim"}
 raw_counts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE, row.names=1)
 colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
 raw_counts_summary = raw_counts_summary[!apply(raw_counts_summary==0, 1, all),]
@@ -88,16 +89,100 @@ cols = c(
 barplot(col=cols, as.matrix(raw_counts_summary), las=2)
 barplot(col=cols, prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
 plot.new()
-legend("topright", legend=rownames(raw_counts_summary), fill=cols, bty="n")
+legend("topleft", legend=rownames(raw_counts_summary), fill=cols, bty="n")
 
 raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
 rownames(raw_counts) = raw_counts[,1]
-raw_counts = raw_counts[,-(1:6)]
+pf = raw_counts[,c(2, 3, 4, 1, 6, 5)]
+names(pf) = c("chr", "start", "end", "name", "score","strand")
+raw_counts = as.matrix(raw_counts[,-(1:6)])
 colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
 head(raw_counts[,1:3])
 tail(raw_counts[,1:3])
 dim( raw_counts)
+
+saveRDS(raw_counts, paste0("datashare/", gse, "/raw_counts_", prefix, ".rds")) 
+saveRDS(pf        , paste0("datashare/", gse,         "/pf_", prefix, ".rds"))
+
+
 ```
+
+## Filtering features
+
+```{r density, results="verbatim"}
+# layout(matrix(1:2, 1), respect=TRUE)
+# plot(density(log2(raw_counts)+1))
+# # raw_counts = raw_counts[!apply(raw_counts<2048, 1, all),]
+# raw_counts = raw_counts[!apply(raw_counts<32, 1, all),]
+# plot(density(log2(raw_counts)+1))
+# dim(raw_counts)
+```
+
+
+## Export features
+
+
+```{r export_feta_bed, results="verbatim"}
+library(GenomicRanges)
+
+max_gap = 999   # features separated by less than 1000 bp are merged
+
+# --- Features (one probe per line) ---
+gr = GenomicRanges::makeGRangesFromDataFrame(
+  pf,
+  keep.extra.columns = TRUE,
+  seqnames.field = "chr",
+  start.field = "start",
+  end.field = "end",
+  strand.field = "strand"
+)
+# gr$name = gr$probe
+gr = sort(gr)
+
+bed_features = data.frame(
+  chrom  = as.character(seqnames(gr)),
+  start  = start(gr) - 1,   # BED is 0-based
+  end    = end(gr),
+  name   = gr$name,
+  score  = 0,
+  strand = "."
+)
+write.table(bed_features, file = paste0("features_", prefix, ".bed"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+# --- Aggregated features (probes closer than max_gap are merged) ---
+regions = GenomicRanges::reduce(gr, min.gapwidth = max_gap + 1, ignore.strand = TRUE)
+
+# Number of probes and list of probe names per region
+ov = GenomicRanges::findOverlaps(gr, regions, ignore.strand = TRUE)
+regions$n_probes = tabulate(subjectHits(ov), nbins = length(regions))
+regions$name = paste0(as.character(seqnames(regions)), ":", start(regions), "-", end(regions))
+regions$probes = vapply(
+  split(gr$name[queryHits(ov)], factor(subjectHits(ov), levels = seq_along(regions))),
+  paste, collapse = ",", FUN.VALUE = character(1)
+)
+
+summary(width(regions))
+table(regions$n_probes)
+
+bed_regions = data.frame(
+  chrom  = as.character(seqnames(regions)),
+  start  = start(regions) - 1,
+  end    = end(regions),
+  name   = regions$name,
+  score  = regions$n_probes,
+  strand = "."
+)
+write.table(bed_regions, file = paste0("features_merged_", prefix, ".bed"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
+
+# # Keep the probe -> region mapping for later use (e.g. averaging beta per region)
+# saveRDS(regions, "features_epic_merged.rds")
+
+```
+
+
+
+
+
 
 ## Fingerprint (`raw_counts`)
 

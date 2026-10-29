@@ -1,5 +1,5 @@
 ---
-title: "DA on features"
+title: "DA on age"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
@@ -15,7 +15,7 @@ output:
 ```
 
 ```{r}
-if (!exists("prefix")) {prefix = "tiles"}
+if (!exists("prefix")) {prefix = "peaks5"}
 prefix2 = "da"
 ```
 
@@ -29,52 +29,61 @@ prefix="`r prefix`" ; rmarkdown::render("04_da.Rmd", output_file=paste0("04_da_"
 ```{r samples, child="samples.Rmd"}
 ```
 
+```{r inputs}
+if (!exists("gse"))             gse = "chip_sa"  ;
+if (!exists("model_func_name")) model_func_name = "deseq2"         ;
+if (!exists("model_formula"))   model_formula = "~age+BMI+smoking+log2DDEugg44"                     ;
+bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", model_func_name, "_", model_formula), ".bed")
+```
 
 # DA
 
 ##  Raw counts
 
-```{r raw_counts, fig.height=3}
-raw_counts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE, row.names=1)
-colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
-raw_counts_summary = raw_counts_summary[!apply(raw_counts_summary==0, 1, all),]
-layout(matrix(1:3, 1), respect=TRUE)
-cols = c(
-  "#E63946",  # rouge
-  "#F4A261",  # orange
-  "#E9C46A",  # jaune
-  "#2A9D8F",  # vert/bleu
-  "#457B9D",  # bleu
-  "#6D597A",  # violet
-  "#B56576",  # vieux rose
-  "#588157"   # vert
-)
-barplot(col=cols, as.matrix(raw_counts_summary), las=2)
-barplot(col=cols, prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
-plot.new()
-legend("topleft", legend=rownames(raw_counts_summary), fill=cols, bty="n")
 
-raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
-rownames(raw_counts) = raw_counts[,1]
-pf = raw_counts[,1:6]
-raw_counts = as.matrix(raw_counts[,-(1:6)])
-colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
-head(raw_counts[,1:3])
-tail(raw_counts[,1:3])
-dim( raw_counts)
+```{r raw_counts, fig.height=3, results="verbatim"}
+raw_counts = readRDS(paste0("datashare/", gse, "/raw_counts_", prefix, ".rds")) 
+pf         = readRDS(paste0("datashare/", gse,         "/pf_", prefix, ".rds"))
+# raw_counts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE, row.names=1)
+# colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
+# raw_counts_summary = raw_counts_summary[!apply(raw_counts_summary==0, 1, all),]
+# layout(matrix(1:3, 1), respect=TRUE)
+# cols = c(
+#   "#E63946",  # rouge
+#   "#F4A261",  # orange
+#   "#E9C46A",  # jaune
+#   "#2A9D8F",  # vert/bleu
+#   "#457B9D",  # bleu
+#   "#6D597A",  # violet
+#   "#B56576",  # vieux rose
+#   "#588157"   # vert
+# )
+# barplot(col=cols, as.matrix(raw_counts_summary), las=2)
+# barplot(col=cols, prop.table(as.matrix(raw_counts_summary), margin=2), las=2)
+# plot.new()
+# legend("topleft", legend=rownames(raw_counts_summary), fill=cols, bty="n")
 
+# raw_counts = read.table(paste0(prefix, "_count.txt"), header=TRUE)
+# rownames(raw_counts) = raw_counts[,1]
+# pf = raw_counts[,c(2, 3, 4, 1, 6, 5)]
+# raw_counts = as.matrix(raw_counts[,-(1:6)])
+# colnames(raw_counts) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts))
+# head(raw_counts[,1:3])
+# tail(raw_counts[,1:3])
+# dim( raw_counts)
 ```
+
 
 
 ## Filtering features
 
 ```{r density, results="verbatim"}
-layout(matrix(1:2, 1), respect=TRUE)
-plot(density(log2(raw_counts)+1))
-# raw_counts = raw_counts[!apply(raw_counts<2048, 1, all),]
-raw_counts = raw_counts[!apply(raw_counts<32, 1, all),]
-plot(density(log2(raw_counts)+1))
-dim(raw_counts)
+# layout(matrix(1:2, 1), respect=TRUE)
+# plot(density(log2(raw_counts)+1))
+# # raw_counts = raw_counts[!apply(raw_counts<2048, 1, all),]
+# raw_counts = raw_counts[!apply(raw_counts<32, 1, all),]
+# plot(density(log2(raw_counts)+1))
+# dim(raw_counts)
 ```
 
 
@@ -82,8 +91,7 @@ dim(raw_counts)
 # Volcano plots
 
 
-```{r volcano, results="verbatim"}
-
+```{r ewas, results="verbatim"}
 if (!all(e$gsm %in% colnames(raw_counts))) {stop("problem gsm vs. colnames(raw_counts)")}
 countData = raw_counts[,e$gsm]
 colnames(countData) = rownames(e)
@@ -92,40 +100,38 @@ colData = e[colnames(countData),]
 if (!all(colnames(countData) == rownames(colData))) {stop("probleme data vs. e")}
 
 
-for (k in factoi) {
-  # k = "sprayed_status"
+k = strsplit(model_formula, "~|\\+")[[1]][2]
   print(k)
-  model_formula = paste0("~", k)
-  frmula = formula(model_formula)
 
   dds <- DESeq2::DESeqDataSetFromMatrix(
     countData = countData[,rownames(colData[!is.na(colData[,k]),])],
     colData = colData[!is.na(colData[,k]),],
-    design = frmula
+    design = formula(model_formula)
   )
-  dds <- DESeq2::DESeq(dds)
-  res <- DESeq2::results(dds)
 
-  head(res[is.na(res$pvalue),])
-  sum(!is.na(res$pvalue))
-  sum(is.na(res$pvalue))
-  sum(!is.na(res$padj))
-  res = res[!is.na(res$pvalue),]
-  # res = res[!is.na(res$padj),]
+  dds = DESeq2::DESeq(dds)
+  res = DESeq2::results(dds, name=DESeq2::resultsNames(dds)[2])
+
+  # stop("EFN")
+  # head(res[is.na(res$pvalue),])
+  # sum(!is.na(res$pvalue))
+  # sum(is.na(res$pvalue))
+  # sum(!is.na(res$padj))
+  # res = res[!is.na(res$pvalue),]
+  # # res = res[!is.na(res$padj),]
 
   layout(matrix(1:2,1), respect=TRUE)
-  plot(res$log2FoldChange, -log10(res$pvalue), xlab="l2fc", ylab="-log10(pval)", main=frmula)
-  plot(res$log2FoldChange, -log10(res$padj)  , xlab="l2fc", ylab="-log10(padj)", main=frmula)
+  plot(res$log2FoldChange, -log10(res$pvalue), xlab="l2fc", ylab="-log10(pval)", main=model_formula)
+  plot(res$log2FoldChange, -log10(res$padj)  , xlab="l2fc", ylab="-log10(padj)", main=model_formula)
 
   # res = res[order(res$log2FoldChange), ]
   idx = rownames(res)[!is.na(res$padj)&res$padj< 0.05]
-  print(cbind(pf[idx,2:4], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+  print(cbind(pf[idx,1:3], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
 
-  model_func_name = "deseq2"  
-  prefix3 = paste0(gse, "_", model_func_name, "_", model_formula)
 
   tmp_df = cbind(pf[rownames(res),], res)
   head(tmp_df)
+  # prefix3 = paste0(gse, "_", model_func_name, "_", model_formula)
   # WriteXLS::WriteXLS(tmp_df, paste0("results_", prefix3, "_", prefix2, "_", prefix, ".xlsx"))
 
   # gsea_input = cbind(rownames(tmp_df), tmp_df$log2FoldChange)
@@ -134,7 +140,7 @@ for (k in factoi) {
   # gsea_input_filename = paste0("results_", prefix3, "_", prefix2, "_", prefix, ".rnk")
   # write.table(gsea_input, gsea_input_filename, sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
-  bed = tmp_df[,-1]
+  bed = tmp_df
   head(bed)
   bed[,3] = bed[,2]+1
   bed[,4] = rownames(bed)
@@ -150,13 +156,9 @@ for (k in factoi) {
   # write ewas res for combp
   bed[,1] = as.character(bed[,1])
   bed = bed[order(bed[,1], bed[,2]),]
-  bed_ewas_filename = paste0("ewas4combp_", prefix3, ".bed")
   write.table(bed, file=bed_ewas_filename , sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
   # bed_on_disk = read.table(bed_ewas_filename, sep="\t", header=TRUE)
 
-
-
-}
 ```
 
 

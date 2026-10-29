@@ -68,3 +68,6 @@ custom_hm(peaks$len    , peaks$qValue     , xlab="len   ", ylab="qValue     ", L
 
 
 
+```{r}
+feat = peaks
+```
