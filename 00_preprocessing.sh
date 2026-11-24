@@ -85,6 +85,33 @@ snakemake -k -s 02_align_fastq_files.py --jobs 50 --cluster "oarsub --project ep
 ## QC is there:
 echo ${project}/results/${study}/multiqc_notrim.html
 
+
+
+
+echo '
+COMPUTEFRAGESIZE = TRUE ; 
+rmarkdown::render("02_fraglen.Rmd")
+' | Rscript - 
+
+echo '
+COUNT = TRUE ; 
+prefix="tiles5000"   ; rmarkdown::render("03_count.Rmd", output_file=paste0("03_count_", prefix, ".html"))
+' | Rscript - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # bed form gft
 # gffread /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gff -T -o /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gtf
 # cat /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.gtf  |  awk 'OFS="\t" {if ($3=="CDS") {print $1,$4-1,$5,$10,$6,$7}}' | tr -d '";' > /home/chuffarf/projects/datashare/genomes/Candida_albicans/IAB/SC5314.A22.haplo/Annotation/Genes/genes.bed

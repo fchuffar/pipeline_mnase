@@ -40,10 +40,11 @@ if (!exists("model_formula"))     model_formula = "~age+BMI+smoking+log2DDEugg44
 prefix3 = paste0(model_func_name, "_", model_formula, "_", pval_thresh)
 pheno_key = strsplit(model_formula, "~|\\+")[[1]][2]
 
-bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", model_func_name, "_", model_formula), ".bed")
+bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", prefix, "_", model_func_name, "_", model_formula), ".bed")
 # # rds_ewas_filename = paste0("ewas_", prefix, ".rds")
 # prefix = paste0(gse, "_", model_func_name, "_", model_formula, "_", pval_thresh)
-study_filename = paste0("datashare/", gse, "/study_preproc_", gse, ".rds")
+# one study file per prefix, model and threshold: parallel comb-p jobs (snakemake) must not share it
+study_filename = paste0("datashare/", gse, "/study_preproc_", gse, "_", prefix, "_", prefix3, ".rds")
 ```
 
 # EWAS
@@ -86,6 +87,7 @@ Identification of differentially methylated regions (DER) using comb-p
 
 ```{r combp, results="verbatim"}
 # Run comb-p, run!!
+# export PYTHONPATH="/home/chuffarf/opt/combined-pvalues/"
 Sys.setenv(PYTHONPATH="/home/chuffarf/opt/combined-pvalues/")
 cmd = "/home/chuffarf/opt/combined-pvalues/cpv/comb-p"
 arg = paste0("pipeline            -c 5 --seed ", pval_thresh, " --dist 1000 -p dmrcombp_", prefix,"_", prefix3, " --region-filter-p 0.05 --region-filter-n 2 ", bed_ewas_filename)
@@ -112,12 +114,22 @@ if (file.exists(combp_res_region_filename)) {
   # reg = combp_res_region[order(-combp_res_region$n_probes, combp_res_region$z_sidak_p),][1,]
   # probes = ewas[as.character(ewas[,1])==as.character(reg[[1]]) & ewas[,2]>=reg[[2]] & ewas[,2]<=reg[[3]],4]
 } else {
-  combp_res_region = data.frame(n_probes=NA, z_sidak_p=NA)[-1,]
-  combp_res_region
+  # no region at all: comb-p writes no regions-t file; write an empty one (header only) so that the output always exists
+  combp_res_region = data.frame(chrom=character(), start=integer(), end=integer(), min_p=numeric(), n_probes=integer(), z_p=numeric(), z_sidak_p=numeric())
+  writeLines("#chrom\tstart\tend\tmin_p\tn_probes\tz_p\tz_sidak_p", combp_res_region_filename)
 }
 results = combp_res_region
 results[,2] = results[,2] - 0
 results[,3] = results[,3] + 0
+print(paste0("DER: ", nrow(results)))
+```
+
+```{r no_der, results="asis"}
+# nothing to annotate nor plot without DER
+if (nrow(results) == 0) {
+  cat("\n\n**No DER** for this model and seed threshold.\n\n")
+  knitr::knit_exit()
+}
 ```
 
 
@@ -196,11 +208,16 @@ dm_regions = annotatr::read_regions(con=tmp_results_filename, genome=genome, for
 # Build the annotations (a single GRanges object)
 annotations = annotatr::build_annotations(genome=genome, annotations=paste0(genome, c("_basicgenes")))
 # Intersect the regions we read in with the annotations
-dm_annotated = annotatr::annotate_regions(
+# NULL when no DER intersects an annotation (few DER, e.g. strict seed thresholds)
+dm_annotated = tryCatch(annotatr::annotate_regions(
     regions = dm_regions,
     annotations = annotations,
     ignore.strand = TRUE,
-    quiet = FALSE)
+    quiet = FALSE), error = function(err) {print(conditionMessage(err)); NULL})
+results$annot.type   = NA
+results$annot.symbol = NA
+results$annot.tx_id  = NA
+if (!is.null(dm_annotated)) {
 # A GRanges object is returned
 df_dm_annotated = data.frame(dm_annotated)
 # dedup
@@ -230,13 +247,11 @@ head(fat_feat_annotations)
 rownames(fat_feat_annotations) %in% rownames(results)
 rownames(results) %in% rownames(fat_feat_annotations)
 # inject into results
-results$annot.type   = NA
-results$annot.symbol = NA
-results$annot.tx_id  = NA
 for (idx in rownames(fat_feat_annotations)) {
   results[idx,"annot.type"  ] = as.character(fat_feat_annotations[idx,"annot.type"  ])
   results[idx,"annot.symbol"] = as.character(fat_feat_annotations[idx,"annot.symbol"])
   results[idx,"annot.tx_id" ] = as.character(fat_feat_annotations[idx,"annot.tx_id" ])
+}
 }
 
 results$nb_probes = NA

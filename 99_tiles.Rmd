@@ -1,5 +1,5 @@
 ```{r}
-tile_size = as.numeric(sub("^[A-Za-z]+", "", prefix))
+tile_size = as.numeric(sub("^[A-Za-z]+", "", sub("q[0-9]+$", "", prefix)))
 if (is.na(tile_size)) tile_size = 5000
 ```
 

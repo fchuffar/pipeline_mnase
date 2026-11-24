@@ -1,5 +1,5 @@
 ```{r}
-log10macspv = as.numeric(sub("^[A-Za-z]+", "", prefix))
+log10macspv = as.numeric(sub("^[A-Za-z]+", "", sub("q[0-9]+$", "", prefix)))
 if (is.na(log10macspv)) log10macspv = 10
 ```
 
@@ -11,20 +11,19 @@ This section defines the genomic coordinates used throughout the analysis.
 
 
 ```{r peaks, results="verbatim"}
-# #	Nom de la colonne	Description	Type / Exemple
-# 1	chrom	Nom du chromosome	chr1
-# 2	chromStart	Position de début du pic (0-based, inclusif)	3455000
-# 3	chromEnd	Position de fin du pic (1-based, exclusif)	3455500
-# 4	name	Nom du pic	peak_00001
-# 5	score	Score de 0 à 1000 (utile pour visualisation UCSC)	500
-# 6	strand	Brin (+, -, ou . si non applicable)	.
-# 7	signalValue	Enrichissement du signal au sommet du pic	12.45
-# 8	pValue	–log10(p-value) de la significativité du pic	7.30
-# 9	qValue	–log10(q-value, FDR ajustée)	5.21
-# 10	peak	Position du sommet du pic par rapport à chromStart (en bp). -1 si inconnu.	250
-feat = read.table(paste0("macs3_output_merged/mrg1.00e-", log10macspv, "_peaks.narrowPeak"))
+# #     Column name     Description     Example
+# 1     chrom   Chromosome      chr1
+# 2     chromStart      Peak start (0-based, inclusive) 825896
+# 3     chromEnd        Peak end (exclusive)    826789
+# 4     name    Peak name       mrgbroad1.00e-10_peak_7
+# 5     score   int(-10*log10 qvalue), capped at 1000 (UCSC display)    172
+# 6     strand  Strand, always "."      .
+# 7     signalValue     Mean fold enrichment over the peak (FE) 3.97
+# 8     pValue  -log10(p-value) 19.36
+# 9     qValue  -log10(q-value, FDR)    17.24
+feat = read.table(paste0("macs3_output_merged/mrgbroad1.00e-", log10macspv, "_peaks.broadPeak"))
 rownames(feat) = feat[,4]
-colnames(feat) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue", "peak")
+colnames(feat) = c("chrom", "chromStart", "chromEnd", "name", "score", "strand", "signalValue", "pValue", "qValue")
 feat = feat[nchar(feat$chrom)<=5,]
 head(feat)
 dim(feat)

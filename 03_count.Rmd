@@ -38,11 +38,15 @@ prefix="`r prefix`" ; rmarkdown::render("03_count.Rmd", output_file=paste0("03_c
 
 
 ```{r featureCounts, results="verbatim"}
+# meta-features (e.g. 99_rmsk.Rmd): several lines of feat share a name and are counted as one feature (one SAF GeneID)
+is_meta = any(duplicated(feat[,4]))
+print(paste0("features: ", length(unique(feat[,4])), ", lines: ", nrow(feat), ", meta-features: ", is_meta))
 # Counts
 feat_saf = feat[, c(4,1:3, 6)]
 # feat_saf = feat[1:100,c(4,1:3, 6)]
 colnames(feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
-feat_saf$Start = as.numeric(feat_saf$Start)
+# feat is BED-like (0-based start, end exclusive), SAF is 1-based with both ends inclusive: Start + 1, End unchanged
+feat_saf$Start = as.numeric(feat_saf$Start) + 1
 feat_saf$End   = as.numeric(feat_saf$End  )
 saf_filename = paste0(prefix, ".saf")
 options(scipen=999)
@@ -50,9 +54,14 @@ write.table(feat_saf, file=saf_filename, sep="\t", quote=FALSE,row.names=FALSE, 
 options(scipen=0)
 
 cmd = "featureCounts"
-mmq = 30
+# minimal mapping quality: suffix q<M> of the prefix (e.g. rmsk50q0: all reads, multi-mapped ones placed at random by bowtie2), 30 by default
+mmq = if (grepl("q[0-9]+$", prefix)) as.numeric(sub(".*q([0-9]+)$", "\\1", prefix)) else 30
+print(paste0("featureCounts -Q ", mmq))
+max_frag_len = 500
 if (sr_or_pe=="PE") {
-  opt_pe="-p --countReadPairs -B -C -O "
+  # -P -d 0 -D max_frag_len: only fragments shorter than 500 bp, as for the macs3 peak calling (03_peak_calling.py: |tlen| < 500)
+  # -O: a fragment overlapping several adjacent features (e.g. split narrow peaks) is counted in each of them
+  opt_pe=paste0("-p --countReadPairs -B -C -O -P -d 0 -D ", max_frag_len, " ")
 } else {
   opt_pe=" "  
 }
@@ -122,7 +131,9 @@ saveRDS(pf        , paste0("datashare/", gse,         "/pf_", prefix, ".rds"))
 ## Export features
 
 
-```{r export_feta_bed, results="verbatim"}
+With meta-features, `featureCounts` reports `;`-separated lists of positions: the per-feature BED files are not written (the positions are in `feat`).
+
+```{r export_feta_bed, results="verbatim", eval=!is_meta}
 library(GenomicRanges)
 
 max_gap = 999   # features separated by less than 1000 bp are merged
@@ -246,6 +257,215 @@ plot(density(log2(norm_counts_deseq+1)))
 ```
 
 
+
+# Report
+
+Covariates `covoi`: by default, the columns of `e` that are factors or numeric, with at least 2 distinct values and less than 50% missing values (set `covoi` before rendering to choose them).
+
+```{r covoi, results="verbatim"}
+if (!exists("covoi")) {
+  covoi = colnames(e)[sapply(colnames(e), function(v) {
+    x = e[[v]]
+    (is.factor(x) | is.numeric(x)) && length(unique(na.omit(x))) >= 2 && mean(is.na(x)) < .5
+  })]
+  covoi = covoi[!grepl("^status_", covoi)]   # status restricted to subsets (exp_grp.R), not covariates
+}
+covoi = setdiff(unique(c(factoi, covoi)), "null")
+covoi
+```
+
+## Features
+
+```{r report_features, fig.height=4, results="verbatim"}
+feat_len = feat_saf$End - feat_saf$Start + 1
+summary(feat_len)
+chr_len = read.table(paste0("/home/chuffarf/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Sequence/WholeGenomeFasta/genome.fa.fai"))
+chr_len = setNames(chr_len[,2], chr_len[,1])
+nb_feat = table(feat_saf$Chr)
+feat_per_mb = sort(nb_feat / chr_len[names(nb_feat)] * 1e6)
+round(feat_per_mb, 1)
+layout(matrix(1:2, 1), respect=TRUE)
+hist(log10(feat_len), breaks=60, col="grey", border="white", main=paste0(prefix, ": ", nrow(feat_saf), " features"), xlab="log10(width) (bp)")
+barplot(feat_per_mb, las=2, col="grey", border=NA, ylab="features per Mb", main="feature density per chromosome", cex.names=.7)
+```
+
+## Fraction of Reads in Peaks (FRiP)
+
+FRiP (Fraction of Reads in Peaks, here fragments in features since reads are paired) = `Assigned / all fragments` in the `featureCounts` summary (each fragment is counted once in the summary, even with `-O`).
+
+```{r report_frip, fig.height=4, results="verbatim"}
+frip = unlist(raw_counts_summary["Assigned", e$gsm] / colSums(raw_counts_summary[, e$gsm]))
+names(frip) = rownames(e)
+e$frip = frip
+# named by sample, read back by exp_grp.R (as e$frip) when prefix matches, to use FRiP as a covariate in 04_da.Rmd
+saveRDS(frip, paste0("e_frip_", prefix, ".rds"))
+summary(frip)
+
+# FRiP by covariate: median per level and Kruskal-Wallis test (factors), Spearman correlation (numeric)
+frip_tests = do.call(rbind, lapply(covoi, function(v) {
+  x = e[[v]]
+  if (is.factor(x)) {
+    x = droplevels(x)
+    med = tapply(frip, x, median)
+    data.frame(covariate=v, type="factor", detail=paste0(names(med), "=", round(med, 3), collapse=" "),
+      stat=NA, pval=kruskal.test(frip ~ x)$p.value)
+  } else {
+    ct = suppressWarnings(cor.test(frip, x, method="spearman"))
+    data.frame(covariate=v, type="numeric", detail="", stat=round(ct$estimate, 2), pval=ct$p.value)
+  }
+}))
+frip_tests$pval = signif(frip_tests$pval, 2)
+rownames(frip_tests) = NULL
+frip_tests[order(frip_tests$pval),]
+
+# lowest FRiP samples
+low_frip = e[order(frip), intersect(c("frip", covoi), colnames(e))][1:10, ]
+low_frip$frip = round(low_frip$frip, 3)
+low_frip
+
+fois = covoi[sapply(covoi, function(v) is.factor(e[[v]]))]
+for (foi in fois) {
+  layout(1, respect=TRUE)
+  par(mar=c(7, 4, 3, 1))
+  x = droplevels(e[[foi]])
+  boxplot(frip ~ x, outline=FALSE, ylim=range(frip), las=2, xlab="", ylab="FRiP", main=paste0("FRiP by ", foi), col="grey90", border="grey40")
+  stripchart(frip ~ x, vertical=TRUE, method="jitter", add=TRUE, pch=16, cex=.6, col=adjustcolor(1, alpha.f=.5))
+}
+```
+
+## TSS ratio
+
+`tss_ratio = log2(counts in features <= 1 kb from a RefSeq TSS / counts in features > 5 kb from a RefSeq TSS)` per sample (features 1-5 kb from a TSS are left out),
+on chr1-22, X, Y and outside the hg38 blacklist v2 (when ``hg38-blacklist.v2.bed.gz`` is present).
+It measures the share of the H3K4me3 signal at promoters vs. distal sites inside the features (FRiP measures in vs. out of the features), and is not affected by the size factors (ratio within a sample).
+RefSeq TSS (``tss_hg38.bed``, one per transcript) are built from the `genes.gtf` annotation when the file does not exist (as in `03_features_classes.Rmd`).
+With meta-features, a feature is at a TSS when all its lines are <= 1 kb from a TSS, distal when all its lines are > 5 kb from a TSS (e.g. `99_rmsk.Rmd`: mRNA promoters vs. open sea windows far from any TSS); the other features (e.g. repeat subfamilies, spread over the genome) are left out.
+
+```{r report_tss_ratio, fig.height=4, results="verbatim"}
+chroms = paste0("chr", c(1:22, "X", "Y"))
+tss_file = "tss_hg38.bed"
+if (!file.exists(tss_file)) {
+  gtf = data.table::fread(paste0("/home/chuffarf/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.gtf"), header=FALSE, sep="\t", quote="")[V3 == "exon" & V1 %in% chroms]
+  gtf[, tx := sub('.*transcript_id "([^"]+)".*', "\\1", V9)]
+  t = gtf[, .(s = min(V4), e = max(V5)), by = .(chrom = V1, tx, strand = V7)]
+  t[, pos := data.table::fifelse(strand == "+", s - 1L, e - 1L)]
+  t = unique(t[, .(chrom, start = pos, end = pos + 1L, name = ".", score = ".", strand)])
+  data.table::setorder(t, chrom, start)
+  data.table::fwrite(t, tss_file, sep="\t", col.names=FALSE)
+  rm(gtf, t)
+}
+tss = read.table(tss_file, header=FALSE)
+tss_gr = GenomicRanges::GRanges(tss[,1], IRanges::IRanges(tss[,2] + 1, tss[,3]))
+# features (BED-like, 0-based start) -> 1-based closed intervals
+feat_gr = GenomicRanges::GRanges(as.character(feat[,1]), IRanges::IRanges(as.numeric(feat[,2]) + 1, as.numeric(feat[,3])), name=as.character(feat[,4]))
+feat_gr = feat_gr[as.character(GenomicRanges::seqnames(feat_gr)) %in% chroms & feat_gr$name %in% rownames(raw_counts)]
+bl_file = "hg38-blacklist.v2.bed.gz"
+if (file.exists(bl_file)) {
+  bl = as.data.frame(data.table::fread(bl_file, header=FALSE, select=1:3))
+  bl_gr = GenomicRanges::GRanges(bl[,1], IRanges::IRanges(bl[,2] + 1, bl[,3]))
+  feat_gr = feat_gr[!IRanges::overlapsAny(feat_gr, bl_gr)]
+}
+# distance to the nearest RefSeq TSS (0 if the TSS is inside the feature)
+dtn = GenomicRanges::distanceToNearest(feat_gr, tss_gr, ignore.strand=TRUE)
+dist_tss = rep(Inf, length(feat_gr))
+dist_tss[S4Vectors::queryHits(dtn)] = S4Vectors::mcols(dtn)$distance
+if (is_meta) {
+  # meta-features: all lines <= 1 kb (TSS) or all lines > 5 kb (distal)
+  dmax = tapply(dist_tss, feat_gr$name, max)
+  dmin = tapply(dist_tss, feat_gr$name, min)
+  tss_feat  = names(dmax)[dmax <= 1000]
+  dist_feat = names(dmin)[dmin > 5000]
+  print(paste0("meta-features: ", length(dmax), ", all lines <= 1 kb from a TSS: ", length(tss_feat), ", all lines > 5 kb: ", length(dist_feat), ", others: ", length(dmax) - length(tss_feat) - length(dist_feat)))
+} else {
+  tss_feat  = feat_gr$name[dist_tss <= 1000]
+  dist_feat = feat_gr$name[dist_tss > 5000]
+  print(paste0("features: ", length(feat_gr), ", <= 1 kb from a TSS: ", length(tss_feat), ", 1-5 kb: ", sum(dist_tss > 1000 & dist_tss <= 5000), ", > 5 kb: ", length(dist_feat)))
+}
+tss_ratio = log2(colSums(raw_counts[tss_feat, e$gsm]) / colSums(raw_counts[dist_feat, e$gsm]))
+names(tss_ratio) = rownames(e)
+e$tss_ratio = tss_ratio
+# named by sample, read back by exp_grp.R (as e$tss_ratio) when prefix matches, to use it as a covariate in 04_da.Rmd
+saveRDS(tss_ratio, paste0("e_tss_ratio_", prefix, ".rds"))
+print(summary(tss_ratio))
+print(paste0("Spearman cor(tss_ratio, FRiP): ", round(cor(tss_ratio, frip, method="spearman"), 3)))
+for (foi in fois) {
+  layout(1, respect=TRUE)
+  par(mar=c(7, 4, 3, 1))
+  x = droplevels(e[[foi]])
+  boxplot(tss_ratio ~ x, outline=FALSE, ylim=range(tss_ratio), las=2, xlab="", ylab="tss_ratio", main=paste0("tss_ratio by ", foi), col="grey90", border="grey40")
+  stripchart(tss_ratio ~ x, vertical=TRUE, method="jitter", add=TRUE, pch=16, cex=.6, col=adjustcolor(1, alpha.f=.5))
+}
+
+# tss_ratio vs FRiP: colour = status, shape = experimenter (when present)
+grp = function(v) if (v %in% colnames(e)) droplevels(as.factor(e[[v]])) else factor(rep("all", nrow(e)))
+st = grp("status")
+ex = grp("experimenter")
+pal = c("#2a78d6", "#eb6834", "#1baf7a", "#8e5cd9")[seq_along(levels(st))]
+pchs = c(16, 17, 15, 18)[seq_along(levels(ex))]
+layout(1, respect=TRUE)
+par(mar=c(5, 4, 3, 1))
+plot(frip, tss_ratio, col=adjustcolor(pal[as.integer(st)], alpha.f=.7), pch=pchs[as.integer(ex)], xlab="FRiP", ylab="tss_ratio", main="tss_ratio vs FRiP")
+legend("topleft", c(levels(st), levels(ex)), col=c(pal, rep("grey40", length(pchs))), pch=c(rep(16, length(pal)), pchs), bty="n", cex=.8)
+
+# does the covariate effects on tss_ratio hold when FRiP is accounted for?
+covs = intersect(c("status", "study", "experimenter"), colnames(e))
+covs = covs[sapply(covs, function(v) length(unique(e[[v]])) > 1)]
+for (f in list(covs, c(covs, "frip"))) {
+  if (length(f) == 0) next
+  fo = reformulate(f, "tss_ratio")
+  print(fo)
+  print(signif(summary(lm(fo, data=e))$coefficients, 3))
+}
+```
+
+## GC bias
+
+The GC bias of the libraries (`gc_slope`, `e_gc_slope.rds`) is computed by `03_gc_slope.Rmd`, on control tiles (low-coverage 5 kb tiles).
+
+## PCA axes vs covariates
+
+PCA on `log2(DESeq2 norm counts + 1)` of the 5000 most variable features. For each of the first PCs: Spearman correlation with numeric covariates (and FRiP), R² of a linear model on factors.
+
+```{r report_pca, fig.height=9, results="verbatim"}
+nb_pc = 5
+l = log2(norm_counts_deseq + 1)
+l = l[order(-apply(l, 1, var))[1:min(5000, nrow(l))], ]
+pca = prcomp(t(l))
+ve = pca$sdev^2 / sum(pca$sdev^2) * 100
+pca_assoc = sapply(1:nb_pc, function(k) {
+  pc = pca$x[rownames(e), k]
+  sapply(c("frip", covoi), function(v) {
+    x = e[[v]]
+    if (is.factor(x)) {summary(lm(pc ~ droplevels(x)))$r.squared} else {suppressWarnings(cor(pc, x, method="spearman", use="complete.obs"))}
+  })
+})
+colnames(pca_assoc) = paste0("PC", 1:nb_pc, " (", round(ve[1:nb_pc], 1), "%)")
+rownames(pca_assoc) = paste0(c("frip", covoi), ifelse(sapply(c("frip", covoi), function(v) is.factor(e[[v]])), " (R2)", " (rho)"))
+round(pca_assoc, 2)
+
+pal = colorRampPalette(c("#2a78d6", "#f2f2f2", "#eb6834"))(101)
+z = pca_assoc; zl = z; zl[] = pmax(-1, pmin(1, z))   # keep dim (pmax copies attributes of its 1st arg)
+par(mar=c(6, 14, 3, 1))
+image(t(zl[nrow(zl):1, , drop=FALSE]), col=pal, zlim=c(-1, 1), axes=FALSE, main="PCA axes vs covariates (rho or R2)")
+xs = seq(0, 1, length.out=ncol(z)); ys = seq(0, 1, length.out=nrow(z))
+axis(1, at=xs, labels=colnames(z), las=2, cex.axis=.8, tick=FALSE)
+axis(2, at=ys, labels=rev(rownames(z)), las=1, cex.axis=.8, tick=FALSE)
+for (i in seq_len(nrow(z))) for (k in seq_len(ncol(z))) text(xs[k], ys[nrow(z) - i + 1], sprintf("%.2f", z[i, k]), cex=.7)
+
+# row 1: coloured by FRiP, row 2: coloured by tss_ratio (blue low, orange high)
+cols_cov = list(FRiP = frip)
+if (exists("tss_ratio")) cols_cov$tss_ratio = tss_ratio
+layout(matrix(seq_len(2 * length(cols_cov)), ncol=2, byrow=TRUE), respect=TRUE)
+for (v in names(cols_cov)) {
+  for (k in c(1, 3)) {
+    plot(pca$x[rownames(e), k], pca$x[rownames(e), k+1], col=colorRampPalette(c("#2a78d6", "#eb6834"))(100)[cut(cols_cov[[v]][rownames(e)], 100)], pch=16,
+      xlab=paste0("PC", k, " (", round(ve[k], 1), "%)"), ylab=paste0("PC", k+1, " (", round(ve[k+1], 1), "%)"), main=paste0("colored by ", v, " (blue low, orange high)"))
+  }
+}
+```
+
+
+
 # PCA
 
 
@@ -312,9 +532,6 @@ for (k in names(norm_counts)) {
   }
 }
 ```
-
-
-
 
 
 # Session Information

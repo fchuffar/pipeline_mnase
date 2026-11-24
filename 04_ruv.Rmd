@@ -1,0 +1,206 @@
+---
+title: "Factors of unwanted variation (RUVg)"
+subtitle: "RUVg factors from the least significant features of a first DA model, and their link with the covariates"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r header, child="header.Rmd"}
+```
+
+```{r params}
+if (!exists("prefix")) {prefix = "peaks10"}
+if (!exists("model_func_name")) {model_func_name = "deseq2"}
+if (!exists("ruv_formula")) {ruv_formula = "~status+study+experimenter"}   # first-pass model giving the controls
+if (!exists("ctl_frac")) {ctl_frac = 0.25}                                  # share of least significant features used as controls
+if (!exists("k_max")) {k_max = 10}                                          # number of factors computed (nested: W_1..W_k do not depend on k)
+if (!exists("ruv_norm")) {ruv_norm = "uq"}                                  # counts given to RUVg: "uq" (upper-quartile normalized) or "raw"
+ruv_from = paste0(model_func_name, "_", ruv_formula, "_ctl", round(100 * ctl_frac))
+ewas_filename = paste0("ewas4combp_", gse, "_", prefix, "_", model_func_name, "_", ruv_formula, ".bed")
+```
+
+- `prefix` = "`r prefix`": feature set.
+- First-pass model: `r model_func_name`, `r ruv_formula` (p-values read in ``r ewas_filename``, written by `04_da.Rmd`).
+- Controls: the `r 100 * ctl_frac`% least significant features of the first-pass model (as in the paper: "selecting the 25% least significant regions as negative controls to estimate five factors of unwanted variation (RUVg method)").
+- `k_max` = `r k_max` factors are computed; `ruv_norm` = "`r ruv_norm`".
+- Outputs: one file per factor, `e_W_<i>_<prefix>_<ruv_from>.rds` (vector named by sample, like `e_frip_<prefix>.rds`), here `e_W_<i>_`r prefix`_`r ruv_from`.rds`.
+
+```{r samples, child="samples.Rmd"}
+```
+
+```{r features, child="features.Rmd"}
+```
+
+
+
+# Controls
+
+```{r controls, results="verbatim"}
+raw_counts = readRDS(paste0("datashare/", gse, "/raw_counts_", prefix, ".rds"))
+# samples of the first-pass model only (first term with NA elsewhere, e.g. status_paper): the factors are estimated on them
+first_term = strsplit(ruv_formula, "~|\\+")[[1]][2]
+e = e[!is.na(e[[first_term]]), ]
+print(paste0("samples (", first_term, " not NA): ", nrow(e)))
+stopifnot(all(e$gsm %in% colnames(raw_counts)))
+x = raw_counts[, e$gsm]
+colnames(x) = rownames(e)
+
+w = read.table(ewas_filename, sep = "\t", header = FALSE, comment.char = "#", col.names = c("chrom", "start", "end", "probes", "pval", "strand", "l2fc", "lpv"))
+# NA p-values of DESeq2 were set to pval = 1 and l2fc = 0 in 04_da.Rmd: not tested, not used as controls
+w = w[!(w$pval == 1 & w$l2fc == 0) & w$probes %in% rownames(x), ]
+n_ctl = round(ctl_frac * nrow(w))
+ctl = w$probes[order(-w$pval)][1:n_ctl]
+print(paste0("tested features: ", nrow(w), ", controls: ", n_ctl, ", min pval of the controls: ", signif(min(w$pval[w$probes %in% ctl]), 3)))
+
+# where are the controls? distance of the features to the nearest RefSeq TSS (tss_hg38.bed, 03_count.Rmd)
+tss = read.table("tss_hg38.bed", header = FALSE)
+tss_gr = GenomicRanges::GRanges(tss[, 1], IRanges::IRanges(tss[, 2] + 1, tss[, 3]))
+gr = GenomicRanges::GRanges(w$chrom, IRanges::IRanges(w$end, w$end))
+dtn = GenomicRanges::distanceToNearest(gr, tss_gr, ignore.strand = TRUE)
+d = rep(Inf, length(gr))
+d[S4Vectors::queryHits(dtn)] = S4Vectors::mcols(dtn)$distance
+dbin = cut(d, c(-1, 1e3, 5e3, 2e4, 1e5, Inf), c("<=1kb", "1-5kb", "5-20kb", "20-100kb", ">100kb"))
+tab = rbind(all = table(dbin), controls = table(dbin[w$probes %in% ctl]))
+print(round(100 * prop.table(tab, 1), 1))
+```
+
+```{r controls_plot, fig.height=4}
+layout(matrix(1:2, 1), respect = TRUE)
+par(mar = c(6, 4, 3, 1))
+barplot(100 * prop.table(tab, 1), beside = TRUE, las = 2, col = c("grey80", "grey30"), ylab = "% of features", main = "distance to TSS")
+legend("topright", c("all tested", "controls"), fill = c("grey80", "grey30"), bty = "n", cex = .8)
+plot(w$l2fc, -log10(w$pval), pch = ".", col = ifelse(w$probes %in% ctl, "grey30", "grey80"), xlab = "l2fc", ylab = "-log10(pval)", main = paste0("controls in ", ruv_formula))
+```
+
+
+
+# RUVg
+
+Same computation as `RUVSeq::RUVg` (`center=TRUE`, `drop=0`, `epsilon=1`): `Y = log(counts + 1)` (samples x features), centered per feature, SVD of the controls, `W = u[, 1:k]`.
+The factors are the left singular vectors: `W_1..W_5` are the same whatever `k >= 5`, so `k_max` factors are computed once and `k` is chosen in the formula of the second model.
+With `ruv_norm = "uq"`, counts are first upper-quartile normalized (`EDASeq::betweenLaneNormalization(which="upper")`, as in the RUVSeq vignette); the paper does not say which counts were used.
+
+```{r ruvg, results="verbatim"}
+if (ruv_norm == "uq") {
+  uq = apply(x, 2, function(v) quantile(v[v > 0], 0.75))
+  xn = round(t(t(x) / uq * mean(uq)))
+} else {
+  xn = x
+}
+Y = t(log(xn[ctl, ] + 1))
+Yc = scale(Y, center = TRUE, scale = FALSE)
+sv = svd(Yc)
+W = sv$u[, 1:k_max, drop = FALSE]
+rownames(W) = rownames(e)
+colnames(W) = paste0("W_", 1:k_max)
+ve = sv$d^2 / sum(sv$d^2) * 100
+print(round(ve[1:k_max], 2))
+
+for (i in 1:k_max) {
+  saveRDS(W[, i], paste0("e_W_", i, "_", prefix, "_", ruv_from, ".rds"))
+}
+print(paste0("written: e_W_<1..", k_max, ">_", prefix, "_", ruv_from, ".rds"))
+```
+
+
+
+# Factors vs. covariates
+
+For each factor: Spearman correlation with numeric covariates, R² of a linear model on factors (as in `03_count.Rmd`).
+
+```{r covoi_ruv, results="verbatim"}
+if (!exists("covoi")) {
+  covoi = colnames(e)[sapply(colnames(e), function(v) {
+    x = e[[v]]
+    (is.factor(x) | is.numeric(x)) && length(unique(na.omit(x))) >= 2 && mean(is.na(x)) < .5
+  })]
+  covoi = covoi[!grepl("^status_", covoi)]   # status restricted to subsets (exp_grp.R), not covariates
+}
+covoi = setdiff(unique(c("status", "study", "experimenter", "frip", "tss_ratio", covoi)), "null")
+covoi = covoi[covoi %in% colnames(e)]
+assoc = sapply(1:k_max, function(k) {
+  sapply(covoi, function(v) {
+    x = e[[v]]
+    if (is.factor(x) | is.character(x)) {summary(lm(W[, k] ~ droplevels(as.factor(x))))$r.squared} else {suppressWarnings(cor(W[, k], x, method = "spearman", use = "complete.obs"))}
+  })
+})
+colnames(assoc) = paste0("W_", 1:k_max, " (", round(ve[1:k_max], 1), "%)")
+rownames(assoc) = paste0(covoi, ifelse(sapply(covoi, function(v) is.numeric(e[[v]])), " (rho)", " (R2)"))
+round(assoc, 2)
+
+# how much of status, tss_ratio and FRiP is captured by W_1..W_k
+cum = do.call(rbind, lapply(1:k_max, function(k) {
+  Wk = W[, 1:k, drop = FALSE]
+  r2 = function(v) {if (v %in% colnames(e)) {summary(lm(as.numeric(e[[v]]) ~ Wk))$r.squared} else {NA}}
+  data.frame(k = k, R2_status = round(r2("status"), 3), R2_tss_ratio = round(r2("tss_ratio"), 3), R2_frip = round(r2("frip"), 3))
+}))
+print(cum, row.names = FALSE)
+```
+
+Status effect on `tss_ratio` with and without the factors: the factors are estimated on features not associated with status, so they can capture the status-independent part of a covariate and leave its status-associated part.
+
+```{r tss_ratio_w, results="verbatim"}
+if ("tss_ratio" %in% colnames(e)) {
+  ew = cbind(e, W[rownames(e), 1:min(5, k_max), drop = FALSE])
+  base = intersect(c("study", "experimenter"), colnames(e))
+  fs = list(c("status", base), c("status", base, colnames(W)[1:min(5, k_max)]), c("status", colnames(W)[1:min(5, k_max)]))
+  for (f in fs) {
+    fo = reformulate(f, "tss_ratio")
+    co = summary(lm(fo, ew))$coefficients["statusCP", ]
+    print(paste0(deparse(fo, width.cutoff = 500), ": status CP = ", round(co[1], 3), ", p = ", signif(co[4], 2)))
+  }
+}
+```
+
+```{r assoc_heatmap, fig.height=7}
+pal = colorRampPalette(c("#2a78d6", "#f2f2f2", "#eb6834"))(101)
+z = assoc; zl = z; zl[] = pmax(-1, pmin(1, z))
+layout(1, respect = TRUE)
+par(mar = c(7, 12, 3, 1))
+image(t(zl[nrow(zl):1, , drop = FALSE]), col = pal, zlim = c(-1, 1), axes = FALSE, main = "RUVg factors vs covariates (rho or R2)")
+xs = seq(0, 1, length.out = ncol(z)); ys = seq(0, 1, length.out = nrow(z))
+axis(1, at = xs, labels = colnames(z), las = 2, cex.axis = .7, tick = FALSE)
+axis(2, at = ys, labels = rev(rownames(z)), las = 1, cex.axis = .7, tick = FALSE)
+for (i in seq_len(nrow(z))) for (k in seq_len(ncol(z))) text(xs[k], ys[nrow(z) - i + 1], sprintf("%.2f", z[i, k]), cex = .55)
+```
+
+## Factor planes
+
+`W_i` vs `W_i+1`, coloured by status, experimenter, study, then by FRiP and `tss_ratio` (blue low, orange high).
+
+```{r planes, fig.height=10}
+cat_cols = c("#2a78d6", "#eb6834", "#1baf7a", "#8e5cd9", "#d4a017", "#666666")
+ramp = colorRampPalette(c("#2a78d6", "#eb6834"))(100)
+colorings = list()
+for (v in intersect(c("status", "experimenter", "study"), colnames(e))) {
+  f = droplevels(as.factor(e[[v]]))
+  colorings[[v]] = list(col = cat_cols[as.integer(f)], leg = levels(f), legcol = cat_cols[seq_along(levels(f))])
+}
+for (v in intersect(c("frip", "tss_ratio"), colnames(e))) {
+  colorings[[v]] = list(col = ramp[cut(e[[v]], 100)], leg = NULL, legcol = NULL)
+}
+pairs_k = seq(1, min(k_max, 6) - 1, by = 2)
+layout(matrix(seq_len(length(colorings) * length(pairs_k)), ncol = length(pairs_k), byrow = TRUE), respect = TRUE)
+par(mar = c(4, 4, 2, 1))
+for (v in names(colorings)) {
+  for (k in pairs_k) {
+    plot(W[, k], W[, k + 1], col = adjustcolor(colorings[[v]]$col, alpha.f = .8), pch = 16, cex = .7,
+      xlab = paste0("W_", k, " (", round(ve[k], 1), "%)"), ylab = paste0("W_", k + 1, " (", round(ve[k + 1], 1), "%)"), main = v, cex.main = .9)
+    if (k == 1 && !is.null(colorings[[v]]$leg)) {legend("topleft", colorings[[v]]$leg, col = colorings[[v]]$legcol, pch = 16, bty = "n", cex = .6)}
+  }
+}
+```
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```

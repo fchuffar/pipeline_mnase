@@ -1,9 +1,10 @@
 source ~/conda_config.sh
 # conda create -n mnase_env
 conda activate mnase_env
-mamba install -c bioconda -c conda-forge -c r samtools fastqc libxcrypt libxcrypt1 multiqc fastq-screen fastx_toolkit bowtie2 deeptools r-base libopenblas bioconductor-geoquery bioconductor-affy bioconductor-biobase r-seqinr r-rcpparmadillo r-devtools r-fastmap r-matrix r-kernsmooth r-catools r-gtools r-nortest r-survival r-beanplot r-gplots r-dbi snakemake macs3 subread bioconductor-deseq2 bioconductor-annotatr bioconductor-vplotr r-openxlsx r-writexls toolshed interlap bioconductor-txdb.hsapiens.ucsc.hg38.knowngene bioconductor-org.hs.eg.db bioconductor-jaspar2022 bioconductor-biostrings bioconductor-tfbstools r-remotes gsl r-cslust
+mamba install -c bioconda -c conda-forge -c r snakemake=7.* samtools bedtools fastqc libxcrypt libxcrypt1 multiqc fastq-screen fastx_toolkit bowtie2 deeptools r-base libopenblas bioconductor-geoquery bioconductor-affy bioconductor-biobase r-seqinr r-rcpparmadillo r-devtools r-fastmap r-matrix r-kernsmooth r-catools r-gtools r-nortest r-survival r-beanplot r-gplots r-dbi snakemake=7.* macs3 subread bioconductor-deseq2 bioconductor-annotatr bioconductor-vplotr r-openxlsx r-writexls toolshed interlap bioconductor-txdb.hsapiens.ucsc.hg38.knowngene bioconductor-org.hs.eg.db bioconductor-jaspar2022 bioconductor-biostrings bioconductor-tfbstools r-remotes gsl r-mclust 
 # -c anaconda 
 # devtools::install_github("mtmorgan/DirichletMultinomial")
+# R CMD INSTALL ~/projects/epimedtools/
 
 # devtools::install_github("fchuffar/epimedtools")
 # devtools::install_github("fchuffar/deeptoolsr")

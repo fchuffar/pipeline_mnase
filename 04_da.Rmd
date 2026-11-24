@@ -1,5 +1,5 @@
 ---
-title: "DA on age"
+title: "Differential analysis (DESeq2)"
 author: "Florent Chuffart"
 date: "`r Sys.Date()`"
 output:
@@ -33,7 +33,14 @@ prefix="`r prefix`" ; rmarkdown::render("04_da.Rmd", output_file=paste0("04_da_"
 if (!exists("gse"))             gse = "chip_sa"  ;
 if (!exists("model_func_name")) model_func_name = "deseq2"         ;
 if (!exists("model_formula"))   model_formula = "~age+BMI+smoking+log2DDEugg44"                     ;
-bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", model_func_name, "_", model_formula), ".bed")
+bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", prefix, "_", model_func_name, "_", model_formula), ".bed")
+da_tsv_filename = paste0("da_", gse, "_", prefix, "_", model_func_name, "_", model_formula, ".tsv")
+```
+
+- `model_func_name` = "`r model_func_name`": `deseq2`, size factors estimated on all the features (DESeq2 default); `deseq2ctl`, size factors estimated on the control features only (`controlGenes`, features of type `control` defined by the feature set, e.g. the open sea windows of `99_rmsk.Rmd`: normalization on the background).
+- Outputs: ``r da_tsv_filename`` (one line per feature, annotated when the feature set provides `feat_annot`) and, for positional feature sets only, ``r bed_ewas_filename`` (comb-p input). Feature sets with meta-features (several lines of `feat` sharing a name, e.g. `99_rmsk.Rmd`) are not positional: no comb-p.
+
+```{r features, child="features.Rmd"}
 ```
 
 # DA
@@ -43,7 +50,8 @@ bed_ewas_filename = paste0("ewas4combp_", paste0(gse, "_", model_func_name, "_",
 
 ```{r raw_counts, fig.height=3, results="verbatim"}
 raw_counts = readRDS(paste0("datashare/", gse, "/raw_counts_", prefix, ".rds")) 
-pf         = readRDS(paste0("datashare/", gse,         "/pf_", prefix, ".rds"))
+pf_file    = paste0("datashare/", gse, "/pf_", prefix, ".rds")
+pf         = if (file.exists(pf_file)) readRDS(pf_file) else NULL   # positions from featureCounts (03_count.Rmd), only used for positional feature sets
 # raw_counts_summary = read.table(paste0(prefix, "_count.txt.summary"), header=TRUE, row.names=1)
 # colnames(raw_counts_summary) = sub(paste0(".*", gse, "\\.([^.]+)_end\\.to\\.end.*"), "\\1", colnames(raw_counts_summary))
 # raw_counts_summary = raw_counts_summary[!apply(raw_counts_summary==0, 1, all),]
@@ -105,10 +113,23 @@ k = strsplit(model_formula, "~|\\+")[[1]][2]
 
   dds <- DESeq2::DESeqDataSetFromMatrix(
     countData = countData[,rownames(colData[!is.na(colData[,k]),])],
-    colData = colData[!is.na(colData[,k]),],
+    # samples with NA in the first term are dropped (e.g. status_hi22: within-lot model); droplevels: no empty level of study, experimenter...
+    colData = droplevels(colData[!is.na(colData[,k]),]),
     design = formula(model_formula)
   )
 
+  # size factors: on the control features (deseq2ctl) or on all the features (deseq2, DESeq2 default); DESeq() keeps size factors already set
+  if (model_func_name == "deseq2ctl") {
+    if (!exists("feat_type")) {stop("deseq2ctl: the feature set does not define feat_type (control features)")}
+    ctl = rownames(dds) %in% names(feat_type)[feat_type == "control"]
+    sf_all = DESeq2::sizeFactors(DESeq2::estimateSizeFactors(dds))
+    dds = DESeq2::estimateSizeFactors(dds, controlGenes = ctl)
+    print(paste0("size factors on ", sum(ctl), " control features (of ", nrow(dds), ")"))
+    print(summary(DESeq2::sizeFactors(dds)))
+    print(paste0("Spearman(size factors on the controls, on all the features): ", round(cor(DESeq2::sizeFactors(dds), sf_all, method = "spearman"), 3)))
+  } else if (model_func_name != "deseq2") {
+    stop(paste0("unknown model_func_name: ", model_func_name))
+  }
   dds = DESeq2::DESeq(dds)
   res = DESeq2::results(dds, name=DESeq2::resultsNames(dds)[2])
 
@@ -126,11 +147,31 @@ k = strsplit(model_formula, "~|\\+")[[1]][2]
 
   # res = res[order(res$log2FoldChange), ]
   idx = rownames(res)[!is.na(res$padj)&res$padj< 0.05]
-  print(cbind(pf[idx,1:3], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+  is_meta = any(duplicated(feat[,4]))   # meta-features: not positional (no comb-p, no position in pf)
+  if (is_meta) {
+    idx = idx[order(res[idx, "padj"])]
+    ann = if (exists("feat_annot")) feat_annot[idx, intersect(c("type", "class", "family"), colnames(feat_annot)), drop = FALSE] else NULL
+    print(paste0("features with padj < 0.05: ", length(idx), " (top 50)"))
+    print(head(cbind(ann, as.data.frame(res[idx, c("baseMean", "log2FoldChange", "pvalue", "padj")])), 50))
+  } else {
+    print(cbind(pf[idx,1:3], res[idx, c("log2FoldChange", "pvalue", "padj") ]))
+  }
+
+  # results table, one line per feature (annotated when the feature set provides feat_annot)
+  da_tab = data.frame(feature = rownames(res), as.data.frame(res), check.names = FALSE)
+  if (exists("feat_annot")) {da_tab = cbind(da_tab, feat_annot[da_tab$feature, setdiff(colnames(feat_annot), "feature"), drop = FALSE])}
+  write.table(da_tab, file = da_tsv_filename, sep = "\t", quote = FALSE, row.names = FALSE)
+  if (exists("feat_annot")) {
+    # features with padj < 0.05 by type and class, up and down
+    sig = da_tab[!is.na(da_tab$padj) & da_tab$padj < 0.05, ]
+    sm = aggregate(feature ~ type + class, da_tab, length); colnames(sm)[3] = "features"
+    sm$up   = sapply(seq_len(nrow(sm)), function(i) sum(sig$type == sm$type[i] & sig$class == sm$class[i] & sig$log2FoldChange > 0))
+    sm$down = sapply(seq_len(nrow(sm)), function(i) sum(sig$type == sm$type[i] & sig$class == sm$class[i] & sig$log2FoldChange < 0))
+    print(sm[order(-(sm$up + sm$down), sm$type), ], row.names = FALSE)
+  }
 
 
-  tmp_df = cbind(pf[rownames(res),], res)
-  head(tmp_df)
+  tmp_df = if (!is_meta) cbind(pf[rownames(res),], res) else NULL   # pf: positions (lists of positions for meta-features)
   # prefix3 = paste0(gse, "_", model_func_name, "_", model_formula)
   # WriteXLS::WriteXLS(tmp_df, paste0("results_", prefix3, "_", prefix2, "_", prefix, ".xlsx"))
 
@@ -140,13 +181,25 @@ k = strsplit(model_formula, "~|\\+")[[1]][2]
   # gsea_input_filename = paste0("results_", prefix3, "_", prefix2, "_", prefix, ".rnk")
   # write.table(gsea_input, gsea_input_filename, sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
+  if (!is_meta) {
   bed = tmp_df
   head(bed)
+  # position given to comb-p: peak summit (narrow peaks, feat$summit from 99_peaks.Rmd),
+  # feature center otherwise (e.g. broad peaks, tiles); 0-based, from feat (BED-like)
+  if (!all(rownames(bed) %in% rownames(feat))) {stop("features in counts not found in feat")}
+  if ("summit" %in% colnames(feat)) {
+    pos = feat[rownames(bed), "summit"]
+  } else {
+    pos = floor((feat[rownames(bed), "chromStart"] + feat[rownames(bed), "chromEnd"]) / 2)
+  }
+  bed[,2] = pos
   bed[,3] = bed[,2]+1
   bed[,4] = rownames(bed)
-  bed[,5] = bed$pvalue
+  # DESeq2 NA p-values (all-zero counts, Cook's outliers, ...): set to 1 (and l2fc to 0) to keep the probes in comb-p without signal
+  print(paste0("NA pvalues set to 1: ", sum(is.na(bed$pvalue))))
+  bed[,5] = ifelse(is.na(bed$pvalue), 1, bed$pvalue)
   bed[,6] = "+"
-  bed[,7] = bed$log2FoldChange
+  bed[,7] = ifelse(is.na(bed$log2FoldChange), 0, bed$log2FoldChange)
   bed[,8] = -log10(bed[,5])  
   bed = bed[,1:8]
   colnames(bed) = c("#chrom", "start", "end", "probes", "pval", "strand", "l2fc", "lpv")
@@ -158,6 +211,7 @@ k = strsplit(model_formula, "~|\\+")[[1]][2]
   bed = bed[order(bed[,1], bed[,2]),]
   write.table(bed, file=bed_ewas_filename , sep="\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
   # bed_on_disk = read.table(bed_ewas_filename, sep="\t", header=TRUE)
+  }
 
 ```
 

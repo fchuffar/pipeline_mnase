@@ -9,7 +9,7 @@ exec(open("samples.R").read())
 foo=version 
 bam_srt = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt.bam"             for sample in samples for trim in ["no"]]
 # bam_mmq = ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_mmq"+mmq+".bam"    for sample in samples for trim in ["30"] for mmq in ["0", "30"]]
-bw =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
+# bw =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
 bwcr =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_srtcr_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no"]]
 # bw2 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin150_fsmax180_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]
 # bw3 =      ["/home/chuffarf/projects/datashare/"+gse+"/"+sample+"_end-to-end_trim"+trim+"_bowtie2_"+species+"_"+annotation+"_"+foo+"_fsmin200_fsmax250_srt_"+sr_or_pe+"_30_4_RPKM.bw"     for sample in samples for trim in ["no", "30", "60"]]

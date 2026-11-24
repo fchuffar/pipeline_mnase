@@ -1,5 +1,5 @@
 ```{r}
-pm_size = as.numeric(sub("^[A-Za-z]+", "", prefix))
+pm_size = as.numeric(sub("^[A-Za-z]+", "", sub("q[0-9]+$", "", prefix)))
 if (is.na(pm_size)) pm_size = 1500
 ```
 
