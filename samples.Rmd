@@ -19,7 +19,7 @@ e$null = factor(1)
 factoi = c()
 ```
 
-```{r exp_grp}
+```{r exp_grp, fig.width=12, fig.height=6}
 if (file.exists("exp_grp.R")) {
   source("exp_grp.R")
 }

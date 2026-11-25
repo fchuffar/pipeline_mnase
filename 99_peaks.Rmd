@@ -1,5 +1,5 @@
 ```{r}
-log10macspv = as.numeric(sub("^[A-Za-z]+", "", prefix))
+log10macspv = as.numeric(sub("^[A-Za-z]+", "", sub("q[0-9]+$", "", prefix)))
 if (is.na(log10macspv)) log10macspv = 10
 ```
 
@@ -29,6 +29,9 @@ peaks = peaks[nchar(peaks$chrom)<=5,]
 head(peaks)
 dim(peaks)
 
+# absolute summit position (0-based), computed before the split below overwrites chromStart
+peaks$summit = peaks$chromStart + peaks$peak
+
 # split multipeaks
 peaks$chromStart2 = peaks$chromStart
 peaks$chromEnd2 = peaks$chromEnd
@@ -42,7 +45,8 @@ peaks[peaks$chromEnd2>peaks$chromEnd,]
 peaks[peaks$chromEnd2<peaks$chromStart,]$chromEnd2 = peaks[peaks$chromEnd2<peaks$chromStart,]$chromEnd
 peaks[peaks$chromEnd2<peaks$chromStart,]
 head(peaks[,-(1:11)])
-peaks$chromStart2 = c(peaks$chromStart[1], peaks$chromEnd2[-nrow(peaks)]+1)
+# BED (0-based start, end exclusive): the next sub-peak starts exactly at the end of the previous one (no +1, no gap)
+peaks$chromStart2 = c(peaks$chromStart[1], peaks$chromEnd2[-nrow(peaks)])
 peaks[peaks$chromStart2<peaks$chromStart,]$chromStart2 = peaks[peaks$chromStart2<peaks$chromStart,]$chromStart
 peaks[peaks$chromStart2<peaks$chromStart,]
 peaks[peaks$chromStart2>peaks$chromEnd,]$chromStart2 = peaks[peaks$chromStart2>peaks$chromEnd,]$chromStart

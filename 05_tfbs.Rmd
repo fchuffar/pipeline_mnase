@@ -38,7 +38,7 @@ This section defines the genomic coordinates used throughout the analysis.
 
 
 
-```{r features, child=paste0("99_", sub("[0-9]+$", "", prefix), ".Rmd")}
+```{r features, child=paste0("99_", sub("[0-9]+(q[0-9]+)?$", "", prefix), ".Rmd")}
 ```
 
 # TFBS

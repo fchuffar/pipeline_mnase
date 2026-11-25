@@ -1,0 +1,246 @@
+---
+title: "Comparison of the differential models"
+subtitle: "DER and their overlap, l2fc vs distance to TSS, l2fc correlation between models, tss_ratio vs status within strata"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r header, child="header.Rmd"}
+```
+
+```{r params}
+if (!exists("prefix")) {prefix = "peaks10"}
+if (!exists("model_func_name")) {model_func_name = "deseq2"}
+if (!exists("pval_threshs")) {pval_threshs = c("0.05", "0.01", "0.001")}
+if (!exists("strata")) {strata = c("experimenter", "study")}
+# models: by default all the ewas4combp files of the prefix (04_da.Rmd)
+ewas_pattern = paste0("^ewas4combp_", gse, "_", prefix, "_", model_func_name, "_(~.*)\\.bed$")
+if (!exists("models")) {models = sub(ewas_pattern, "\\1", list.files(".", pattern = ewas_pattern))}
+ewas_file = function(m) paste0("ewas4combp_", gse, "_", prefix, "_", model_func_name, "_", m, ".bed")
+der_file = function(m, t) paste0("dmrcombp_", prefix, "_", model_func_name, "_", m, "_", t, ".regions-t.bed")
+models = models[file.exists(ewas_file(models))]
+# family: all samples (first term status) or a subset of samples (first term status_<subset>, exp_grp.R)
+first_term = sub("^~([^+]+).*$", "\\1", models)
+family = ifelse(first_term == "status", "all samples", sub("^status_", "", first_term))
+ord = order(family != "all samples", family, lengths(strsplit(models, "+", fixed = TRUE)), models)
+models = models[ord]; family = family[ord]
+```
+
+- `prefix` = "`r prefix`", `model_func_name` = "`r model_func_name`", comb-p seed thresholds: `r paste(pval_threshs, collapse = ", ")`.
+- `r length(models)` models (`ewas4combp_<gse>_<prefix>_<model_func_name>_<formula>.bed`, written by `04_da.Rmd`). Models whose first term is `status_<subset>` (`exp_grp.R`) are fitted on a subset of samples (a lot, or SD + one CP diagnosis): the other samples have `NA` and are dropped by `04_da.Rmd`.
+
+```{r samples, child="samples.Rmd"}
+```
+
+```{r models_table, results="verbatim"}
+library(data.table)
+library(GenomicRanges)
+n_samples = sapply(first_term, function(v) {x = e[[v]]; c(SD = sum(x %in% "SD"), CP = sum(x %in% "CP"))})
+mt = data.frame(model = models, family = family, SD = n_samples["SD", ], CP = n_samples["CP", ], row.names = NULL)
+print(mt)
+```
+
+
+
+# Number of DER
+
+```{r der, results="verbatim"}
+ew = lapply(models, function(m) {w = fread(ewas_file(m)); setnames(w, 1, "chrom"); w[order(w$probes)]})
+names(ew) = models
+read_der = function(m, t) {
+  f = der_file(m, t)
+  if (!file.exists(f)) {return(NULL)}
+  x = fread(f)
+  if (nrow(x) == 0) {return(GRanges())}
+  GRanges(x[[1]], IRanges(x[[2]] + 1, x[[3]]))
+}
+ders = lapply(pval_threshs, function(t) {r = lapply(models, read_der, t = t); names(r) = models; r})
+names(ders) = pval_threshs
+recap = data.frame(model = models, family = family, pct_p05 = round(sapply(ew, function(w) 100 * mean(w$pval < .05)), 1),
+  sapply(pval_threshs, function(t) sapply(ders[[t]], function(g) if (is.null(g)) NA else length(g))), row.names = NULL, check.names = FALSE)
+colnames(recap)[-(1:3)] = paste0("DER_", pval_threshs)
+print(recap)
+write.csv(recap, paste0("04_models_", prefix, "_der_counts.csv"), row.names = FALSE)
+```
+
+`pct_p05`: share of windows with p < 0.05 (5% expected without any effect).
+
+```{r der_barplot, fig.height=7}
+layout(1, respect = TRUE)
+par(mar = c(4, 22, 2, 1))
+x = recap[nrow(recap):1, paste0("DER_", pval_threshs[1])]
+barplot(x, horiz = TRUE, names.arg = rev(models), las = 1, cex.names = .6, col = ifelse(rev(family) == "all samples", "grey40", "grey75"), border = NA,
+  xlab = paste0("number of DER (seed ", pval_threshs[1], ")"), main = "DER per model (dark: all samples, light: subsets)")
+```
+
+## Overlap of the DER between models
+
+Percentage of the DER (seed `r pval_threshs[1]`) of the model in row overlapping at least one DER of the model in column (not symmetric).
+
+```{r der_overlap, fig.height=9}
+d1 = ders[[pval_threshs[1]]]
+ov = sapply(models, function(b) sapply(models, function(a) {
+  if (is.null(d1[[a]]) || length(d1[[a]]) == 0 || is.null(d1[[b]])) {NA} else {100 * mean(overlapsAny(d1[[a]], d1[[b]]))}
+}))
+heat = function(z, zlim, main, pal, fmt = "%.0f", labs = models) {
+  layout(1, respect = TRUE)
+  par(mar = c(16, 16, 3, 1))
+  image(1:ncol(z), 1:nrow(z), t(z[nrow(z):1, , drop = FALSE]), col = pal, zlim = zlim, axes = FALSE, xlab = "", ylab = "", main = main)
+  axis(1, at = 1:ncol(z), labels = labs, las = 2, cex.axis = .55, tick = FALSE)
+  axis(2, at = 1:nrow(z), labels = rev(labs), las = 1, cex.axis = .55, tick = FALSE)
+  for (i in 1:nrow(z)) for (j in 1:ncol(z)) if (!is.na(z[i, j])) text(j, nrow(z) - i + 1, sprintf(fmt, z[i, j]), cex = .45)
+}
+heat(ov, c(0, 100), "% of DER (row) overlapping DER (column)", colorRampPalette(c("white", "steelblue"))(101))
+write.csv(round(ov, 1), paste0("04_models_", prefix, "_der_overlap.csv"))
+```
+
+
+
+# l2fc vs. distance to the nearest TSS
+
+All the windows (not only the DER) are binned by the distance of their summit to the nearest RefSeq TSS (`tss_hg38.bed`, built in `03_count.Rmd`). A genome-wide shift of H3K4me3 between TSS and distal sites gives a gradient of the l2fc with the distance to the TSS; without any effect, ~50% of the windows are higher in CP and ~5% have p < 0.05 in each bin.
+
+```{r dist_tss, results="verbatim"}
+tss = fread("tss_hg38.bed", header = FALSE)
+tss_gr = GRanges(tss$V1, IRanges(tss$V2 + 1, tss$V3))
+labs = c("<=1kb", "1-5kb", "5-20kb", "20-100kb", ">100kb")
+w0 = ew[[1]]
+gr = GRanges(w0$chrom, IRanges(w0$end, w0$end))
+d = rep(Inf, length(gr)); dtn = distanceToNearest(gr, tss_gr, ignore.strand = TRUE)
+d[S4Vectors::queryHits(dtn)] = mcols(dtn)$distance
+dbin = cut(d, c(-1, 1e3, 5e3, 2e4, 1e5, Inf), labs)
+# all ewas files have the same windows, sorted by probe name
+stopifnot(all(sapply(ew, function(w) identical(w$probes, w0$probes))))
+L = sapply(ew, function(w) w$l2fc)
+P = sapply(ew, function(w) w$pval)
+grad = function(f) apply(L, 2, function(x) tapply(x, dbin, f))
+med = grad(median)
+up = apply(L, 2, function(x) tapply(x > 0, dbin, mean)) * 100
+p05 = apply(P, 2, function(x) tapply(x < .05, dbin, mean)) * 100
+print(round(t(med), 3))
+print(round(t(up), 1))
+print(round(t(p05), 1))
+```
+
+```{r dist_tss_plot, fig.height=8}
+fams = unique(family)
+cols = function(n) c("#2a78d6", "#eb6834", "#1baf7a", "#8e5cd9", "#d4a017", "#e87ba4", "#666666", "#17becf", "#8c564b", "#bcbd22", "#000000")[seq_len(n)]
+groups = list("all samples" = models[family == "all samples"], "subsets" = models[family != "all samples"])
+groups = groups[lengths(groups) > 0]
+layout(matrix(seq_len(3 * length(groups)), ncol = 3, byrow = TRUE), respect = TRUE)
+for (g in names(groups)) {
+  m = groups[[g]]
+  par(mar = c(5, 4, 3, 1))
+  for (v in c("up", "p05")) {
+    mat = get(v)[, m, drop = FALSE]
+    matplot(mat, type = "b", pch = 16, lty = 1, lwd = 2, col = cols(length(m)), xaxt = "n", xlab = "", ylim = c(0, max(get(v))),
+      ylab = ifelse(v == "up", "% higher in CP", "% p < 0.05"), main = g, cex.main = .9)
+    axis(1, at = seq_along(labs), labels = labs, las = 2, cex.axis = .8)
+    abline(h = ifelse(v == "up", 50, 5), lty = 2, col = "grey50")
+  }
+  par(mar = c(0, 0, 0, 0)); plot.new()
+  legend("center", m, col = cols(length(m)), lwd = 2, pch = 16, bty = "n", cex = .55)
+}
+```
+
+
+
+# Correlation of the l2fc between models
+
+Spearman correlation of the l2fc of all the windows between models. Between independent subsets (e.g. two lots), a positive correlation means that the CP vs SD differences replicate.
+
+```{r l2fc_cor, fig.height=9}
+cm = cor(L, method = "spearman")
+heat(cm, c(-1, 1), "Spearman correlation of the l2fc (all windows)", colorRampPalette(c("#2a78d6", "white", "#eb6834"))(101), fmt = "%.2f")
+write.csv(round(cm, 3), paste0("04_models_", prefix, "_l2fc_cor.csv"))
+```
+
+The correlation over all windows mixes the TSS / distal gradient and local differences. Within each distance bin, the gradient is removed: correlation of the l2fc between the subset models, per distance bin.
+
+```{r l2fc_cor_bin, results="verbatim"}
+sm = models[family != "all samples"]
+if (length(sm) >= 2) {
+  pairs = combn(sm, 2)
+  cb = t(apply(pairs, 2, function(p) sapply(labs, function(b) {i = which(dbin == b); cor(L[i, p[1]], L[i, p[2]], method = "spearman")})))
+  rownames(cb) = paste(pairs[1, ], "vs", pairs[2, ])
+  print(round(cb, 2))
+}
+```
+
+
+
+# `tss_ratio` vs. status within strata
+
+The status effect on `tss_ratio` (`e_tss_ratio_<prefix>.rds`, `03_count.Rmd`) is estimated within each level of each stratum (`lm(tss_ratio ~ status + other strata)` and Wilcoxon test), then tested for homogeneity (interaction `status x stratum`) and by leaving out one level at a time.
+
+```{r tss_ratio_strata, results="verbatim"}
+stopifnot("tss_ratio" %in% colnames(e), "status" %in% colnames(e))
+strata = strata[strata %in% colnames(e)]
+for (v in strata) {print(table(droplevels(as.factor(e[[v]])), e$status, dnn = c(v, "status")))}
+if (length(strata) >= 2) {print(ftable(table(e[, c(strata, "status")])))}
+
+# lm on the samples x, with the strata that vary in x as covariates
+fit_status = function(x, drop = NULL) {
+  cv = setdiff(strata, drop)
+  cv = cv[sapply(cv, function(z) length(unique(x[[z]])) > 1)]
+  summary(lm(reformulate(c("status", cv), "tss_ratio"), x))$coefficients["statusCP", ]
+}
+within = do.call(rbind, lapply(c(strata, "diag"), function(v) {
+  do.call(rbind, lapply(levels(droplevels(as.factor(e[[v]]))), function(l) {
+    # diag: SD of all the lots vs CP of the diagnosis
+    x = if (v == "diag") e[e$status == "SD" | e$diag %in% l, ] else e[e[[v]] %in% l, ]
+    n = table(droplevels(x$status))
+    res = data.frame(stratum = v, level = l, n_SD = sum(x$status == "SD"), n_CP = sum(x$status == "CP"), diff_median = NA, wilcox_p = NA, lm_CP = NA, lm_p = NA)
+    if (length(n) == 2 && min(n) >= 3) {
+      co = fit_status(x, drop = if (v == "diag") NULL else v)
+      res$diff_median = round(median(x$tss_ratio[x$status == "CP"]) - median(x$tss_ratio[x$status == "SD"]), 3)
+      res$wilcox_p = signif(wilcox.test(tss_ratio ~ status, x)$p.value, 2)
+      res$lm_CP = round(co[1], 3)
+      res$lm_p = signif(co[4], 2)
+    }
+    res
+  }))
+}))
+print(within, row.names = FALSE)
+
+co = fit_status(e)
+print(paste0("all samples: status CP = ", round(co[1], 3), ", p = ", signif(co[4], 2)))
+for (v in strata) {
+  m0 = lm(reformulate(c("status", strata), "tss_ratio"), e)
+  m1 = lm(reformulate(c(paste0("status*", v), setdiff(strata, v)), "tss_ratio"), e)
+  print(paste0("interaction status x ", v, ": p = ", signif(anova(m0, m1)[2, "Pr(>F)"], 2)))
+}
+loo = do.call(rbind, lapply(strata, function(v) {
+  do.call(rbind, lapply(levels(droplevels(as.factor(e[[v]]))), function(l) {
+    x = e[!e[[v]] %in% l, ]
+    co = fit_status(x)
+    data.frame(stratum = v, left_out = l, n = nrow(x), lm_CP = round(co[1], 3), lm_p = signif(co[4], 2))
+  }))
+}))
+print(loo, row.names = FALSE)
+```
+
+```{r tss_ratio_strata_plot, fig.height=5}
+layout(matrix(seq_along(strata), 1), respect = TRUE)
+par(mar = c(7, 4, 3, 1))
+for (v in strata) {
+  g = droplevels(interaction(droplevels(as.factor(e[[v]])), e$status, sep = " ", lex.order = TRUE))
+  boxplot(e$tss_ratio ~ g, las = 2, xlab = "", ylab = "tss_ratio", main = paste0("tss_ratio by status within ", v), outline = FALSE,
+    col = c("#2a78d6", "#eb6834")[as.integer(factor(sub(".* ", "", levels(g)), levels = c("SD", "CP")))], ylim = range(e$tss_ratio))
+  stripchart(e$tss_ratio ~ g, vertical = TRUE, method = "jitter", add = TRUE, pch = 16, cex = .5, col = adjustcolor(1, alpha.f = .5))
+}
+```
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
