@@ -409,7 +409,7 @@ legend("topleft", c(levels(st), levels(ex)), col=c(pal, rep("grey40", length(pch
 
 # does the covariate effects on tss_ratio hold when FRiP is accounted for?
 covs = intersect(c("status", "study", "experimenter"), colnames(e))
-covs = covs[sapply(covs, function(v) length(unique(e[[v]])) > 1)]
+covs = covs[vapply(covs, function(v) length(unique(e[[v]])) > 1, logical(1))]
 for (f in list(covs, c(covs, "frip"))) {
   if (length(f) == 0) next
   fo = reformulate(f, "tss_ratio")
