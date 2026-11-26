@@ -216,6 +216,63 @@ k = strsplit(model_formula, "~|\\+")[[1]][2]
 ```
 
 
+# Latent factors (lfmm)
+
+Latent factors (LF) of the features with `lfmm::lfmm_ridge` (as in `pipeline_dnam/03_minfi.Rmd`), on the samples and the variables of the model above:
+`Y` = `log2(DESeq2 norm counts + 1)` of the model (samples x features, centered per feature: lfmm has no intercept), `X` = the terms of `model_formula`
+(factors as 0/1 dummies), whose effects are kept out of the factors. The factors therefore describe the variation left once the model terms are accounted for.
+
+- `lf_k` (default 10) factors, ridge `lf_lambda` (default 1e-5); `lf_max_feat` (default 200,000): above it, only the most variable features are used (e.g. `tiles1000`).
+- Output: one file per factor, as the RUVg factors of `04_ruv.Rmd`: `e_LF<i>_<prefix>_<lf_from>.rds` (vector named by sample, scaled), with
+  `lf_from` = `<model_func_name>_<model_formula>_lfmm`. Not read by `exp_grp.R` yet.
+
+```{r latent_factors, results="verbatim", fig.height=5}
+if (!exists("lf_k")) {lf_k = 10}
+if (!exists("lf_lambda")) {lf_lambda = 1e-5}
+if (!exists("lf_max_feat")) {lf_max_feat = 200000}
+lf_cd = as.data.frame(SummarizedExperiment::colData(dds))
+data = t(log2(DESeq2::counts(dds, normalized = TRUE) + 1))       # samples x features, same samples and normalization as the model
+data = data[, apply(data, 2, var) > 0, drop = FALSE]
+if (ncol(data) > lf_max_feat) {data = data[, order(-apply(data, 2, var))[1:lf_max_feat]]}
+Y = scale(data, center = TRUE, scale = FALSE)                       # lfmm has no intercept: center each feature
+X = model.matrix(formula(model_formula), lf_cd[rownames(Y), , drop = FALSE])[, -1, drop = FALSE]   # model terms, factors -> 0/1 dummies
+stopifnot(!anyNA(X), !anyNA(Y))
+print(paste0("features: ", ncol(Y), ", samples: ", nrow(Y), ", columns of X: ", paste(colnames(X), collapse = ", ")))
+lfmm_fit = lfmm::lfmm_ridge(Y = Y, X = X, K = lf_k, lambda = lf_lambda)
+U = lfmm_fit$U   # latent factors
+V = lfmm_fit$V   # loadings
+rownames(U) = rownames(Y)
+colnames(U) = paste0("LF", seq_len(ncol(U)))
+lf_from = paste0(model_func_name, "_", model_formula, "_lfmm")
+Us = scale(U)
+for (i in seq_len(ncol(Us))) {
+  saveRDS(Us[, i], paste0("e_LF", i, "_", prefix, "_", lf_from, ".rds"))
+}   # one file per factor, as the RUVg factors of 04_ruv.Rmd
+print(paste0("written: e_LF<1..", ncol(Us), ">_", prefix, "_", lf_from, ".rds"))
+
+# share of the variance of the centered Y carried by each factor: squared singular values of U V^T = eigenvalues of (U'U)(V'V)
+tot = sum(Y^2)
+ev = sort(Re(eigen(crossprod(U) %*% crossprod(V))$values), decreasing = TRUE)
+pct_lf = 100 * ev / tot
+names(pct_lf) = paste0("LF", seq_along(pct_lf))
+print(round(pct_lf, 2))
+print(round(cumsum(pct_lf), 2))
+layout(1, respect = TRUE)
+barplot(pct_lf, ylab = "% of variance explained", xlab = "latent factors", main = paste0("lfmm latent factors, ", model_formula), las = 2)
+
+# factors vs covariates of e (FRiP, tss_ratio, gc_slope when available, and the other factors / numeric columns): Spearman (numeric) or R2 (factors)
+lf_cov = unique(c(intersect(c("frip", "tss_ratio", "gc_slope"), colnames(lf_cd)),
+  colnames(lf_cd)[sapply(colnames(lf_cd), function(v) (is.factor(lf_cd[[v]]) || is.numeric(lf_cd[[v]])) && length(unique(na.omit(lf_cd[[v]]))) > 1 &&
+    mean(is.na(lf_cd[[v]])) < .5 && !grepl("^status_|^W[a-z]*_?[0-9]+$|^LF[0-9]+$|^sizeFactor$", v))]))
+lf_assoc = sapply(colnames(U), function(k) sapply(lf_cov, function(v) {
+  x = lf_cd[rownames(U), v]
+  if (is.factor(x)) {summary(lm(U[, k] ~ droplevels(x)))$r.squared} else {suppressWarnings(cor(U[, k], x, method = "spearman", use = "complete.obs"))}
+}))
+rownames(lf_assoc) = paste0(lf_cov, ifelse(sapply(lf_cov, function(v) is.factor(lf_cd[[v]])), " (R2)", " (rho)"))
+round(lf_assoc, 2)
+```
+
+
 
 
 # Session Information

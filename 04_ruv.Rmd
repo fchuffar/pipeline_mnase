@@ -19,7 +19,7 @@ if (!exists("prefix")) {prefix = "peaks10"}
 if (!exists("model_func_name")) {model_func_name = "deseq2"}
 if (!exists("ruv_formula")) {ruv_formula = "~status+study+experimenter"}   # first-pass model giving the controls
 if (!exists("ctl_frac")) {ctl_frac = 0.25}                                  # share of least significant features used as controls
-if (!exists("k_max")) {k_max = 10}                                          # number of factors computed (nested: W_1..W_k do not depend on k)
+if (!exists("k_max")) {k_max = 10}                                          # number of factors computed (nested: W1..Wk do not depend on k)
 if (!exists("ruv_norm")) {ruv_norm = "uq"}                                  # counts given to RUVg: "uq" (upper-quartile normalized) or "raw"
 ruv_from = paste0(model_func_name, "_", ruv_formula, "_ctl", round(100 * ctl_frac))
 ewas_filename = paste0("ewas4combp_", gse, "_", prefix, "_", model_func_name, "_", ruv_formula, ".bed")
@@ -29,7 +29,7 @@ ewas_filename = paste0("ewas4combp_", gse, "_", prefix, "_", model_func_name, "_
 - First-pass model: `r model_func_name`, `r ruv_formula` (p-values read in ``r ewas_filename``, written by `04_da.Rmd`).
 - Controls: the `r 100 * ctl_frac`% least significant features of the first-pass model (as in the paper: "selecting the 25% least significant regions as negative controls to estimate five factors of unwanted variation (RUVg method)").
 - `k_max` = `r k_max` factors are computed; `ruv_norm` = "`r ruv_norm`".
-- Outputs: one file per factor, `e_W_<i>_<prefix>_<ruv_from>.rds` (vector named by sample, like `e_frip_<prefix>.rds`), here `e_W_<i>_`r prefix`_`r ruv_from`.rds`.
+- Outputs: one file per factor, `e_W<i>_<prefix>_<ruv_from>.rds` (vector named by sample, like `e_frip_<prefix>.rds`), here `e_W<i>_`r prefix`_`r ruv_from`.rds`.
 
 ```{r samples, child="samples.Rmd"}
 ```
@@ -83,7 +83,7 @@ plot(w$l2fc, -log10(w$pval), pch = ".", col = ifelse(w$probes %in% ctl, "grey30"
 # RUVg
 
 Same computation as `RUVSeq::RUVg` (`center=TRUE`, `drop=0`, `epsilon=1`): `Y = log(counts + 1)` (samples x features), centered per feature, SVD of the controls, `W = u[, 1:k]`.
-The factors are the left singular vectors: `W_1..W_5` are the same whatever `k >= 5`, so `k_max` factors are computed once and `k` is chosen in the formula of the second model.
+The factors are the left singular vectors: `W1..W5` are the same whatever `k >= 5`, so `k_max` factors are computed once and `k` is chosen in the formula of the second model.
 With `ruv_norm = "uq"`, counts are first upper-quartile normalized (`EDASeq::betweenLaneNormalization(which="upper")`, as in the RUVSeq vignette); the paper does not say which counts were used.
 
 ```{r ruvg, results="verbatim"}
@@ -98,14 +98,14 @@ Yc = scale(Y, center = TRUE, scale = FALSE)
 sv = svd(Yc)
 W = sv$u[, 1:k_max, drop = FALSE]
 rownames(W) = rownames(e)
-colnames(W) = paste0("W_", 1:k_max)
+colnames(W) = paste0("W", 1:k_max)
 ve = sv$d^2 / sum(sv$d^2) * 100
 print(round(ve[1:k_max], 2))
 
 for (i in 1:k_max) {
-  saveRDS(W[, i], paste0("e_W_", i, "_", prefix, "_", ruv_from, ".rds"))
+  saveRDS(W[, i], paste0("e_W", i, "_", prefix, "_", ruv_from, ".rds"))
 }
-print(paste0("written: e_W_<1..", k_max, ">_", prefix, "_", ruv_from, ".rds"))
+print(paste0("written: e_W<1..", k_max, ">_", prefix, "_", ruv_from, ".rds"))
 ```
 
 
@@ -130,11 +130,11 @@ assoc = sapply(1:k_max, function(k) {
     if (is.factor(x) | is.character(x)) {summary(lm(W[, k] ~ droplevels(as.factor(x))))$r.squared} else {suppressWarnings(cor(W[, k], x, method = "spearman", use = "complete.obs"))}
   })
 })
-colnames(assoc) = paste0("W_", 1:k_max, " (", round(ve[1:k_max], 1), "%)")
+colnames(assoc) = paste0("W", 1:k_max, " (", round(ve[1:k_max], 1), "%)")
 rownames(assoc) = paste0(covoi, ifelse(sapply(covoi, function(v) is.numeric(e[[v]])), " (rho)", " (R2)"))
 round(assoc, 2)
 
-# how much of status, tss_ratio and FRiP is captured by W_1..W_k
+# how much of status, tss_ratio and FRiP is captured by W1..Wk
 cum = do.call(rbind, lapply(1:k_max, function(k) {
   Wk = W[, 1:k, drop = FALSE]
   r2 = function(v) {if (v %in% colnames(e)) {summary(lm(as.numeric(e[[v]]) ~ Wk))$r.squared} else {NA}}
@@ -191,7 +191,7 @@ par(mar = c(4, 4, 2, 1))
 for (v in names(colorings)) {
   for (k in pairs_k) {
     plot(W[, k], W[, k + 1], col = adjustcolor(colorings[[v]]$col, alpha.f = .8), pch = 16, cex = .7,
-      xlab = paste0("W_", k, " (", round(ve[k], 1), "%)"), ylab = paste0("W_", k + 1, " (", round(ve[k + 1], 1), "%)"), main = v, cex.main = .9)
+      xlab = paste0("W", k, " (", round(ve[k], 1), "%)"), ylab = paste0("W", k + 1, " (", round(ve[k + 1], 1), "%)"), main = v, cex.main = .9)
     if (k == 1 && !is.null(colorings[[v]]$leg)) {legend("topleft", colorings[[v]]$leg, col = colorings[[v]]$legcol, pch = 16, bty = "n", cex = .6)}
   }
 }
